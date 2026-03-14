@@ -113,10 +113,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     update(s => ({ ...s, activeGame: game }));
   }, [update]);
 
+  const recordOpponentScore = useCallback((points: 1 | 2 | 3) => {
+    update(s => {
+      if (!s.activeGame) return s;
+      const score: OpponentScore = {
+        id: genId(),
+        points,
+        quarterId: s.activeGame.currentQuarter,
+        timestamp: Date.now(),
+      };
+      return { ...s, activeGame: { ...s.activeGame, opponentScores: [...(s.activeGame.opponentScores || []), score] } };
+    });
+  }, [update]);
+
+  const undoLastOpponentScore = useCallback(() => {
+    update(s => {
+      if (!s.activeGame || !(s.activeGame.opponentScores || []).length) return s;
+      return { ...s, activeGame: { ...s.activeGame, opponentScores: s.activeGame.opponentScores.slice(0, -1) } };
+    });
+  }, [update]);
+
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, addTournament,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
+      recordOpponentScore, undoLastOpponentScore,
     }}>
       {children}
     </AppContext.Provider>
