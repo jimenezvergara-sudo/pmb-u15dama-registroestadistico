@@ -1,0 +1,181 @@
+import React, { useState } from 'react';
+import { useApp } from '@/context/AppContext';
+import { QuarterId, QUARTER_LABELS } from '@/types/basketball';
+import CourtDiagram from '@/components/CourtDiagram';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { Undo2 } from 'lucide-react';
+
+const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
+
+const LiveGame: React.FC = () => {
+  const { activeGame, setQuarter, recordShot, undoLastShot, endGame } = useApp();
+  const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+
+  if (!activeGame) return null;
+
+  const handleZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
+    setPendingShot(zone);
+    setSelectedPlayer(null);
+  };
+
+  const handlePlayerSelect = (playerId: string) => {
+    setSelectedPlayer(playerId);
+  };
+
+  const handleResult = (made: boolean) => {
+    if (!pendingShot || !selectedPlayer) return;
+    recordShot({
+      playerId: selectedPlayer,
+      x: pendingShot.x,
+      y: pendingShot.y,
+      made,
+      points: pendingShot.points,
+    });
+    const player = activeGame.roster.find(p => p.id === selectedPlayer);
+    const pts = made ? `+${pendingShot.points}` : 'Fallo';
+    toast(`#${player?.number} ${player?.name}: ${pts}`, {
+      duration: 1500,
+      action: { label: 'Deshacer', onClick: undoLastShot },
+    });
+    setPendingShot(null);
+    setSelectedPlayer(null);
+  };
+
+  const handleUndo = () => {
+    undoLastShot();
+    toast('Último tiro deshecho', { duration: 1000 });
+  };
+
+  // Calculate score
+  const teamScore = activeGame.shots
+    .filter(s => s.made)
+    .reduce((sum, s) => sum + s.points, 0);
+
+  const quarterScore = activeGame.shots
+    .filter(s => s.made && s.quarterId === activeGame.currentQuarter)
+    .reduce((sum, s) => sum + s.points, 0);
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header: Score + Quarter */}
+      <div className="bg-secondary px-4 py-3 flex items-center justify-between">
+        <div>
+          <p className="text-xs text-secondary-foreground/70 uppercase tracking-wider font-medium">vs {activeGame.opponentName}</p>
+          <p className="text-3xl font-extrabold text-primary">{teamScore}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-secondary-foreground/70 font-medium">Cuarto: +{quarterScore}</p>
+          <div className="flex gap-1 mt-1">
+            {QUARTERS.slice(0, 4).map(q => (
+              <button
+                key={q}
+                onClick={() => setQuarter(q)}
+                className={`px-2 py-1 rounded text-xs font-bold tap-feedback ${
+                  activeGame.currentQuarter === q
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary-foreground/10 text-secondary-foreground/60'
+                }`}
+              >
+                {QUARTER_LABELS[q]}
+              </button>
+            ))}
+            <button
+              onClick={() => {
+                const otQuarters = QUARTERS.filter(q => q.startsWith('OT'));
+                const currentOt = otQuarters.indexOf(activeGame.currentQuarter as any);
+                const next = otQuarters[currentOt >= 0 ? Math.min(currentOt + 1, otQuarters.length - 1) : 0];
+                setQuarter(next);
+              }}
+              className={`px-2 py-1 rounded text-xs font-bold tap-feedback ${
+                activeGame.currentQuarter.startsWith('OT')
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary-foreground/10 text-secondary-foreground/60'
+              }`}
+            >
+              OT
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Court */}
+      <div className="px-2 pt-2">
+        <CourtDiagram
+          onZoneTap={handleZoneTap}
+          shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
+        />
+      </div>
+
+      {/* Instruction */}
+      <div className="px-4 py-2 text-center text-xs text-muted-foreground font-medium">
+        {!pendingShot && 'Toca una zona de la cancha'}
+        {pendingShot && !selectedPlayer && `Zona ${pendingShot.points}pt — Selecciona jugadora`}
+        {pendingShot && selectedPlayer && '¿Canasta o Fallo?'}
+      </div>
+
+      {/* Bottom: Player grid + Actions */}
+      <div className="flex-1 px-3 pb-2 flex flex-col gap-2 overflow-y-auto">
+        {/* Player grid */}
+        <div className="grid grid-cols-4 gap-2">
+          {activeGame.roster.map(player => (
+            <button
+              key={player.id}
+              onClick={() => handlePlayerSelect(player.id)}
+              disabled={!pendingShot}
+              className={`flex flex-col items-center py-2 px-1 rounded-lg tap-feedback min-h-[56px] transition-colors ${
+                selectedPlayer === player.id
+                  ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
+                  : pendingShot
+                  ? 'bg-card text-card-foreground hover:bg-accent'
+                  : 'bg-card text-muted-foreground opacity-50'
+              }`}
+            >
+              <span className="text-lg font-extrabold leading-none">{player.number}</span>
+              <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-center">{player.name.split(' ')[0]}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Made / Missed buttons */}
+        {pendingShot && selectedPlayer && (
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={() => handleResult(true)}
+              className="h-14 text-lg font-bold tap-feedback bg-success text-success-foreground hover:bg-success/90"
+            >
+              ✓ Canasta
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleResult(false)}
+              className="h-14 text-lg font-bold tap-feedback"
+            >
+              ✗ Fallo
+            </Button>
+          </div>
+        )}
+
+        {/* Actions row */}
+        <div className="flex gap-2 mt-auto pt-2">
+          <Button variant="outline" size="sm" onClick={handleUndo} className="flex-1 gap-1">
+            <Undo2 className="w-4 h-4" /> Deshacer
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              if (confirm('¿Finalizar partido?')) endGame();
+            }}
+            className="flex-1"
+          >
+            Finalizar
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LiveGame;
