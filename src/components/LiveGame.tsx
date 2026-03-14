@@ -9,9 +9,10 @@ import { Undo2 } from 'lucide-react';
 const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const LiveGame: React.FC = () => {
-  const { activeGame, setQuarter, recordShot, undoLastShot, endGame } = useApp();
+  const { activeGame, setQuarter, recordShot, undoLastShot, endGame, recordOpponentScore, undoLastOpponentScore } = useApp();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [showRivalPanel, setShowRivalPanel] = useState(false);
 
   if (!activeGame) return null;
 
