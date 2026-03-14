@@ -5,6 +5,7 @@ import CourtDiagram from '@/components/CourtDiagram';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2 } from 'lucide-react';
+import logoPmb from '@/assets/logo-pmb.png';
 
 const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
