@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Player, ShotEvent, Game, QuarterId, Tournament } from '@/types/basketball';
+import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore } from '@/types/basketball';
 
 interface AppState {
   players: Player[];

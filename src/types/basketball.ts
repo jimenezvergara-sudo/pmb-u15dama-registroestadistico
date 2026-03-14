@@ -34,6 +34,13 @@ export const QUARTER_LABELS: Record<QuarterId, string> = {
   OT3: 'OT3',
 };
 
+export interface OpponentScore {
+  id: string;
+  points: 1 | 2 | 3;
+  quarterId: QuarterId;
+  timestamp: number;
+}
+
 export interface Game {
   id: string;
   tournamentId?: string;
@@ -41,5 +48,6 @@ export interface Game {
   date: string;
   roster: Player[];
   shots: ShotEvent[];
+  opponentScores: OpponentScore[];
   currentQuarter: QuarterId;
 }
