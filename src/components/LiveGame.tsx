@@ -69,11 +69,13 @@ const LiveGame: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Header: Scoreboard */}
-      <div className="bg-secondary px-4 py-3">
+      <div className="bg-primary px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="text-center flex-1">
-            <p className="text-[10px] text-secondary-foreground/60 uppercase tracking-wider font-bold">Nosotras</p>
-            <p className="text-4xl font-black text-primary leading-none">{teamScore}</p>
+          <div className="text-center flex-1 flex flex-col items-center">
+            <img src={logoPmb} alt="PMB" className="w-6 h-6 mb-0.5" />
+            <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">PMB</p>
+            <p className="text-4xl font-black text-primary-foreground leading-none">{teamScore}</p>
+          </div>
           </div>
           <div className="text-center px-3">
             <p className="text-[10px] text-secondary-foreground/50 font-bold">VS</p>
