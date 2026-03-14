@@ -54,8 +54,15 @@ const LiveGame: React.FC = () => {
     .filter(s => s.made)
     .reduce((sum, s) => sum + s.points, 0);
 
+  const opponentTotal = (activeGame.opponentScores || [])
+    .reduce((sum, s) => sum + s.points, 0);
+
   const quarterScore = activeGame.shots
     .filter(s => s.made && s.quarterId === activeGame.currentQuarter)
+    .reduce((sum, s) => sum + s.points, 0);
+
+  const opponentQuarterScore = (activeGame.opponentScores || [])
+    .filter(s => s.quarterId === activeGame.currentQuarter)
     .reduce((sum, s) => sum + s.points, 0);
 
   return (
