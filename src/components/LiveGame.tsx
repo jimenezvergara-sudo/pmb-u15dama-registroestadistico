@@ -75,15 +75,13 @@ const LiveGame: React.FC = () => {
             <img src={logoPmb} alt="PMB" className="w-6 h-6 mb-0.5" />
             <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">PMB</p>
             <p className="text-4xl font-black text-primary-foreground leading-none">{teamScore}</p>
-          </div>
-          </div>
           <div className="text-center px-3">
-            <p className="text-[10px] text-secondary-foreground/50 font-bold">VS</p>
-            <p className="text-xs text-secondary-foreground/60 font-medium mt-0.5">Q: {quarterScore}-{opponentQuarterScore}</p>
+            <p className="text-[10px] text-primary-foreground/50 font-bold">VS</p>
+            <p className="text-xs text-primary-foreground/60 font-medium mt-0.5">Q: {quarterScore}-{opponentQuarterScore}</p>
           </div>
           <div className="text-center flex-1">
-            <p className="text-[10px] text-secondary-foreground/60 uppercase tracking-wider font-bold truncate">{activeGame.opponentName}</p>
-            <p className="text-4xl font-black text-destructive leading-none">{opponentTotal}</p>
+            <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold truncate">{activeGame.opponentName}</p>
+            <p className="text-4xl font-black text-primary-foreground/80 leading-none">{opponentTotal}</p>
           </div>
         </div>
         <div className="flex items-center justify-between mt-2">
