@@ -75,6 +75,7 @@ const LiveGame: React.FC = () => {
             <img src={logoPmb} alt="PMB" className="w-6 h-6 mb-0.5" />
             <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">PMB</p>
             <p className="text-4xl font-black text-primary-foreground leading-none">{teamScore}</p>
+          </div>
           <div className="text-center px-3">
             <p className="text-[10px] text-primary-foreground/50 font-bold">VS</p>
             <p className="text-xs text-primary-foreground/60 font-medium mt-0.5">Q: {quarterScore}-{opponentQuarterScore}</p>
