@@ -18,6 +18,8 @@ interface AppContextValue extends AppState {
   recordShot: (shot: Omit<ShotEvent, 'id' | 'timestamp' | 'quarterId'>) => void;
   undoLastShot: () => void;
   setActiveGame: (game: Game) => void;
+  recordOpponentScore: (points: 1 | 2 | 3) => void;
+  undoLastOpponentScore: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
