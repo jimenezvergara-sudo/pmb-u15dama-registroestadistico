@@ -148,17 +148,29 @@ const LiveGame: React.FC = () => {
         </Button>
       </div>
 
-      {/* Court */}
+      {/* Court + Free throw button */}
       <div className="px-2 pt-2">
         <CourtDiagram
           onZoneTap={handleZoneTap}
           shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
         />
+        <div className="flex justify-center mt-1">
+          <button
+            onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
+            className={`px-4 py-2 rounded-lg text-sm font-bold tap-feedback border-2 ${
+              pendingShot?.points === 1
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-card text-card-foreground border-border hover:border-primary'
+            }`}
+          >
+            🏀 Tiro Libre (1pt)
+          </button>
+        </div>
       </div>
 
       {/* Instruction */}
-      <div className="px-4 py-2 text-center text-xs text-muted-foreground font-medium">
-        {!pendingShot && 'Toca una zona de la cancha'}
+      <div className="px-4 py-1.5 text-center text-xs text-muted-foreground font-medium">
+        {!pendingShot && 'Toca una zona de la cancha o Tiro Libre'}
         {pendingShot && !selectedPlayer && `Zona ${pendingShot.points}pt — Selecciona jugadora`}
         {pendingShot && selectedPlayer && '¿Canasta o Fallo?'}
       </div>
