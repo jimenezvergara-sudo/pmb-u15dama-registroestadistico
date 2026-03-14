@@ -1,14 +1,36 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState } from 'react';
+import { AppProvider, useApp } from '@/context/AppContext';
+import BottomNav, { TabId } from '@/components/BottomNav';
+import LiveGame from '@/components/LiveGame';
+import NewGame from '@/components/NewGame';
+import RosterManager from '@/components/RosterManager';
+import Dashboard from '@/components/Dashboard';
+import TournamentManager from '@/components/TournamentManager';
 
-const Index = () => {
+const AppContent: React.FC = () => {
+  const { activeGame } = useApp();
+  const [tab, setTab] = useState<TabId>('roster');
+
+  // Auto-switch to live when game starts
+  React.useEffect(() => {
+    if (activeGame) setTab('live');
+  }, [activeGame?.id]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16">
+      {tab === 'live' && (activeGame ? <LiveGame /> : <NewGame />)}
+      {tab === 'roster' && <RosterManager />}
+      {tab === 'dashboard' && <Dashboard />}
+      {tab === 'tournaments' && <TournamentManager />}
+      <BottomNav activeTab={tab} onTabChange={setTab} hasActiveGame={!!activeGame} />
     </div>
   );
 };
+
+const Index = () => (
+  <AppProvider>
+    <AppContent />
+  </AppProvider>
+);
 
 export default Index;
