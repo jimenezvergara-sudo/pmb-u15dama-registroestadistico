@@ -109,8 +109,8 @@ const LiveGame: React.FC = () => {
               }}
               className={`px-2 py-1 rounded text-xs font-bold tap-feedback ${
                 activeGame.currentQuarter.startsWith('OT')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary-foreground/10 text-secondary-foreground/60'
+                  ? 'bg-primary-foreground text-primary'
+                  : 'bg-primary-foreground/20 text-primary-foreground/70'
               }`}
             >
               OT
