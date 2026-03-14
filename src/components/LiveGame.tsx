@@ -119,7 +119,7 @@ const LiveGame: React.FC = () => {
           <button
             onClick={() => setShowRivalPanel(!showRivalPanel)}
             className={`px-3 py-1 rounded text-xs font-bold tap-feedback ${
-              showRivalPanel ? 'bg-destructive text-destructive-foreground' : 'bg-secondary-foreground/10 text-secondary-foreground/60'
+              showRivalPanel ? 'bg-destructive text-destructive-foreground' : 'bg-primary-foreground/20 text-primary-foreground/70'
             }`}
           >
             +Rival
