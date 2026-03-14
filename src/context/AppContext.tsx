@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Player, ShotEvent, Game, QuarterId, Tournament } from '@/types/basketball';
+import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore } from '@/types/basketball';
 
 interface AppState {
   players: Player[];
@@ -18,6 +18,8 @@ interface AppContextValue extends AppState {
   recordShot: (shot: Omit<ShotEvent, 'id' | 'timestamp' | 'quarterId'>) => void;
   undoLastShot: () => void;
   setActiveGame: (game: Game) => void;
+  recordOpponentScore: (points: 1 | 2 | 3) => void;
+  undoLastOpponentScore: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -66,6 +68,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       date: new Date().toISOString(),
       roster,
       shots: [],
+      opponentScores: [],
       currentQuarter: 'Q1',
       tournamentId,
     };
@@ -110,10 +113,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     update(s => ({ ...s, activeGame: game }));
   }, [update]);
 
+  const recordOpponentScore = useCallback((points: 1 | 2 | 3) => {
+    update(s => {
+      if (!s.activeGame) return s;
+      const score: OpponentScore = {
+        id: genId(),
+        points,
+        quarterId: s.activeGame.currentQuarter,
+        timestamp: Date.now(),
+      };
+      return { ...s, activeGame: { ...s.activeGame, opponentScores: [...(s.activeGame.opponentScores || []), score] } };
+    });
+  }, [update]);
+
+  const undoLastOpponentScore = useCallback(() => {
+    update(s => {
+      if (!s.activeGame || !(s.activeGame.opponentScores || []).length) return s;
+      return { ...s, activeGame: { ...s.activeGame, opponentScores: s.activeGame.opponentScores.slice(0, -1) } };
+    });
+  }, [update]);
+
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, addTournament,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
+      recordOpponentScore, undoLastOpponentScore,
     }}>
       {children}
     </AppContext.Provider>
