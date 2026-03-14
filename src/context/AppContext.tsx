@@ -68,6 +68,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       date: new Date().toISOString(),
       roster,
       shots: [],
+      opponentScores: [],
       currentQuarter: 'Q1',
       tournamentId,
     };
