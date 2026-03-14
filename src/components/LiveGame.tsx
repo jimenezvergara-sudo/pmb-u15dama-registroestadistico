@@ -67,15 +67,24 @@ const LiveGame: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header: Score + Quarter */}
-      <div className="bg-secondary px-4 py-3 flex items-center justify-between">
-        <div>
-          <p className="text-xs text-secondary-foreground/70 uppercase tracking-wider font-medium">vs {activeGame.opponentName}</p>
-          <p className="text-3xl font-extrabold text-primary">{teamScore}</p>
+      {/* Header: Scoreboard */}
+      <div className="bg-secondary px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="text-center flex-1">
+            <p className="text-[10px] text-secondary-foreground/60 uppercase tracking-wider font-bold">Nosotras</p>
+            <p className="text-4xl font-black text-primary leading-none">{teamScore}</p>
+          </div>
+          <div className="text-center px-3">
+            <p className="text-[10px] text-secondary-foreground/50 font-bold">VS</p>
+            <p className="text-xs text-secondary-foreground/60 font-medium mt-0.5">Q: {quarterScore}-{opponentQuarterScore}</p>
+          </div>
+          <div className="text-center flex-1">
+            <p className="text-[10px] text-secondary-foreground/60 uppercase tracking-wider font-bold truncate">{activeGame.opponentName}</p>
+            <p className="text-4xl font-black text-destructive leading-none">{opponentTotal}</p>
+          </div>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-secondary-foreground/70 font-medium">Cuarto: +{quarterScore}</p>
-          <div className="flex gap-1 mt-1">
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex gap-1">
             {QUARTERS.slice(0, 4).map(q => (
               <button
                 key={q}
@@ -105,8 +114,48 @@ const LiveGame: React.FC = () => {
               OT
             </button>
           </div>
+          <button
+            onClick={() => setShowRivalPanel(!showRivalPanel)}
+            className={`px-3 py-1 rounded text-xs font-bold tap-feedback ${
+              showRivalPanel ? 'bg-destructive text-destructive-foreground' : 'bg-secondary-foreground/10 text-secondary-foreground/60'
+            }`}
+          >
+            +Rival
+          </button>
         </div>
       </div>
+
+      {/* Rival scoring panel */}
+      {showRivalPanel && (
+        <div className="bg-destructive/10 px-4 py-3 flex items-center gap-2">
+          <span className="text-xs font-bold text-destructive mr-auto">Puntos Rival:</span>
+          {([1, 2, 3] as const).map(pts => (
+            <Button
+              key={pts}
+              size="sm"
+              variant="outline"
+              className="h-10 w-14 text-sm font-bold border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground tap-feedback"
+              onClick={() => {
+                recordOpponentScore(pts);
+                toast(`Rival: +${pts}`, { duration: 1000 });
+              }}
+            >
+              +{pts}
+            </Button>
+          ))}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-10 px-2 text-destructive"
+            onClick={() => {
+              undoLastOpponentScore();
+              toast('Último punto rival deshecho', { duration: 1000 });
+            }}
+          >
+            <Undo2 className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
 
       {/* Court */}
       <div className="px-2 pt-2">
