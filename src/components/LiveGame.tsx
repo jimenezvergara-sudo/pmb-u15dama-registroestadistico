@@ -115,48 +115,38 @@ const LiveGame: React.FC = () => {
               OT
             </button>
           </div>
-          <button
-            onClick={() => setShowRivalPanel(!showRivalPanel)}
-            className={`px-3 py-1 rounded text-xs font-bold tap-feedback ${
-              showRivalPanel ? 'bg-destructive text-destructive-foreground' : 'bg-primary-foreground/20 text-primary-foreground/70'
-            }`}
-          >
-            +Rival
-          </button>
         </div>
       </div>
 
-      {/* Rival scoring panel */}
-      {showRivalPanel && (
-        <div className="bg-destructive/10 px-4 py-3 flex items-center gap-2">
-          <span className="text-xs font-bold text-destructive mr-auto">Puntos Rival:</span>
-          {([1, 2, 3] as const).map(pts => (
-            <Button
-              key={pts}
-              size="sm"
-              variant="outline"
-              className="h-10 w-14 text-sm font-bold border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground tap-feedback"
-              onClick={() => {
-                recordOpponentScore(pts);
-                toast(`Rival: +${pts}`, { duration: 1000 });
-              }}
-            >
-              +{pts}
-            </Button>
-          ))}
+      {/* Rival scoring - always visible compact row */}
+      <div className="bg-destructive/10 px-3 py-2 flex items-center gap-1.5">
+        <span className="text-[10px] font-bold text-destructive mr-auto uppercase tracking-wider">Rival</span>
+        {([1, 2, 3] as const).map(pts => (
           <Button
+            key={pts}
             size="sm"
-            variant="ghost"
-            className="h-10 px-2 text-destructive"
+            variant="outline"
+            className="h-8 w-12 text-xs font-bold border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground tap-feedback"
             onClick={() => {
-              undoLastOpponentScore();
-              toast('Último punto rival deshecho', { duration: 1000 });
+              recordOpponentScore(pts);
+              toast(`Rival: +${pts}`, { duration: 1000 });
             }}
           >
-            <Undo2 className="w-4 h-4" />
+            +{pts}
           </Button>
-        </div>
-      )}
+        ))}
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-8 px-1.5 text-destructive"
+          onClick={() => {
+            undoLastOpponentScore();
+            toast('Último punto rival deshecho', { duration: 1000 });
+          }}
+        >
+          <Undo2 className="w-3.5 h-3.5" />
+        </Button>
+      </div>
 
       {/* Court */}
       <div className="px-2 pt-2">
