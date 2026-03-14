@@ -5,6 +5,7 @@ import CourtDiagram from '@/components/CourtDiagram';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2 } from 'lucide-react';
+import logoPmb from '@/assets/logo-pmb.png';
 
 const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
@@ -68,19 +69,20 @@ const LiveGame: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Header: Scoreboard */}
-      <div className="bg-secondary px-4 py-3">
+      <div className="bg-primary px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="text-center flex-1">
-            <p className="text-[10px] text-secondary-foreground/60 uppercase tracking-wider font-bold">Nosotras</p>
-            <p className="text-4xl font-black text-primary leading-none">{teamScore}</p>
+          <div className="text-center flex-1 flex flex-col items-center">
+            <img src={logoPmb} alt="PMB" className="w-6 h-6 mb-0.5" />
+            <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">PMB</p>
+            <p className="text-4xl font-black text-primary-foreground leading-none">{teamScore}</p>
           </div>
           <div className="text-center px-3">
-            <p className="text-[10px] text-secondary-foreground/50 font-bold">VS</p>
-            <p className="text-xs text-secondary-foreground/60 font-medium mt-0.5">Q: {quarterScore}-{opponentQuarterScore}</p>
+            <p className="text-[10px] text-primary-foreground/50 font-bold">VS</p>
+            <p className="text-xs text-primary-foreground/60 font-medium mt-0.5">Q: {quarterScore}-{opponentQuarterScore}</p>
           </div>
           <div className="text-center flex-1">
-            <p className="text-[10px] text-secondary-foreground/60 uppercase tracking-wider font-bold truncate">{activeGame.opponentName}</p>
-            <p className="text-4xl font-black text-destructive leading-none">{opponentTotal}</p>
+            <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold truncate">{activeGame.opponentName}</p>
+            <p className="text-4xl font-black text-primary-foreground/80 leading-none">{opponentTotal}</p>
           </div>
         </div>
         <div className="flex items-center justify-between mt-2">
@@ -91,8 +93,8 @@ const LiveGame: React.FC = () => {
                 onClick={() => setQuarter(q)}
                 className={`px-2 py-1 rounded text-xs font-bold tap-feedback ${
                   activeGame.currentQuarter === q
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary-foreground/10 text-secondary-foreground/60'
+                    ? 'bg-primary-foreground text-primary'
+                    : 'bg-primary-foreground/20 text-primary-foreground/70'
                 }`}
               >
                 {QUARTER_LABELS[q]}
@@ -107,8 +109,8 @@ const LiveGame: React.FC = () => {
               }}
               className={`px-2 py-1 rounded text-xs font-bold tap-feedback ${
                 activeGame.currentQuarter.startsWith('OT')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary-foreground/10 text-secondary-foreground/60'
+                  ? 'bg-primary-foreground text-primary'
+                  : 'bg-primary-foreground/20 text-primary-foreground/70'
               }`}
             >
               OT
@@ -117,7 +119,7 @@ const LiveGame: React.FC = () => {
           <button
             onClick={() => setShowRivalPanel(!showRivalPanel)}
             className={`px-3 py-1 rounded text-xs font-bold tap-feedback ${
-              showRivalPanel ? 'bg-destructive text-destructive-foreground' : 'bg-secondary-foreground/10 text-secondary-foreground/60'
+              showRivalPanel ? 'bg-destructive text-destructive-foreground' : 'bg-primary-foreground/20 text-primary-foreground/70'
             }`}
           >
             +Rival
