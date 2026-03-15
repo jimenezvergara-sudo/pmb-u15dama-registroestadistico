@@ -6,10 +6,11 @@ import NewGame from '@/components/NewGame';
 import RosterManager from '@/components/RosterManager';
 import Dashboard from '@/components/Dashboard';
 import TournamentManager from '@/components/TournamentManager';
+import HomeScreen from '@/components/HomeScreen';
 
 const AppContent: React.FC = () => {
   const { activeGame } = useApp();
-  const [tab, setTab] = useState<TabId>('roster');
+  const [tab, setTab] = useState<TabId>('home');
 
   // Auto-switch to live when game starts
   React.useEffect(() => {
@@ -18,6 +19,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16">
+      {tab === 'home' && <HomeScreen />}
       {tab === 'live' && (activeGame ? <LiveGame /> : <NewGame />)}
       {tab === 'roster' && <RosterManager />}
       {tab === 'dashboard' && <Dashboard />}
