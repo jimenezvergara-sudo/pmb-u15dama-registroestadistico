@@ -1,7 +1,7 @@
 import React from 'react';
-import { BarChart3, Users, Plus, Trophy } from 'lucide-react';
+import { BarChart3, Users, Plus, Trophy, Home } from 'lucide-react';
 
-export type TabId = 'live' | 'roster' | 'dashboard' | 'tournaments';
+export type TabId = 'home' | 'live' | 'roster' | 'dashboard' | 'tournaments';
 
 interface Props {
   activeTab: TabId;
