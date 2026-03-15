@@ -278,6 +278,7 @@ const Dashboard: React.FC = () => {
               <th className="text-center py-2 px-1 font-bold">PTS</th>
               <th className="text-center py-2 px-1 font-bold">TC</th>
               <th className="text-center py-2 px-1 font-bold">%</th>
+              <th className="text-center py-2 px-1 font-bold">2PT</th>
               <th className="text-center py-2 px-1 font-bold">3PT</th>
               <th className="text-center py-2 px-1 font-bold">TL</th>
             </tr>
