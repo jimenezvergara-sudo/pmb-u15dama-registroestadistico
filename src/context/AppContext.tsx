@@ -58,6 +58,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     update(s => ({ ...s, players: s.players.filter(p => p.id !== id) }));
   }, [update]);
 
+  const removeGame = useCallback((id: string) => {
+    update(s => ({ ...s, games: s.games.filter(g => g.id !== id) }));
+  }, [update]);
+
   const addTournament = useCallback((t: Omit<Tournament, 'id'>) => {
     update(s => ({ ...s, tournaments: [...s.tournaments, { ...t, id: genId() }] }));
   }, [update]);
