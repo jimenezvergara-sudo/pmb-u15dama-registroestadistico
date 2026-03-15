@@ -6,6 +6,7 @@ import NewGame from '@/components/NewGame';
 import RosterManager from '@/components/RosterManager';
 import Dashboard from '@/components/Dashboard';
 import TournamentManager from '@/components/TournamentManager';
+import HomeScreen from '@/components/HomeScreen';
 
 const AppContent: React.FC = () => {
   const { activeGame } = useApp();
