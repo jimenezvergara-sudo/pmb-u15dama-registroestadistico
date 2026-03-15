@@ -295,6 +295,7 @@ const Dashboard: React.FC = () => {
                     {row.pct}%
                   </span>
                 </td>
+                <td className="text-center py-2 px-1">{row.twoM}/{row.twoA}</td>
                 <td className="text-center py-2 px-1">{row.threeM}/{row.threeA}</td>
                 <td className="text-center py-2 px-1">{row.ftM}/{row.ftA}</td>
               </tr>
