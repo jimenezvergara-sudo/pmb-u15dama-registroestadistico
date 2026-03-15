@@ -11,7 +11,7 @@ import logoPmb from '@/assets/logo-pmb.png';
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const Dashboard: React.FC = () => {
-  const { games, tournaments } = useApp();
+  const { games, tournaments, removeGame } = useApp();
   const [filterTournamentId, setFilterTournamentId] = useState<string>('ALL');
   const [selectedGameId, setSelectedGameId] = useState<string>('ALL');
   const [filterQuarter, setFilterQuarter] = useState<QuarterId | 'ALL'>('ALL');
