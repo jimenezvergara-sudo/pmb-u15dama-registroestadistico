@@ -3,6 +3,9 @@ import { useApp } from '@/context/AppContext';
 import { Game, QuarterId, QUARTER_LABELS } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import logoPmb from '@/assets/logo-pmb.png';
 
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
