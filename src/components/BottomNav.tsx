@@ -10,6 +10,7 @@ interface Props {
 }
 
 const tabs: { id: TabId; icon: React.ReactNode; label: string }[] = [
+  { id: 'home', icon: <Home className="w-5 h-5" />, label: 'Inicio' },
   { id: 'live', icon: <Plus className="w-5 h-5" />, label: 'Partido' },
   { id: 'roster', icon: <Users className="w-5 h-5" />, label: 'Plantilla' },
   { id: 'tournaments', icon: <Trophy className="w-5 h-5" />, label: 'Torneos' },

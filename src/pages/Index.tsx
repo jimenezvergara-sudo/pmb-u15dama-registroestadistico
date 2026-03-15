@@ -19,6 +19,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16">
+      {tab === 'home' && <HomeScreen />}
       {tab === 'live' && (activeGame ? <LiveGame /> : <NewGame />)}
       {tab === 'roster' && <RosterManager />}
       {tab === 'dashboard' && <Dashboard />}
