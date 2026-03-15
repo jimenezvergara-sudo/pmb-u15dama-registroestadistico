@@ -10,7 +10,7 @@ import HomeScreen from '@/components/HomeScreen';
 
 const AppContent: React.FC = () => {
   const { activeGame } = useApp();
-  const [tab, setTab] = useState<TabId>('roster');
+  const [tab, setTab] = useState<TabId>('home');
 
   // Auto-switch to live when game starts
   React.useEffect(() => {
