@@ -86,14 +86,17 @@ const Dashboard: React.FC = () => {
   // Box score
   const boxScore = roster.map(player => {
     const playerShots = filteredShots.filter(s => s.playerId === player.id);
-    const fga = playerShots.length;
-    const fgm = playerShots.filter(s => s.made).length;
+    const fieldShots = playerShots.filter(s => s.points >= 2); // solo dobles y triples
+    const fga = fieldShots.length;
+    const fgm = fieldShots.filter(s => s.made).length;
     const pts = playerShots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
+    const twoA = playerShots.filter(s => s.points === 2).length;
+    const twoM = playerShots.filter(s => s.points === 2 && s.made).length;
     const threeA = playerShots.filter(s => s.points === 3).length;
     const threeM = playerShots.filter(s => s.points === 3 && s.made).length;
     const ftA = playerShots.filter(s => s.points === 1).length;
     const ftM = playerShots.filter(s => s.points === 1 && s.made).length;
-    return { player, pts, fga, fgm, threeA, threeM, ftA, ftM, pct: fga > 0 ? Math.round((fgm / fga) * 100) : 0 };
+    return { player, pts, fga, fgm, twoA, twoM, threeA, threeM, ftA, ftM, pct: fga > 0 ? Math.round((fgm / fga) * 100) : 0 };
   }).sort((a, b) => b.pts - a.pts);
 
   const totalPoints = filteredShots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
@@ -275,6 +278,7 @@ const Dashboard: React.FC = () => {
               <th className="text-center py-2 px-1 font-bold">PTS</th>
               <th className="text-center py-2 px-1 font-bold">TC</th>
               <th className="text-center py-2 px-1 font-bold">%</th>
+              <th className="text-center py-2 px-1 font-bold">2PT</th>
               <th className="text-center py-2 px-1 font-bold">3PT</th>
               <th className="text-center py-2 px-1 font-bold">TL</th>
             </tr>
@@ -291,6 +295,7 @@ const Dashboard: React.FC = () => {
                     {row.pct}%
                   </span>
                 </td>
+                <td className="text-center py-2 px-1">{row.twoM}/{row.twoA}</td>
                 <td className="text-center py-2 px-1">{row.threeM}/{row.threeA}</td>
                 <td className="text-center py-2 px-1">{row.ftM}/{row.ftA}</td>
               </tr>
