@@ -11,6 +11,7 @@ interface AppState {
 interface AppContextValue extends AppState {
   addPlayer: (p: Omit<Player, 'id'>) => void;
   removePlayer: (id: string) => void;
+  removeGame: (id: string) => void;
   addTournament: (t: Omit<Tournament, 'id'>) => void;
   startGame: (opponentName: string, roster: Player[], tournamentId?: string) => void;
   endGame: () => void;
