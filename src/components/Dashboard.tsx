@@ -3,12 +3,15 @@ import { useApp } from '@/context/AppContext';
 import { Game, QuarterId, QUARTER_LABELS } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import logoPmb from '@/assets/logo-pmb.png';
 
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const Dashboard: React.FC = () => {
-  const { games, tournaments } = useApp();
+  const { games, tournaments, removeGame } = useApp();
   const [filterTournamentId, setFilterTournamentId] = useState<string>('ALL');
   const [selectedGameId, setSelectedGameId] = useState<string>('ALL');
   const [filterQuarter, setFilterQuarter] = useState<QuarterId | 'ALL'>('ALL');
@@ -124,24 +127,46 @@ const Dashboard: React.FC = () => {
         ))}
       </select>
 
-      {/* Game filter */}
-      <select
-        value={selectedGameId}
-        onChange={e => {
-          setSelectedGameId(e.target.value);
-          setFilterPlayer('ALL');
-        }}
-        className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm font-semibold"
-      >
-        <option value="ALL">
-          {tournamentGames.length > 0 ? `Todos los partidos (${tournamentGames.length})` : 'Sin partidos'}
-        </option>
-        {tournamentGames.map(g => (
-          <option key={g.id} value={g.id}>
-            vs {g.opponentName} — {new Date(g.date).toLocaleDateString()}
+      {/* Game filter + delete */}
+      <div className="flex gap-2">
+        <select
+          value={selectedGameId}
+          onChange={e => {
+            setSelectedGameId(e.target.value);
+            setFilterPlayer('ALL');
+          }}
+          className="flex-1 h-10 rounded-md border border-input bg-background px-3 text-sm font-semibold"
+        >
+          <option value="ALL">
+            {tournamentGames.length > 0 ? `Todos los partidos (${tournamentGames.length})` : 'Sin partidos'}
           </option>
-        ))}
-      </select>
+          {tournamentGames.map(g => {
+            const teamPts = g.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
+            const oppPts = (g.opponentScores || []).reduce((sum, s) => sum + s.points, 0);
+            return (
+              <option key={g.id} value={g.id}>
+                vs {g.opponentName} ({teamPts}-{oppPts}) — {new Date(g.date).toLocaleDateString()}
+              </option>
+            );
+          })}
+        </select>
+        {selectedGameId !== 'ALL' && (
+          <Button
+            variant="destructive"
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            onClick={() => {
+              if (confirm('¿Eliminar este partido? Se borrará de todas las estadísticas.')) {
+                removeGame(selectedGameId);
+                setSelectedGameId('ALL');
+                toast('Partido eliminado', { duration: 2000 });
+              }
+            }}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
 
       {/* Quarter filters */}
       <div className="flex gap-2 overflow-x-auto">
