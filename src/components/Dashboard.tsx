@@ -113,7 +113,7 @@ const Dashboard: React.FC = () => {
   const oppPpg = numGames > 0 ? (totalOpponent / numGames).toFixed(1) : '0';
 
   // Efficiency leaders
-  const efficiencyLeaders = useMemo(() => {
+  const efficiencyLeaders = (() => {
     const withTriples = boxScore.filter(r => r.threeA > 0).sort((a, b) => b.threePct - a.threePct || b.threeM - a.threeM);
     const withDoubles = boxScore.filter(r => r.twoA > 0).sort((a, b) => b.twoPct - a.twoPct || b.twoM - a.twoM);
     const withFt = boxScore.filter(r => r.ftA > 0).sort((a, b) => b.ftPct - a.ftPct || b.ftM - a.ftM);
@@ -122,20 +122,17 @@ const Dashboard: React.FC = () => {
       dobles: withDoubles[0] || null,
       tl: withFt[0] || null,
     };
-  }, [boxScore]);
+  })();
 
   // Rival comparison (when filtering by team)
-  const rivalGames = useMemo(() => {
-    if (filterTeamId === 'ALL') return [];
-    return games.filter(g => g.opponentTeamId === filterTeamId);
-  }, [games, filterTeamId]);
+  const rivalGames = filterTeamId === 'ALL' ? [] : games.filter(g => g.opponentTeamId === filterTeamId);
 
   // Unique opponent teams from games
-  const opponentTeamIds = useMemo(() => {
+  const opponentTeamIds = (() => {
     const ids = new Set<string>();
     games.forEach(g => { if (g.opponentTeamId) ids.add(g.opponentTeamId); });
     return Array.from(ids);
-  }, [games]);
+  })();
 
   return (
     <div className="p-4 space-y-4 pb-24">
