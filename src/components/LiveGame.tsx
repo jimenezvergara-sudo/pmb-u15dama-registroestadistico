@@ -16,13 +16,18 @@ const LiveGame: React.FC = () => {
 
   if (!activeGame) return null;
 
-  const handleZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
-    setPendingShot(zone);
-    setSelectedPlayer(null);
-  };
-
+  // New flow: select player first, then zone, then result
   const handlePlayerSelect = (playerId: string) => {
     setSelectedPlayer(playerId);
+    setPendingShot(null); // reset zone when switching player
+  };
+
+  const handleZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
+    if (!selectedPlayer) {
+      toast('Selecciona una jugadora primero', { duration: 1500 });
+      return;
+    }
+    setPendingShot(zone);
   };
 
   const handleResult = (made: boolean) => {
@@ -41,7 +46,7 @@ const LiveGame: React.FC = () => {
       action: { label: 'Deshacer', onClick: undoLastShot },
     });
     setPendingShot(null);
-    setSelectedPlayer(null);
+    // Keep player selected for consecutive shots
   };
 
   const handleUndo = () => {
@@ -49,7 +54,6 @@ const LiveGame: React.FC = () => {
     toast('Último tiro deshecho', { duration: 1000 });
   };
 
-  // Calculate score
   const teamScore = activeGame.shots
     .filter(s => s.made)
     .reduce((sum, s) => sum + s.points, 0);
@@ -118,7 +122,7 @@ const LiveGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Rival scoring - always visible compact row */}
+      {/* Rival scoring */}
       <div className="bg-destructive/10 px-3 py-2 flex items-center gap-1.5">
         <span className="text-[10px] font-bold text-destructive mr-auto uppercase tracking-wider">Rival</span>
         {([1, 2, 3] as const).map(pts => (
@@ -148,8 +152,52 @@ const LiveGame: React.FC = () => {
         </Button>
       </div>
 
+      {/* Player grid FIRST - new flow */}
+      <div className="px-3 pt-3">
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+          {!selectedPlayer ? '1. Selecciona jugadora' : pendingShot ? '3. ¿Canasta o Fallo?' : '2. Toca zona en cancha'}
+        </p>
+        <div className="grid grid-cols-4 gap-2">
+          {activeGame.roster.map(player => (
+            <button
+              key={player.id}
+              onClick={() => handlePlayerSelect(player.id)}
+              className={`flex flex-col items-center py-2 px-1 rounded-lg tap-feedback min-h-[52px] transition-colors ${
+                selectedPlayer === player.id
+                  ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
+                  : 'bg-card text-card-foreground hover:bg-accent'
+              }`}
+            >
+              <span className="text-lg font-extrabold leading-none">{player.number}</span>
+              <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-center">{player.name.split(' ')[0]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Made / Missed buttons - show when zone selected */}
+      {pendingShot && selectedPlayer && (
+        <div className="px-3 pt-2">
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={() => handleResult(true)}
+              className="h-12 text-lg font-bold tap-feedback bg-success text-success-foreground hover:bg-success/90"
+            >
+              ✓ Canasta
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleResult(false)}
+              className="h-12 text-lg font-bold tap-feedback"
+            >
+              ✗ Fallo
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Court + Free throw button */}
-      <div className="px-2 pt-2">
+      <div className="px-2 pt-2 flex-1">
         <CourtDiagram
           onZoneTap={handleZoneTap}
           shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
@@ -168,71 +216,21 @@ const LiveGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Instruction */}
-      <div className="px-4 py-1.5 text-center text-xs text-muted-foreground font-medium">
-        {!pendingShot && 'Toca una zona de la cancha o Tiro Libre'}
-        {pendingShot && !selectedPlayer && `Zona ${pendingShot.points}pt — Selecciona jugadora`}
-        {pendingShot && selectedPlayer && '¿Canasta o Fallo?'}
-      </div>
-
-      {/* Bottom: Player grid + Actions */}
-      <div className="flex-1 px-3 pb-2 flex flex-col gap-2 overflow-y-auto">
-        {/* Player grid */}
-        <div className="grid grid-cols-4 gap-2">
-          {activeGame.roster.map(player => (
-            <button
-              key={player.id}
-              onClick={() => handlePlayerSelect(player.id)}
-              disabled={!pendingShot}
-              className={`flex flex-col items-center py-2 px-1 rounded-lg tap-feedback min-h-[56px] transition-colors ${
-                selectedPlayer === player.id
-                  ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
-                  : pendingShot
-                  ? 'bg-card text-card-foreground hover:bg-accent'
-                  : 'bg-card text-muted-foreground opacity-50'
-              }`}
-            >
-              <span className="text-lg font-extrabold leading-none">{player.number}</span>
-              <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-center">{player.name.split(' ')[0]}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Made / Missed buttons */}
-        {pendingShot && selectedPlayer && (
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={() => handleResult(true)}
-              className="h-14 text-lg font-bold tap-feedback bg-success text-success-foreground hover:bg-success/90"
-            >
-              ✓ Canasta
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleResult(false)}
-              className="h-14 text-lg font-bold tap-feedback"
-            >
-              ✗ Fallo
-            </Button>
-          </div>
-        )}
-
-        {/* Actions row */}
-        <div className="flex gap-2 mt-auto pt-2">
-          <Button variant="outline" size="sm" onClick={handleUndo} className="flex-1 gap-1">
-            <Undo2 className="w-4 h-4" /> Deshacer
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              if (confirm('¿Finalizar partido?')) endGame();
-            }}
-            className="flex-1"
-          >
-            Finalizar
-          </Button>
-        </div>
+      {/* Actions row */}
+      <div className="flex gap-2 px-3 pb-2 pt-1">
+        <Button variant="outline" size="sm" onClick={handleUndo} className="flex-1 gap-1">
+          <Undo2 className="w-4 h-4" /> Deshacer
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            if (confirm('¿Finalizar partido?')) endGame();
+          }}
+          className="flex-1"
+        >
+          Finalizar
+        </Button>
       </div>
     </div>
   );

@@ -13,7 +13,6 @@ interface LeaderData {
 const HomeScreen: React.FC = () => {
   const { games, players } = useApp();
 
-  // Global stats
   const totalGames = games.length;
 
   const wins = games.filter(g => {
@@ -35,7 +34,6 @@ const HomeScreen: React.FC = () => {
   const ptsPerGame = totalGames > 0 ? (totalTeamPts / totalGames).toFixed(1) : '0';
   const ptsAgainst = totalGames > 0 ? (totalOppPts / totalGames).toFixed(1) : '0';
 
-  // Leaders calculations across all games
   const allShots = games.flatMap(g => g.shots);
 
   const playerStats = players.map(p => {
@@ -66,12 +64,12 @@ const HomeScreen: React.FC = () => {
       data: topThrees ? { name: topThrees.name, number: topThrees.number, value: `${topThrees.triples} triples` } : null,
     },
     {
-      title: 'Líder 2 Puntos',
+      title: 'Líder Dobles',
       icon: <CircleDot className="w-5 h-5" />,
       data: topDoubles ? { name: topDoubles.name, number: topDoubles.number, value: `${topDoubles.dobles} dobles` } : null,
     },
     {
-      title: 'Mejor % Libres',
+      title: 'Mejor % Tiros Libres',
       icon: <Percent className="w-5 h-5" />,
       data: topFt ? { name: topFt.name, number: topFt.number, value: `${topFt.ftPct.toFixed(1)}%` } : null,
     },
@@ -79,79 +77,47 @@ const HomeScreen: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Header with gradient */}
       <div className="bg-primary px-5 pt-6 pb-10 rounded-b-3xl relative overflow-hidden">
-        {/* Subtle decorative circle */}
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-primary-foreground/5" />
         <div className="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-primary-foreground/5" />
-
         <div className="flex items-center justify-between relative z-10">
           <div>
-            <h1 className="text-2xl font-black text-primary-foreground tracking-tight">
-              PMB Elite
-            </h1>
-            <p className="text-xs text-primary-foreground/50 font-semibold mt-0.5">
-              Puerto Montt Basket
-            </p>
+            <h1 className="text-2xl font-black text-primary-foreground tracking-tight">PMB Elite</h1>
+            <p className="text-xs text-primary-foreground/50 font-semibold mt-0.5">Puerto Montt Basket</p>
           </div>
-          <img
-            src={logoPmb}
-            alt="PMB"
-            className="w-14 h-14 rounded-xl shadow-lg ring-2 ring-primary-foreground/20"
-          />
+          <img src={logoPmb} alt="PMB" className="w-14 h-14 rounded-xl shadow-lg ring-2 ring-primary-foreground/20" />
         </div>
       </div>
 
-      {/* Global Stats Row - overlapping header */}
       <div className="grid grid-cols-3 gap-3 px-4 -mt-6 relative z-10">
         {[
           { label: 'RÉCORD', value: `${wins}-${losses}` },
           { label: 'PTS/P', value: ptsPerGame },
           { label: 'PTS/C', value: ptsAgainst },
         ].map(stat => (
-          <Card
-            key={stat.label}
-            className="bg-primary border-none shadow-xl shadow-primary/30"
-          >
+          <Card key={stat.label} className="bg-primary border-none shadow-xl shadow-primary/30">
             <CardContent className="p-3 text-center">
-              <p className="text-[9px] font-bold text-primary-foreground/50 uppercase tracking-widest">
-                {stat.label}
-              </p>
-              <p className="text-2xl font-black text-primary-foreground leading-tight mt-1">
-                {stat.value}
-              </p>
+              <p className="text-[9px] font-bold text-primary-foreground/50 uppercase tracking-widest">{stat.label}</p>
+              <p className="text-2xl font-black text-primary-foreground leading-tight mt-1">{stat.value}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Season Leaders */}
       <div className="px-4 mt-8 flex-1">
-        <h2 className="text-base font-extrabold text-foreground mb-4">
-          Líderes de Temporada
-        </h2>
+        <h2 className="text-base font-extrabold text-foreground mb-4">Líderes de Temporada</h2>
         <div className="grid grid-cols-2 gap-3">
           {leaders.map(leader => (
-            <Card
-              key={leader.title}
-              className="border-border/40 shadow-md hover:shadow-lg transition-shadow bg-card"
-            >
+            <Card key={leader.title} className="border-border/40 shadow-md hover:shadow-lg transition-shadow bg-card">
               <CardContent className="p-4 flex flex-col items-center text-center">
-                {/* Icon circle */}
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2.5">
                   <span className="text-primary">{leader.icon}</span>
                 </div>
-                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
-                  {leader.title}
-                </p>
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{leader.title}</p>
                 {leader.data ? (
                   <>
-                    <p className="text-sm font-bold text-foreground leading-tight">
-                      {leader.data.name}
-                    </p>
-                    <p className="text-xl font-black text-primary leading-tight mt-1">
-                      {leader.data.value}
-                    </p>
+                    <p className="text-sm font-bold text-foreground leading-tight">{leader.data.name}</p>
+                    <p className="text-xl font-black text-primary leading-tight mt-1">{leader.data.value}</p>
                   </>
                 ) : (
                   <p className="text-xs text-muted-foreground italic mt-2">Sin datos</p>
@@ -162,7 +128,6 @@ const HomeScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Games played indicator */}
       <div className="px-4 py-6">
         <p className="text-[10px] text-muted-foreground text-center uppercase tracking-widest font-semibold">
           {totalGames} {totalGames === 1 ? 'partido jugado' : 'partidos jugados'}

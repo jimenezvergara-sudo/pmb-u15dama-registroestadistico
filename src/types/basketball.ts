@@ -5,6 +5,13 @@ export interface Player {
   photo?: string;
 }
 
+export interface Team {
+  id: string;
+  clubName: string;
+  city: string;
+  region: string;
+}
+
 export interface Tournament {
   id: string;
   name: string;
@@ -15,10 +22,10 @@ export interface ShotEvent {
   id: string;
   playerId: string;
   quarterId: QuarterId;
-  x: number; // 0-100 percentage on court
-  y: number; // 0-100 percentage on court
+  x: number;
+  y: number;
   made: boolean;
-  points: 1 | 2 | 3; // FT, 2pt, 3pt
+  points: 1 | 2 | 3;
   timestamp: number;
 }
 
@@ -41,13 +48,17 @@ export interface OpponentScore {
   timestamp: number;
 }
 
+export type GameLeg = 'ida' | 'vuelta';
+
 export interface Game {
   id: string;
   tournamentId?: string;
+  opponentTeamId?: string;
   opponentName: string;
   date: string;
   roster: Player[];
   shots: ShotEvent[];
   opponentScores: OpponentScore[];
   currentQuarter: QuarterId;
+  leg?: GameLeg;
 }
