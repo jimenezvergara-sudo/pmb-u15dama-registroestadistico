@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Player } from '@/types/basketball';
+import { Player, GameLeg } from '@/types/basketball';
 import { Play } from 'lucide-react';
 
 const NewGame: React.FC = () => {
-  const { players, startGame, tournaments } = useApp();
-  const [opponent, setOpponent] = useState('');
+  const { players, startGame, tournaments, teams } = useApp();
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('');
+  const [customOpponent, setCustomOpponent] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set());
   const [tournamentId, setTournamentId] = useState<string>('');
+  const [leg, setLeg] = useState<GameLeg | ''>('');
 
   const togglePlayer = (id: string) => {
     setSelectedPlayers(prev => {
@@ -19,10 +21,20 @@ const NewGame: React.FC = () => {
     });
   };
 
+  const opponentName = selectedTeamId
+    ? teams.find(t => t.id === selectedTeamId)?.clubName || ''
+    : customOpponent.trim();
+
   const handleStart = () => {
-    if (!opponent.trim() || selectedPlayers.size === 0) return;
+    if (!opponentName || selectedPlayers.size === 0) return;
     const roster = players.filter(p => selectedPlayers.has(p.id));
-    startGame(opponent.trim(), roster, tournamentId || undefined);
+    startGame(
+      opponentName,
+      roster,
+      tournamentId || undefined,
+      selectedTeamId || undefined,
+      leg || undefined,
+    );
   };
 
   return (
@@ -30,17 +42,54 @@ const NewGame: React.FC = () => {
       <h2 className="text-xl font-extrabold text-foreground">Nuevo Partido</h2>
 
       <div className="space-y-3">
-        <Input
-          placeholder="Equipo rival"
-          value={opponent}
-          onChange={e => setOpponent(e.target.value)}
-        />
+        {/* Team selector */}
+        {teams.length > 0 ? (
+          <div className="space-y-2">
+            <select
+              value={selectedTeamId}
+              onChange={e => {
+                setSelectedTeamId(e.target.value);
+                if (e.target.value) setCustomOpponent('');
+              }}
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm font-semibold"
+            >
+              <option value="">Seleccionar equipo rival...</option>
+              {teams.map(t => (
+                <option key={t.id} value={t.id}>{t.clubName} — {t.city}</option>
+              ))}
+            </select>
+            {!selectedTeamId && (
+              <Input
+                placeholder="O escribe el nombre del rival"
+                value={customOpponent}
+                onChange={e => setCustomOpponent(e.target.value)}
+              />
+            )}
+          </div>
+        ) : (
+          <Input
+            placeholder="Equipo rival"
+            value={customOpponent}
+            onChange={e => setCustomOpponent(e.target.value)}
+          />
+        )}
+
+        {/* Leg selector */}
+        <select
+          value={leg}
+          onChange={e => setLeg(e.target.value as GameLeg | '')}
+          className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm font-semibold"
+        >
+          <option value="">Tipo de partido</option>
+          <option value="ida">Ida</option>
+          <option value="vuelta">Vuelta</option>
+        </select>
 
         {tournaments.length > 0 && (
           <select
             value={tournamentId}
             onChange={e => setTournamentId(e.target.value)}
-            className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+            className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm font-semibold"
           >
             <option value="">Sin torneo</option>
             {tournaments.map(t => (
@@ -79,7 +128,7 @@ const NewGame: React.FC = () => {
 
       <Button
         onClick={handleStart}
-        disabled={!opponent.trim() || selectedPlayers.size === 0}
+        disabled={!opponentName || selectedPlayers.size === 0}
         className="w-full h-14 text-lg font-bold tap-feedback gap-2"
       >
         <Play className="w-5 h-5" /> Iniciar Partido

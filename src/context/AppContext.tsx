@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore } from '@/types/basketball';
+import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, GameLeg } from '@/types/basketball';
 
 interface AppState {
   players: Player[];
   tournaments: Tournament[];
+  teams: Team[];
   games: Game[];
   activeGame: Game | null;
 }
@@ -13,7 +14,9 @@ interface AppContextValue extends AppState {
   removePlayer: (id: string) => void;
   removeGame: (id: string) => void;
   addTournament: (t: Omit<Tournament, 'id'>) => void;
-  startGame: (opponentName: string, roster: Player[], tournamentId?: string) => void;
+  addTeam: (t: Omit<Team, 'id'>) => void;
+  removeTeam: (id: string) => void;
+  startGame: (opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg) => void;
   endGame: () => void;
   setQuarter: (q: QuarterId) => void;
   recordShot: (shot: Omit<ShotEvent, 'id' | 'timestamp' | 'quarterId'>) => void;
@@ -30,9 +33,12 @@ const genId = () => Math.random().toString(36).slice(2, 10);
 const loadState = (): AppState => {
   try {
     const raw = localStorage.getItem('hoopstats');
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...parsed, teams: parsed.teams || [] };
+    }
   } catch {}
-  return { players: [], tournaments: [], games: [], activeGame: null };
+  return { players: [], tournaments: [], teams: [], games: [], activeGame: null };
 };
 
 const saveState = (s: AppState) => {
@@ -66,7 +72,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     update(s => ({ ...s, tournaments: [...s.tournaments, { ...t, id: genId() }] }));
   }, [update]);
 
-  const startGame = useCallback((opponentName: string, roster: Player[], tournamentId?: string) => {
+  const addTeam = useCallback((t: Omit<Team, 'id'>) => {
+    update(s => ({ ...s, teams: [...s.teams, { ...t, id: genId() }] }));
+  }, [update]);
+
+  const removeTeam = useCallback((id: string) => {
+    update(s => ({ ...s, teams: s.teams.filter(t => t.id !== id) }));
+  }, [update]);
+
+  const startGame = useCallback((opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg) => {
     const game: Game = {
       id: genId(),
       opponentName,
@@ -76,6 +90,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       opponentScores: [],
       currentQuarter: 'Q1',
       tournamentId,
+      opponentTeamId,
+      leg,
     };
     update(s => ({ ...s, activeGame: game }));
   }, [update]);
@@ -141,6 +157,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, removeGame, addTournament,
+      addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
       recordOpponentScore, undoLastOpponentScore,
     }}>

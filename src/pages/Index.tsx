@@ -6,13 +6,13 @@ import NewGame from '@/components/NewGame';
 import RosterManager from '@/components/RosterManager';
 import Dashboard from '@/components/Dashboard';
 import TournamentManager from '@/components/TournamentManager';
+import TeamManager from '@/components/TeamManager';
 import HomeScreen from '@/components/HomeScreen';
 
 const AppContent: React.FC = () => {
   const { activeGame } = useApp();
   const [tab, setTab] = useState<TabId>('home');
 
-  // Auto-switch to live when game starts
   React.useEffect(() => {
     if (activeGame) setTab('live');
   }, [activeGame?.id]);
@@ -22,6 +22,7 @@ const AppContent: React.FC = () => {
       {tab === 'home' && <HomeScreen />}
       {tab === 'live' && (activeGame ? <LiveGame /> : <NewGame />)}
       {tab === 'roster' && <RosterManager />}
+      {tab === 'teams' && <TeamManager />}
       {tab === 'dashboard' && <Dashboard />}
       {tab === 'tournaments' && <TournamentManager />}
       <BottomNav activeTab={tab} onTabChange={setTab} hasActiveGame={!!activeGame} />
