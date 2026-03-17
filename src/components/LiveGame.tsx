@@ -130,6 +130,7 @@ const LiveGame: React.FC = () => {
     const player = activeGame.roster.find(p => p.id === selectedPlayer);
     const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida', foul: 'Falta' };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
+    setSelectedPlayer(null);
 
     if (action === 'foul') {
       const currentFouls = (activeGame.actions || []).filter(
