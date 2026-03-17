@@ -113,6 +113,7 @@ const LiveGame: React.FC = () => {
       action: { label: 'Deshacer', onClick: undoLastShot },
     });
     setPendingShot(null);
+    setSelectedPlayer(null);
   };
 
   const handleUndo = () => {
