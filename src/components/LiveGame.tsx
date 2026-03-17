@@ -81,7 +81,10 @@ const LiveGame: React.FC = () => {
             <p className="text-[10px] text-primary-foreground/50 font-bold">VS</p>
             <p className="text-xs text-primary-foreground/60 font-medium mt-0.5">Q: {quarterScore}-{opponentQuarterScore}</p>
           </div>
-          <div className="text-center flex-1">
+          <div className="text-center flex-1 flex flex-col items-center">
+            <div className="w-6 h-6 mb-0.5 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+              <span className="text-xs font-bold text-primary-foreground/70">VS</span>
+            </div>
             <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold truncate">{activeGame.opponentName}</p>
             <p className="text-4xl font-black text-primary-foreground/80 leading-none">{opponentTotal}</p>
           </div>
