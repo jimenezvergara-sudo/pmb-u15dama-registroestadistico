@@ -45,6 +45,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   const minFtAttempts = Math.max(1, Math.floor(teamTotalFtAttempts * 0.2));
   const minFieldAttempts = Math.max(1, Math.floor(teamTotalFieldAttempts * 0.2));
 
+  const allActions = games.flatMap(g => g.actions || []);
+
   const playerStats = players.map(p => {
     const shots = allShots.filter(s => s.playerId === p.id);
     const totalPts = shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
@@ -65,12 +67,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     const fieldAttempts = shots.filter(s => s.points >= 2).length;
     const fieldPct = fieldAttempts > 0 ? (fieldMade / fieldAttempts) * 100 : 0;
 
+    const rebounds = allActions.filter(a => a.playerId === p.id && a.type === 'rebound').length;
+    const assists = allActions.filter(a => a.playerId === p.id && a.type === 'assist').length;
+    const steals = allActions.filter(a => a.playerId === p.id && a.type === 'steal').length;
+
     return {
       ...p, totalPts,
       triplesMade, triplesAttempts, triplesPct,
       doblesMade, doblesAttempts, doblesPct,
       ftMade, ftAttempts, ftPct,
       fieldMade, fieldAttempts, fieldPct,
+      rebounds, assists, steals,
     };
   });
 
