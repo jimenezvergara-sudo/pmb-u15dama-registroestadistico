@@ -7,7 +7,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Button } from '@/components/ui/button';
 import { Trash2, Target, CircleDot, Crosshair } from 'lucide-react';
 import { toast } from 'sonner';
-import logoBasqest from '@/assets/logo-basqest.png';
+import logoBasqest from '@/assets/logo-basqest-full.png';
 
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
