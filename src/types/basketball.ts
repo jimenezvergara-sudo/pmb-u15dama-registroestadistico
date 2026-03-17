@@ -64,6 +64,14 @@ export interface GameAction {
   timestamp: number;
 }
 
+export interface SubstitutionEvent {
+  id: string;
+  playerIn: string;
+  playerOut: string;
+  quarterId: QuarterId;
+  timestamp: number;
+}
+
 export interface Game {
   id: string;
   tournamentId?: string;
@@ -74,7 +82,12 @@ export interface Game {
   shots: ShotEvent[];
   opponentScores: OpponentScore[];
   actions: GameAction[];
+  substitutions: SubstitutionEvent[];
   currentQuarter: QuarterId;
   leg?: GameLeg;
   category?: Category;
+  onCourtPlayerIds: string[];
+  courtTimeMs: Record<string, number>;
+  gameStartTimestamp?: number;
+  lastTimerSnapshot?: number;
 }
