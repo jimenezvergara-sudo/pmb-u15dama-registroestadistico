@@ -179,6 +179,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     update(s => ({ ...s, activeCategory: c }));
   }, [update]);
 
+  const recordAction = useCallback((playerId: string, type: ActionType) => {
+    update(s => {
+      if (!s.activeGame) return s;
+      const action: GameAction = {
+        id: genId(),
+        playerId,
+        quarterId: s.activeGame.currentQuarter,
+        type,
+        timestamp: Date.now(),
+      };
+      return { ...s, activeGame: { ...s.activeGame, actions: [...(s.activeGame.actions || []), action] } };
+    });
+  }, [update]);
+
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, removeGame, addTournament,
