@@ -64,7 +64,7 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, title, subtitle, b
         disabled={selected.size !== 5}
         className="mt-4 h-12 text-base font-bold"
       >
-        Iniciar Registro
+        {buttonLabel || 'Iniciar Registro'}
       </Button>
     </div>
   );
