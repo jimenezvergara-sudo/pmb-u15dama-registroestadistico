@@ -6,10 +6,14 @@ import { CheckCircle2, Circle } from 'lucide-react';
 interface Props {
   roster: Player[];
   onConfirm: (starterIds: string[]) => void;
+  title?: string;
+  subtitle?: string;
+  buttonLabel?: string;
+  preSelected?: string[];
 }
 
-const StartingLineup: React.FC<Props> = ({ roster, onConfirm }) => {
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+const StartingLineup: React.FC<Props> = ({ roster, onConfirm, title, subtitle, buttonLabel, preSelected }) => {
+  const [selected, setSelected] = useState<Set<string>>(new Set(preSelected || []));
 
   const toggle = (id: string) => {
     setSelected(prev => {
@@ -25,9 +29,9 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm }) => {
 
   return (
     <div className="flex flex-col h-full p-4">
-      <h2 className="text-lg font-extrabold text-foreground mb-1">Quinteto Inicial</h2>
+      <h2 className="text-lg font-extrabold text-foreground mb-1">{title || 'Quinteto Inicial'}</h2>
       <p className="text-xs text-muted-foreground mb-4">
-        Selecciona las 5 jugadoras que inician ({selected.size}/5)
+        {subtitle || `Selecciona las 5 jugadoras que inician (${selected.size}/5)`}
       </p>
 
       <div className="flex-1 overflow-y-auto space-y-2">
@@ -60,7 +64,7 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm }) => {
         disabled={selected.size !== 5}
         className="mt-4 h-12 text-base font-bold"
       >
-        Iniciar Registro
+        {buttonLabel || 'Iniciar Registro'}
       </Button>
     </div>
   );
