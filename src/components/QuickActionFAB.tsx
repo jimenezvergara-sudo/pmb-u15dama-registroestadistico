@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Activity, X } from 'lucide-react';
 
 interface Props {
   disabled: boolean;
