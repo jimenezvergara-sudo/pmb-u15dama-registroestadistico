@@ -58,6 +58,27 @@ const LiveGame: React.FC = () => {
     );
   }
 
+  // Show lineup selector when changing quarters
+  if (pendingQuarter) {
+    return (
+      <StartingLineup
+        roster={activeGame.roster}
+        preSelected={activeGame.onCourtPlayerIds || []}
+        title={`Quinteto para ${QUARTER_LABELS[pendingQuarter]}`}
+        subtitle={`Selecciona las 5 jugadoras que inician el ${QUARTER_LABELS[pendingQuarter]} (seleccionadas/5)`}
+        buttonLabel={`Iniciar ${QUARTER_LABELS[pendingQuarter]}`}
+        onConfirm={(starterIds) => {
+          snapshotCourtTime();
+          setOnCourtPlayers(starterIds);
+          setQuarter(pendingQuarter);
+          setPendingQuarter(null);
+          setSelectedPlayer(null);
+          setPendingShot(null);
+        }}
+      />
+    );
+  }
+
   // If coming back to an already-started game
   if (!gameStarted && (activeGame.onCourtPlayerIds || []).length > 0) {
     setGameStarted(true);
