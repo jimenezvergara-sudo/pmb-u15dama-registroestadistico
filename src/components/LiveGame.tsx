@@ -70,10 +70,10 @@ const LiveGame: React.FC = () => {
       toast('Selecciona una jugadora primero', { duration: 1500 });
       return;
     }
+    recordAction(selectedPlayer, action);
     const player = activeGame.roster.find(p => p.id === selectedPlayer);
     const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida' };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
-    // TODO: persist stat events when stat tracking is added to context
   };
 
   const teamScore = activeGame.shots
