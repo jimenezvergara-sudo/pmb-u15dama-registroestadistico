@@ -46,6 +46,11 @@ const Dashboard: React.FC = () => {
     return Array.from(map.values());
   }, [isAggregate, selectedGame, tournamentGames]);
 
+  const allActions = useMemo(() => {
+    if (isAggregate) return tournamentGames.flatMap(g => g.actions || []);
+    return selectedGame?.actions || [];
+  }, [isAggregate, tournamentGames, selectedGame]);
+
   if (games.length === 0) {
     return (
       <div className="p-4 flex flex-col items-center justify-center h-full gap-4">
