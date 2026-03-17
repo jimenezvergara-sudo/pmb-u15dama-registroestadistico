@@ -7,9 +7,10 @@ interface Props {
 }
 
 const ACTIONS = [
-  { key: 'rebound' as const, label: '🏀 Rebote', angle: -90 },
-  { key: 'assist' as const, label: '🤝 Asistencia', angle: -45 },
-  { key: 'steal' as const, label: '🖐️ Robo', angle: 0 },
+  { key: 'rebound' as const, label: '🏀 Rebote', angle: -120 },
+  { key: 'assist' as const, label: '🤝 Asistencia', angle: -75 },
+  { key: 'steal' as const, label: '🖐️ Robo', angle: -30 },
+  { key: 'turnover' as const, label: '❌ Pérdida', angle: 15 },
 ];
 
 const QuickActionFAB: React.FC<Props> = ({ disabled, onAction }) => {

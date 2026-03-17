@@ -65,13 +65,13 @@ const LiveGame: React.FC = () => {
     toast('Último tiro deshecho', { duration: 1000 });
   };
 
-  const handleQuickAction = (action: 'rebound' | 'assist' | 'steal') => {
+  const handleQuickAction = (action: 'rebound' | 'assist' | 'steal' | 'turnover') => {
     if (!selectedPlayer) {
       toast('Selecciona una jugadora primero', { duration: 1500 });
       return;
     }
     const player = activeGame.roster.find(p => p.id === selectedPlayer);
-    const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo' };
+    const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida' };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
     // TODO: persist stat events when stat tracking is added to context
   };
