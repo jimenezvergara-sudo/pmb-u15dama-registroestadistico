@@ -197,7 +197,7 @@ const LiveGame: React.FC = () => {
       </div>
 
       {/* Made / Missed + Actions - always visible at bottom */}
-      <div className="relative z-10 bg-background pt-2">
+      <div className="relative z-10 bg-background pt-4 mt-4">
         {pendingShot && selectedPlayer && (
           <div className="px-3 pb-2">
             <div className="grid grid-cols-2 gap-3">
