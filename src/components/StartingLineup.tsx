@@ -29,9 +29,9 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, title, subtitle, b
 
   return (
     <div className="flex flex-col h-full p-4">
-      <h2 className="text-lg font-extrabold text-foreground mb-1">Quinteto Inicial</h2>
+      <h2 className="text-lg font-extrabold text-foreground mb-1">{title || 'Quinteto Inicial'}</h2>
       <p className="text-xs text-muted-foreground mb-4">
-        Selecciona las 5 jugadoras que inician ({selected.size}/5)
+        {subtitle || `Selecciona las 5 jugadoras que inician (${selected.size}/5)`}
       </p>
 
       <div className="flex-1 overflow-y-auto space-y-2">
