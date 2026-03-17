@@ -177,7 +177,7 @@ const LiveGame: React.FC = () => {
       </div>
 
       {/* Free throw button + Court */}
-      <div className="px-2 pt-4 flex-1">
+      <div className="px-2 pt-4 flex-1 overflow-hidden">
         <div className="flex justify-center mb-2">
           <button
             onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
@@ -196,42 +196,42 @@ const LiveGame: React.FC = () => {
         />
       </div>
 
-      {/* Made / Missed buttons */}
-      {pendingShot && selectedPlayer && (
-        <div className="px-3 pt-2">
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={() => handleResult(true)}
-              className="h-12 text-lg font-bold tap-feedback bg-success text-success-foreground hover:bg-success/90"
-            >
-              ✓ Canasta
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleResult(false)}
-              className="h-12 text-lg font-bold tap-feedback"
-            >
-              ✗ Fallo
-            </Button>
+      {/* Made / Missed + Actions - always visible at bottom */}
+      <div className="relative z-10 bg-background pt-2">
+        {pendingShot && selectedPlayer && (
+          <div className="px-3 pb-2">
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => handleResult(true)}
+                className="h-12 text-lg font-bold tap-feedback bg-success text-success-foreground hover:bg-success/90"
+              >
+                ✓ Canasta
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => handleResult(false)}
+                className="h-12 text-lg font-bold tap-feedback"
+              >
+                ✗ Fallo
+              </Button>
+            </div>
           </div>
+        )}
+        <div className="flex gap-2 px-3 pb-2 pt-1">
+          <Button variant="outline" size="sm" onClick={handleUndo} className="flex-1 gap-1">
+            <Undo2 className="w-4 h-4" /> Deshacer
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              if (confirm('¿Finalizar partido?')) endGame();
+            }}
+            className="flex-1"
+          >
+            Finalizar
+          </Button>
         </div>
-      )}
-
-      {/* Actions row */}
-      <div className="flex gap-2 px-3 pb-2 pt-3 mt-2">
-        <Button variant="outline" size="sm" onClick={handleUndo} className="flex-1 gap-1">
-          <Undo2 className="w-4 h-4" /> Deshacer
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => {
-            if (confirm('¿Finalizar partido?')) endGame();
-          }}
-          className="flex-1"
-        >
-          Finalizar
-        </Button>
       </div>
     </div>
   );
