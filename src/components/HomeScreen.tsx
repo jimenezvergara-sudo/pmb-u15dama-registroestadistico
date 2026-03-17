@@ -146,6 +146,30 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       mainValue: topFt ? `${topFt.ftMade}` : '—',
       subValue: topFt ? `Efic: ${topFt.ftPct.toFixed(0)}% (${topFt.ftMade}/${topFt.ftAttempts})` : '',
     },
+    {
+      title: 'Líder Rebotes',
+      icon: <Grab className="w-5 h-5" />,
+      name: topReb?.name || null,
+      number: topReb?.number ?? null,
+      mainValue: topReb ? `${topReb.rebounds}` : '—',
+      subValue: topReb && totalGames > 0 ? `${(topReb.rebounds / totalGames).toFixed(1)} reb/partido` : '',
+    },
+    {
+      title: 'Líder Asistencias',
+      icon: <Handshake className="w-5 h-5" />,
+      name: topAst?.name || null,
+      number: topAst?.number ?? null,
+      mainValue: topAst ? `${topAst.assists}` : '—',
+      subValue: topAst && totalGames > 0 ? `${(topAst.assists / totalGames).toFixed(1)} ast/partido` : '',
+    },
+    {
+      title: 'Líder Robos',
+      icon: <ShieldCheck className="w-5 h-5" />,
+      name: topStl?.name || null,
+      number: topStl?.number ?? null,
+      mainValue: topStl ? `${topStl.steals}` : '—',
+      subValue: topStl && totalGames > 0 ? `${(topStl.steals / totalGames).toFixed(1)} rob/partido` : '',
+    },
   ];
 
   return (
