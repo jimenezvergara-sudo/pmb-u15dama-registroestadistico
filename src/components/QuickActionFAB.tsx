@@ -3,7 +3,7 @@ import { Plus, X } from 'lucide-react';
 
 interface Props {
   disabled: boolean;
-  onAction: (action: 'rebound' | 'assist' | 'steal') => void;
+  onAction: (action: 'rebound' | 'assist' | 'steal' | 'turnover') => void;
 }
 
 const ACTIONS = [
