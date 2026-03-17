@@ -22,7 +22,7 @@ import {
 const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const LiveGame: React.FC = () => {
-  const { activeGame, setQuarter, recordShot, undoLastShot, endGame, recordOpponentScore, undoLastOpponentScore } = useApp();
+  const { activeGame, setQuarter, recordShot, undoLastShot, endGame, recordOpponentScore, undoLastOpponentScore, recordAction } = useApp();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [courtRotation, setCourtRotation] = useState(0);
