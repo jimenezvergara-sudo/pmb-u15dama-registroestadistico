@@ -191,7 +191,9 @@ const LiveGame: React.FC = () => {
             {QUARTERS.slice(0, 4).map(q => (
               <button
                 key={q}
-                onClick={() => setQuarter(q)}
+                onClick={() => {
+                  if (q !== activeGame.currentQuarter) setPendingQuarter(q);
+                }}
                 className={`px-2 py-1 rounded text-xs font-bold tap-feedback ${
                   activeGame.currentQuarter === q
                     ? 'bg-primary-foreground text-primary'
@@ -206,7 +208,7 @@ const LiveGame: React.FC = () => {
                 const otQuarters = QUARTERS.filter(q => q.startsWith('OT'));
                 const currentOt = otQuarters.indexOf(activeGame.currentQuarter as any);
                 const next = otQuarters[currentOt >= 0 ? Math.min(currentOt + 1, otQuarters.length - 1) : 0];
-                setQuarter(next);
+                if (next !== activeGame.currentQuarter) setPendingQuarter(next);
               }}
               className={`px-2 py-1 rounded text-xs font-bold tap-feedback ${
                 activeGame.currentQuarter.startsWith('OT')
