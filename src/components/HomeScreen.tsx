@@ -97,8 +97,8 @@ const HomeScreen: React.FC = () => {
         ].map(stat => (
           <Card key={stat.label} className="bg-card border border-border/60 shadow-xl">
             <CardContent className="p-3 text-center">
-              <p className="text-[9px] font-bold text-primary-foreground/50 uppercase tracking-widest">{stat.label}</p>
-              <p className="text-2xl font-black text-primary-foreground leading-tight mt-1">{stat.value}</p>
+              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
+              <p className="text-2xl font-black text-foreground leading-tight mt-1">{stat.value}</p>
             </CardContent>
           </Card>
         ))}
