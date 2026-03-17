@@ -81,6 +81,11 @@ const Dashboard: React.FC = () => {
     };
   });
 
+  const allActions = useMemo(() => {
+    if (isAggregate) return tournamentGames.flatMap(g => g.actions || []);
+    return selectedGame?.actions || [];
+  }, [isAggregate, tournamentGames, selectedGame]);
+
   const boxScore = roster.map(player => {
     const playerShots = filteredShots.filter(s => s.playerId === player.id);
     const fieldShots = playerShots.filter(s => s.points >= 2);
@@ -93,8 +98,15 @@ const Dashboard: React.FC = () => {
     const threeM = playerShots.filter(s => s.points === 3 && s.made).length;
     const ftA = playerShots.filter(s => s.points === 1).length;
     const ftM = playerShots.filter(s => s.points === 1 && s.made).length;
+
+    const playerActions = allActions.filter(a => a.playerId === player.id);
+    const reb = playerActions.filter(a => a.type === 'rebound').length;
+    const ast = playerActions.filter(a => a.type === 'assist').length;
+    const stl = playerActions.filter(a => a.type === 'steal').length;
+
     return {
       player, pts, fga, fgm, twoA, twoM, threeA, threeM, ftA, ftM,
+      reb, ast, stl,
       fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
       twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
