@@ -86,10 +86,6 @@ const Dashboard: React.FC = () => {
     };
   });
 
-  const allActions = useMemo(() => {
-    if (isAggregate) return tournamentGames.flatMap(g => g.actions || []);
-    return selectedGame?.actions || [];
-  }, [isAggregate, tournamentGames, selectedGame]);
 
   const boxScore = roster.map(player => {
     const playerShots = filteredShots.filter(s => s.playerId === player.id);
