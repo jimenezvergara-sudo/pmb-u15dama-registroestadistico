@@ -107,6 +107,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       roster,
       shots: [],
       opponentScores: [],
+      actions: [],
       currentQuarter: 'Q1',
       tournamentId,
       opponentTeamId,
