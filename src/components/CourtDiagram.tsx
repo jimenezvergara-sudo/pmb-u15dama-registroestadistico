@@ -48,7 +48,7 @@ const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [] }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto relative">
+    <div className="w-full max-w-md mx-auto relative overflow-hidden">
       <button
         onClick={() => setRotation(r => (r + 90) % 360)}
         className="absolute top-1 right-1 z-10 p-1.5 rounded-full bg-card/80 backdrop-blur-sm border border-border text-muted-foreground hover:text-foreground hover:bg-card transition-colors tap-feedback"
@@ -56,7 +56,7 @@ const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [] }) => {
       >
         <RotateCw className="w-4 h-4" />
       </button>
-      <div className="aspect-[300/280]" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.3s ease' }}>
+      <div className="aspect-[300/280] my-2" style={{ transform: `rotate(${rotation}deg) scale(${rotation % 180 !== 0 ? 0.75 : 1})`, transition: 'transform 0.3s ease' }}>
         <svg viewBox="0 0 300 280" className="w-full h-full" style={{ touchAction: 'manipulation' }}>
           {/* Court background */}
           <rect x="0" y="0" width="300" height="280" rx="4" className="fill-court-bg" />
