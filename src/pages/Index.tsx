@@ -51,15 +51,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16">
-      {/* Category badge */}
-      <div className="flex justify-center pt-1">
-        <button
-          onClick={() => setShowCategoryPicker(true)}
-          className="text-[10px] font-bold text-accent-foreground bg-accent px-3 py-1 rounded-full tap-feedback"
-        >
-          📂 {activeCategory}
-        </button>
-      </div>
+      
       {tab === 'home' && <HomeScreen />}
       {tab === 'live' && (activeGame ? <LiveGame /> : <NewGame />)}
       {tab === 'roster' && <RosterManager />}

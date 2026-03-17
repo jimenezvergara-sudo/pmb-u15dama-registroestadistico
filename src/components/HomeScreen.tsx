@@ -105,7 +105,15 @@ const HomeScreen: React.FC = () => {
       </div>
 
       <div className="px-4 mt-8 flex-1">
-        <h2 className="text-base font-extrabold text-foreground mb-4">Líderes de Temporada</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-extrabold text-foreground">Líderes de Temporada</h2>
+          <button
+            onClick={() => {/* handled via context */}}
+            className="text-[10px] font-bold text-accent-foreground bg-accent px-3 py-1 rounded-full"
+          >
+            📂 {activeCategory}
+          </button>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           {leaders.map(leader => (
             <Card key={leader.title} className="border-border/40 shadow-md hover:shadow-lg transition-shadow bg-card">
