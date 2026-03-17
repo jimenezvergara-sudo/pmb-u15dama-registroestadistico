@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Player } from '@/types/basketball';
 import { Plus, Trash2 } from 'lucide-react';
+import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 
 const RosterManager: React.FC = () => {
   const { players, addPlayer, removePlayer } = useApp();
