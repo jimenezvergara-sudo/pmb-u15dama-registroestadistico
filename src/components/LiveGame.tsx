@@ -58,7 +58,7 @@ const LiveGame: React.FC = () => {
   }
 
   // If coming back to an already-started game
-  if (!gameStarted && activeGame.onCourtPlayerIds.length > 0) {
+  if (!gameStarted && (activeGame.onCourtPlayerIds || []).length > 0) {
     setGameStarted(true);
   }
 
