@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Player, GameLeg } from '@/types/basketball';
 import { Play } from 'lucide-react';
+import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 
 const NewGame: React.FC = () => {
   const { players, startGame, tournaments, teams } = useApp();
@@ -39,7 +40,10 @@ const NewGame: React.FC = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <h2 className="text-xl font-extrabold text-foreground">Nuevo Partido</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-extrabold text-foreground">Nuevo Partido</h2>
+        <img src={logoHorizontal} alt="BASQEST+" className="h-8 object-contain" />
+      </div>
 
       <div className="space-y-3">
         {/* Team selector */}
