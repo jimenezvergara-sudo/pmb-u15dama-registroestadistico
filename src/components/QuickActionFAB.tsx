@@ -47,24 +47,20 @@ const QuickActionFAB: React.FC<Props> = ({ disabled, onAction }) => {
       className="relative"
       style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
     >
-      {/* Radial menu items */}
-      {open && !disabled && ACTIONS.map((action, i) => (
-        <button
-          key={action.key}
-          onClick={() => { onAction(action.key); setOpen(false); }}
-          className="absolute whitespace-nowrap px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-lg tap-feedback transition-all duration-200"
-          style={{
-            transform: `translate(${Math.cos((action.angle * Math.PI) / 180) * 80}px, ${Math.sin((action.angle * Math.PI) / 180) * 80}px)`,
-            top: '50%',
-            left: '50%',
-            marginTop: '-14px',
-            marginLeft: '-14px',
-            zIndex: 20,
-          }}
-        >
-          {action.label}
-        </button>
-      ))}
+      {/* Vertical menu above FAB */}
+      {open && !disabled && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex flex-col gap-1.5 items-center z-20">
+          {ACTIONS.map(action => (
+            <button
+              key={action.key}
+              onClick={() => { onAction(action.key); setOpen(false); }}
+              className="whitespace-nowrap px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-lg tap-feedback transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* FAB button */}
       <button
