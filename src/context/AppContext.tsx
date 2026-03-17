@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, GameLeg, Category, ActionType, GameAction } from '@/types/basketball';
+import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, GameLeg, Category, ActionType, GameAction, SubstitutionEvent } from '@/types/basketball';
 
 interface AppState {
   players: Player[];
@@ -27,6 +27,10 @@ interface AppContextValue extends AppState {
   undoLastOpponentScore: () => void;
   setActiveCategory: (c: Category) => void;
   recordAction: (playerId: string, type: ActionType) => void;
+  setOnCourtPlayers: (playerIds: string[]) => void;
+  recordSubstitution: (playerIn: string, playerOut: string) => void;
+  snapshotCourtTime: () => void;
+  startGameTimer: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -46,7 +50,6 @@ const loadState = (): AppState => {
         activeCategory: parsed.activeCategory || 'U15',
       };
     }
-    // Try migrating from old key
     const old = localStorage.getItem('hoopstats');
     if (old) {
       const parsed = JSON.parse(old);
@@ -62,6 +65,19 @@ const loadState = (): AppState => {
 
 const saveState = (s: AppState) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+};
+
+/** Flush accumulated court-time for on-court players */
+const flushCourtTime = (game: Game): Game => {
+  const now = Date.now();
+  const last = game.lastTimerSnapshot || game.gameStartTimestamp || now;
+  const elapsed = now - last;
+  if (elapsed <= 0) return { ...game, lastTimerSnapshot: now };
+  const courtTimeMs = { ...game.courtTimeMs };
+  game.onCourtPlayerIds.forEach(pid => {
+    courtTimeMs[pid] = (courtTimeMs[pid] || 0) + elapsed;
+  });
+  return { ...game, courtTimeMs, lastTimerSnapshot: now };
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -108,11 +124,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       shots: [],
       opponentScores: [],
       actions: [],
+      substitutions: [],
       currentQuarter: 'Q1',
       tournamentId,
       opponentTeamId,
       leg,
       category: state.activeCategory,
+      onCourtPlayerIds: [],
+      courtTimeMs: {},
     };
     update(s => ({ ...s, activeGame: game }));
   }, [update, state.activeCategory]);
@@ -120,14 +139,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const endGame = useCallback(() => {
     update(s => {
       if (!s.activeGame) return s;
-      return { ...s, games: [...s.games, s.activeGame], activeGame: null };
+      const flushed = flushCourtTime(s.activeGame);
+      return { ...s, games: [...s.games, flushed], activeGame: null };
     });
   }, [update]);
 
   const setQuarter = useCallback((q: QuarterId) => {
     update(s => {
       if (!s.activeGame) return s;
-      return { ...s, activeGame: { ...s.activeGame, currentQuarter: q } };
+      const flushed = flushCourtTime(s.activeGame);
+      return { ...s, activeGame: { ...flushed, currentQuarter: q } };
     });
   }, [update]);
 
@@ -193,12 +214,58 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, [update]);
 
+  const setOnCourtPlayers = useCallback((playerIds: string[]) => {
+    update(s => {
+      if (!s.activeGame) return s;
+      return { ...s, activeGame: { ...s.activeGame, onCourtPlayerIds: playerIds } };
+    });
+  }, [update]);
+
+  const recordSubstitution = useCallback((playerIn: string, playerOut: string) => {
+    update(s => {
+      if (!s.activeGame) return s;
+      const flushed = flushCourtTime(s.activeGame);
+      const sub: SubstitutionEvent = {
+        id: genId(),
+        playerIn,
+        playerOut,
+        quarterId: flushed.currentQuarter,
+        timestamp: Date.now(),
+      };
+      const newOnCourt = flushed.onCourtPlayerIds.filter(id => id !== playerOut).concat(playerIn);
+      return {
+        ...s,
+        activeGame: {
+          ...flushed,
+          substitutions: [...(flushed.substitutions || []), sub],
+          onCourtPlayerIds: newOnCourt,
+        },
+      };
+    });
+  }, [update]);
+
+  const snapshotCourtTime = useCallback(() => {
+    update(s => {
+      if (!s.activeGame) return s;
+      return { ...s, activeGame: flushCourtTime(s.activeGame) };
+    });
+  }, [update]);
+
+  const startGameTimer = useCallback(() => {
+    update(s => {
+      if (!s.activeGame) return s;
+      const now = Date.now();
+      return { ...s, activeGame: { ...s.activeGame, gameStartTimestamp: now, lastTimerSnapshot: now } };
+    });
+  }, [update]);
+
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, removeGame, addTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
+      setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer,
     }}>
       {children}
     </AppContext.Provider>
