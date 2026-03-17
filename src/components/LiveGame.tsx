@@ -177,7 +177,7 @@ const LiveGame: React.FC = () => {
       </div>
 
       {/* Free throw button + Court */}
-      <div className="px-2 pt-4 flex-1 overflow-hidden">
+      <div className="px-2 pt-8 flex-1 overflow-hidden">
         <div className="flex justify-center mb-2">
           <button
             onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
