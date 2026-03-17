@@ -20,7 +20,10 @@ const RosterManager: React.FC = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <h2 className="text-xl font-extrabold text-foreground">Plantilla</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-extrabold text-foreground">Plantilla</h2>
+        <img src={logoHorizontal} alt="BASQEST+" className="h-8 object-contain" />
+      </div>
 
       <div className="flex gap-2">
         <Input
