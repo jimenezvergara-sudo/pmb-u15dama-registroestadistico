@@ -10,7 +10,11 @@ interface LeaderData {
   value: string;
 }
 
-const HomeScreen: React.FC = () => {
+interface HomeScreenProps {
+  onCategoryPress?: () => void;
+}
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   const { games, players, activeCategory } = useApp();
 
   const totalGames = games.length;
