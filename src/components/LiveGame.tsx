@@ -98,15 +98,31 @@ const LiveGame: React.FC = () => {
     toast('Último tiro deshecho', { duration: 1000 });
   };
 
-  const handleQuickAction = (action: 'rebound' | 'assist' | 'steal' | 'turnover') => {
+  const handleQuickAction = (action: 'rebound' | 'assist' | 'steal' | 'turnover' | 'foul') => {
     if (!selectedPlayer) {
       toast('Selecciona una jugadora primero', { duration: 1500 });
       return;
     }
     recordAction(selectedPlayer, action);
     const player = activeGame.roster.find(p => p.id === selectedPlayer);
-    const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida' };
+    const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida', foul: 'Falta' };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
+
+    if (action === 'foul') {
+      const currentFouls = (activeGame.actions || []).filter(
+        a => a.playerId === selectedPlayer && a.type === 'foul'
+      ).length + 1; // +1 for the one just recorded
+      if (currentFouls >= 5) {
+        toast.error(`⚠️ #${player?.number} ${player?.name} tiene ${currentFouls} faltas!`, {
+          duration: 4000,
+          style: { background: 'hsl(var(--destructive))', color: 'hsl(var(--destructive-foreground))' },
+        });
+      } else if (currentFouls === 4) {
+        toast.warning(`⚠️ #${player?.number} ${player?.name}: 4 faltas — ¡una más y sale!`, {
+          duration: 3000,
+        });
+      }
+    }
   };
 
   const teamScore = activeGame.shots
