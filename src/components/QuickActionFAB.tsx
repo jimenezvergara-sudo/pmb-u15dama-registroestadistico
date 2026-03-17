@@ -70,7 +70,7 @@ const QuickActionFAB: React.FC<Props> = ({ disabled, onAction }) => {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         disabled={disabled}
-        className={`px-4 py-2 rounded-lg text-sm font-bold tap-feedback border-2 touch-none flex items-center gap-1.5 ${
+        className={`px-3 py-2 rounded-lg text-xs font-bold tap-feedback border-2 touch-none flex items-center gap-1 ${
           disabled
             ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed border-border'
             : open

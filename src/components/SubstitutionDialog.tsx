@@ -42,9 +42,9 @@ const SubstitutionDialog: React.FC<Props> = ({ roster, onCourtIds, onSubstitute 
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
       <DialogTrigger asChild>
         <button
-          className="px-4 py-2 rounded-lg text-sm font-bold tap-feedback border-2 bg-card text-card-foreground border-border hover:border-primary flex items-center gap-1.5"
+          className="px-3 py-2 rounded-lg text-xs font-bold tap-feedback border-2 bg-card text-card-foreground border-border hover:border-primary flex items-center gap-1"
         >
-          <ArrowRightLeft className="w-4 h-4" />
+          <ArrowRightLeft className="w-3.5 h-3.5" />
           Cambios
         </button>
       </DialogTrigger>
