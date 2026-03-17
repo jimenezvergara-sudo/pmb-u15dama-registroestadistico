@@ -236,6 +236,7 @@ const LiveGame: React.FC = () => {
         <div className="grid grid-cols-4 gap-2">
           {activeGame.roster.map(player => {
             const isOnCourt = onCourtIds.includes(player.id);
+            const fouls = (activeGame.actions || []).filter(a => a.playerId === player.id && a.type === 'foul').length;
             return (
               <button
                 key={player.id}
@@ -250,6 +251,13 @@ const LiveGame: React.FC = () => {
                 <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-center">{player.name.split(' ')[0]}</span>
                 {isOnCourt && (
                   <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success" />
+                )}
+                {fouls > 0 && (
+                  <span className={`absolute top-0.5 left-0.5 min-w-[16px] h-4 rounded-full text-[9px] font-black flex items-center justify-center px-0.5 ${
+                    fouls >= 5 ? 'bg-destructive text-destructive-foreground animate-pulse' : fouls === 4 ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {fouls}F
+                  </span>
                 )}
               </button>
             );
