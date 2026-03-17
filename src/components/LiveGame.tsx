@@ -44,7 +44,7 @@ const LiveGame: React.FC = () => {
   if (!activeGame) return null;
 
   // Show starting lineup screen if game hasn't started yet
-  if (!gameStarted && activeGame.onCourtPlayerIds.length === 0) {
+  if (!gameStarted && (activeGame.onCourtPlayerIds || []).length === 0) {
     return (
       <StartingLineup
         roster={activeGame.roster}
