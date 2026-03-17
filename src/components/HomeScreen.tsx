@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Target, CircleDot, Percent } from 'lucide-react';
-import logoBasqest from '@/assets/logo-basqest.png';
+import logoBasqest from '@/assets/logo-basqest-new.png';
 
 interface LeaderData {
   name: string;
