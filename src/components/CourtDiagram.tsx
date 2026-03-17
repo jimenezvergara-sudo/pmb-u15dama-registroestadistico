@@ -33,6 +33,8 @@ const ZONES: CourtZone[] = [
 interface Props {
   onZoneTap: (zone: { x: number; y: number; points: 1 | 2 | 3 }) => void;
   shots?: Array<{ x: number; y: number; made: boolean; points: 1 | 2 | 3 }>;
+  rotation?: number;
+  onRotationChange?: (r: number) => void;
 }
 
 const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [] }) => {
