@@ -12,8 +12,8 @@ interface Props {
   preSelected?: string[];
 }
 
-const StartingLineup: React.FC<Props> = ({ roster, onConfirm }) => {
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+const StartingLineup: React.FC<Props> = ({ roster, onConfirm, title, subtitle, buttonLabel, preSelected }) => {
+  const [selected, setSelected] = useState<Set<string>>(new Set(preSelected || []));
 
   const toggle = (id: string) => {
     setSelected(prev => {
