@@ -26,6 +26,7 @@ interface AppContextValue extends AppState {
   recordOpponentScore: (points: 1 | 2 | 3) => void;
   undoLastOpponentScore: () => void;
   setActiveCategory: (c: Category) => void;
+  recordAction: (playerId: string, type: ActionType) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
