@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Target, CircleDot, Percent } from 'lucide-react';
+import { Trophy, Target, CircleDot, Percent, Grab, Handshake, ShieldCheck } from 'lucide-react';
 import logoBasqest from '@/assets/logo-basqest-new.png';
 
 interface HomeScreenProps {
@@ -45,6 +45,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   const minFtAttempts = Math.max(1, Math.floor(teamTotalFtAttempts * 0.2));
   const minFieldAttempts = Math.max(1, Math.floor(teamTotalFieldAttempts * 0.2));
 
+  const allActions = games.flatMap(g => g.actions || []);
+
   const playerStats = players.map(p => {
     const shots = allShots.filter(s => s.playerId === p.id);
     const totalPts = shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
@@ -65,12 +67,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     const fieldAttempts = shots.filter(s => s.points >= 2).length;
     const fieldPct = fieldAttempts > 0 ? (fieldMade / fieldAttempts) * 100 : 0;
 
+    const rebounds = allActions.filter(a => a.playerId === p.id && a.type === 'rebound').length;
+    const assists = allActions.filter(a => a.playerId === p.id && a.type === 'assist').length;
+    const steals = allActions.filter(a => a.playerId === p.id && a.type === 'steal').length;
+
     return {
       ...p, totalPts,
       triplesMade, triplesAttempts, triplesPct,
       doblesMade, doblesAttempts, doblesPct,
       ftMade, ftAttempts, ftPct,
       fieldMade, fieldAttempts, fieldPct,
+      rebounds, assists, steals,
     };
   });
 
@@ -89,6 +96,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   // Leader: Best FT% (with 20% volume threshold)
   const topFt = [...playerStats].filter(p => p.ftAttempts >= minFtAttempts).sort((a, b) => b.ftPct - a.ftPct || b.ftMade - a.ftMade)[0]
     || [...playerStats].filter(p => p.ftAttempts >= 1).sort((a, b) => b.ftPct - a.ftPct)[0];
+
+  // Leader: Most rebounds
+  const topReb = [...playerStats].filter(p => p.rebounds > 0).sort((a, b) => b.rebounds - a.rebounds)[0];
+  // Leader: Most assists
+  const topAst = [...playerStats].filter(p => p.assists > 0).sort((a, b) => b.assists - a.assists)[0];
+  // Leader: Most steals
+  const topStl = [...playerStats].filter(p => p.steals > 0).sort((a, b) => b.steals - a.steals)[0];
 
   interface LeaderCard {
     title: string;
@@ -131,6 +145,30 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       number: topFt?.number ?? null,
       mainValue: topFt ? `${topFt.ftMade}` : '—',
       subValue: topFt ? `Efic: ${topFt.ftPct.toFixed(0)}% (${topFt.ftMade}/${topFt.ftAttempts})` : '',
+    },
+    {
+      title: 'Líder Rebotes',
+      icon: <Grab className="w-5 h-5" />,
+      name: topReb?.name || null,
+      number: topReb?.number ?? null,
+      mainValue: topReb ? `${topReb.rebounds}` : '—',
+      subValue: topReb && totalGames > 0 ? `${(topReb.rebounds / totalGames).toFixed(1)} reb/partido` : '',
+    },
+    {
+      title: 'Líder Asistencias',
+      icon: <Handshake className="w-5 h-5" />,
+      name: topAst?.name || null,
+      number: topAst?.number ?? null,
+      mainValue: topAst ? `${topAst.assists}` : '—',
+      subValue: topAst && totalGames > 0 ? `${(topAst.assists / totalGames).toFixed(1)} ast/partido` : '',
+    },
+    {
+      title: 'Líder Robos',
+      icon: <ShieldCheck className="w-5 h-5" />,
+      name: topStl?.name || null,
+      number: topStl?.number ?? null,
+      mainValue: topStl ? `${topStl.steals}` : '—',
+      subValue: topStl && totalGames > 0 ? `${(topStl.steals / totalGames).toFixed(1)} rob/partido` : '',
     },
   ];
 
