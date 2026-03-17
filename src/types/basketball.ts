@@ -54,6 +54,16 @@ export interface OpponentScore {
 
 export type GameLeg = 'ida' | 'vuelta';
 
+export type ActionType = 'rebound' | 'assist' | 'steal' | 'turnover';
+
+export interface GameAction {
+  id: string;
+  playerId: string;
+  quarterId: QuarterId;
+  type: ActionType;
+  timestamp: number;
+}
+
 export interface Game {
   id: string;
   tournamentId?: string;
@@ -63,6 +73,7 @@ export interface Game {
   roster: Player[];
   shots: ShotEvent[];
   opponentScores: OpponentScore[];
+  actions: GameAction[];
   currentQuarter: QuarterId;
   leg?: GameLeg;
   category?: Category;
