@@ -48,9 +48,7 @@ const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [], rotation, onRota
   const handleClick = (zone: CourtZone, e: React.MouseEvent<SVGPathElement>) => {
     const svg = e.currentTarget.ownerSVGElement;
     if (!svg) return;
-    const rect = svg.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const { x, y } = screenToSvg(svg, e.clientX, e.clientY);
     onZoneTap({ x, y, points: zone.points });
   };
 
