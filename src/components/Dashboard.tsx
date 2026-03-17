@@ -104,6 +104,7 @@ const Dashboard: React.FC = () => {
     const reb = playerActions.filter(a => a.type === 'rebound').length;
     const ast = playerActions.filter(a => a.type === 'assist').length;
     const stl = playerActions.filter(a => a.type === 'steal').length;
+    const pf = playerActions.filter(a => a.type === 'foul').length;
 
     // Calculate court time percentage
     let courtTimePct = 0;
@@ -130,7 +131,7 @@ const Dashboard: React.FC = () => {
 
     return {
       player, pts, fga, fgm, twoA, twoM, threeA, threeM, ftA, ftM,
-      reb, ast, stl, courtTimePct,
+      reb, ast, stl, pf, courtTimePct,
       fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
       twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
@@ -364,6 +365,7 @@ const Dashboard: React.FC = () => {
                 <th className="text-center py-2 px-0.5 font-bold">REB</th>
                 <th className="text-center py-2 px-0.5 font-bold">AST</th>
                 <th className="text-center py-2 px-0.5 font-bold">STL</th>
+                <th className="text-center py-2 px-0.5 font-bold">PF</th>
                 <th className="text-center py-2 px-0.5 font-bold">MIN%</th>
               </tr>
             </thead>
@@ -394,6 +396,7 @@ const Dashboard: React.FC = () => {
                   <td className="text-center py-2 px-0.5 font-semibold">{row.reb}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">{row.ast}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">{row.stl}</td>
+                  <td className={`text-center py-2 px-0.5 font-semibold ${row.pf >= 5 ? 'text-destructive font-bold' : row.pf === 4 ? 'text-amber-500 font-bold' : ''}`}>{row.pf}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">
                     {row.courtTimePct > 0 ? `${row.courtTimePct}%` : '—'}
                   </td>

@@ -3,7 +3,7 @@ import { Activity, X } from 'lucide-react';
 
 interface Props {
   disabled: boolean;
-  onAction: (action: 'rebound' | 'assist' | 'steal' | 'turnover') => void;
+  onAction: (action: 'rebound' | 'assist' | 'steal' | 'turnover' | 'foul') => void;
 }
 
 const ACTIONS = [
@@ -11,6 +11,7 @@ const ACTIONS = [
   { key: 'assist' as const, label: '🤝 Asistencia', angle: -75 },
   { key: 'steal' as const, label: '🖐️ Robo', angle: -30 },
   { key: 'turnover' as const, label: '❌ Pérdida', angle: 15 },
+  { key: 'foul' as const, label: '🟡 Falta', angle: 60 },
 ];
 
 const QuickActionFAB: React.FC<Props> = ({ disabled, onAction }) => {

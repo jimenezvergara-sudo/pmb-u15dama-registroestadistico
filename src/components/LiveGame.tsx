@@ -98,15 +98,31 @@ const LiveGame: React.FC = () => {
     toast('Último tiro deshecho', { duration: 1000 });
   };
 
-  const handleQuickAction = (action: 'rebound' | 'assist' | 'steal' | 'turnover') => {
+  const handleQuickAction = (action: 'rebound' | 'assist' | 'steal' | 'turnover' | 'foul') => {
     if (!selectedPlayer) {
       toast('Selecciona una jugadora primero', { duration: 1500 });
       return;
     }
     recordAction(selectedPlayer, action);
     const player = activeGame.roster.find(p => p.id === selectedPlayer);
-    const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida' };
+    const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida', foul: 'Falta' };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
+
+    if (action === 'foul') {
+      const currentFouls = (activeGame.actions || []).filter(
+        a => a.playerId === selectedPlayer && a.type === 'foul'
+      ).length + 1; // +1 for the one just recorded
+      if (currentFouls >= 5) {
+        toast.error(`⚠️ #${player?.number} ${player?.name} tiene ${currentFouls} faltas!`, {
+          duration: 4000,
+          style: { background: 'hsl(var(--destructive))', color: 'hsl(var(--destructive-foreground))' },
+        });
+      } else if (currentFouls === 4) {
+        toast.warning(`⚠️ #${player?.number} ${player?.name}: 4 faltas — ¡una más y sale!`, {
+          duration: 3000,
+        });
+      }
+    }
   };
 
   const teamScore = activeGame.shots
@@ -220,6 +236,7 @@ const LiveGame: React.FC = () => {
         <div className="grid grid-cols-4 gap-2">
           {activeGame.roster.map(player => {
             const isOnCourt = onCourtIds.includes(player.id);
+            const fouls = (activeGame.actions || []).filter(a => a.playerId === player.id && a.type === 'foul').length;
             return (
               <button
                 key={player.id}
@@ -234,6 +251,13 @@ const LiveGame: React.FC = () => {
                 <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-center">{player.name.split(' ')[0]}</span>
                 {isOnCourt && (
                   <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success" />
+                )}
+                {fouls > 0 && (
+                  <span className={`absolute top-0.5 left-0.5 min-w-[16px] h-4 rounded-full text-[9px] font-black flex items-center justify-center px-0.5 ${
+                    fouls >= 5 ? 'bg-destructive text-destructive-foreground animate-pulse' : fouls === 4 ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {fouls}F
+                  </span>
                 )}
               </button>
             );
