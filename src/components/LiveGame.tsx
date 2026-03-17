@@ -215,7 +215,7 @@ const LiveGame: React.FC = () => {
       )}
 
       {/* Actions row */}
-      <div className="flex gap-2 px-3 pb-2 pt-1">
+      <div className="flex gap-2 px-3 pb-2 pt-3 mt-2">
         <Button variant="outline" size="sm" onClick={handleUndo} className="flex-1 gap-1">
           <Undo2 className="w-4 h-4" /> Deshacer
         </Button>
