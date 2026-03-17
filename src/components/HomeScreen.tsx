@@ -95,7 +95,7 @@ const HomeScreen: React.FC = () => {
           { label: 'PTS/P', value: ptsPerGame },
           { label: 'PTS/C', value: ptsAgainst },
         ].map(stat => (
-          <Card key={stat.label} className="bg-card border border-border/60 shadow-xl">
+          <Card key={stat.label} className="bg-card border-2 border-amber-400/70 shadow-xl">
             <CardContent className="p-3 text-center">
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
               <p className="text-2xl font-black text-foreground leading-tight mt-1">{stat.value}</p>
