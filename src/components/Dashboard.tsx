@@ -105,9 +105,32 @@ const Dashboard: React.FC = () => {
     const ast = playerActions.filter(a => a.type === 'assist').length;
     const stl = playerActions.filter(a => a.type === 'steal').length;
 
+    // Calculate court time percentage
+    let courtTimePct = 0;
+    if (!isAggregate && selectedGame) {
+      const totalGameTime = Object.values(selectedGame.courtTimeMs || {}).reduce((max, t) => Math.max(max, t), 0);
+      const playerTime = (selectedGame.courtTimeMs || {})[player.id] || 0;
+      if (totalGameTime > 0) {
+        courtTimePct = Math.round((playerTime / totalGameTime) * 100);
+      }
+    } else if (isAggregate) {
+      // Average across games
+      let totalPct = 0;
+      let gamesWithData = 0;
+      tournamentGames.forEach(g => {
+        const ct = g.courtTimeMs || {};
+        const maxTime = Object.values(ct).reduce((max: number, t: unknown) => Math.max(max, t as number), 0);
+        if (maxTime > 0 && ct[player.id] !== undefined) {
+          totalPct += ((ct[player.id] || 0) / maxTime) * 100;
+          gamesWithData++;
+        }
+      });
+      courtTimePct = gamesWithData > 0 ? Math.round(totalPct / gamesWithData) : 0;
+    }
+
     return {
       player, pts, fga, fgm, twoA, twoM, threeA, threeM, ftA, ftM,
-      reb, ast, stl,
+      reb, ast, stl, courtTimePct,
       fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
       twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
@@ -341,6 +364,7 @@ const Dashboard: React.FC = () => {
                 <th className="text-center py-2 px-1 font-bold">REB</th>
                 <th className="text-center py-2 px-1 font-bold">AST</th>
                 <th className="text-center py-2 px-1 font-bold">STL</th>
+                <th className="text-center py-2 px-1 font-bold">MIN%</th>
               </tr>
             </thead>
             <tbody>
@@ -370,6 +394,9 @@ const Dashboard: React.FC = () => {
                   <td className="text-center py-2 px-1 font-semibold">{row.reb}</td>
                   <td className="text-center py-2 px-1 font-semibold">{row.ast}</td>
                   <td className="text-center py-2 px-1 font-semibold">{row.stl}</td>
+                  <td className="text-center py-2 px-1 font-semibold">
+                    {row.courtTimePct > 0 ? `${row.courtTimePct}%` : '—'}
+                  </td>
                 </tr>
               ))}
             </tbody>

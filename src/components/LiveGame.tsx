@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { QuarterId, QUARTER_LABELS } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
 import QuickActionFAB from '@/components/QuickActionFAB';
+import SubstitutionDialog from '@/components/SubstitutionDialog';
+import StartingLineup from '@/components/StartingLineup';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2 } from 'lucide-react';
@@ -22,12 +24,43 @@ import {
 const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const LiveGame: React.FC = () => {
-  const { activeGame, setQuarter, recordShot, undoLastShot, endGame, recordOpponentScore, undoLastOpponentScore, recordAction } = useApp();
+  const {
+    activeGame, setQuarter, recordShot, undoLastShot, endGame,
+    recordOpponentScore, undoLastOpponentScore, recordAction,
+    setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer,
+  } = useApp();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [courtRotation, setCourtRotation] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
+
+  // Periodically flush court time every 10s
+  useEffect(() => {
+    if (!activeGame || !gameStarted) return;
+    const interval = setInterval(() => snapshotCourtTime(), 10000);
+    return () => clearInterval(interval);
+  }, [activeGame, gameStarted, snapshotCourtTime]);
 
   if (!activeGame) return null;
+
+  // Show starting lineup screen if game hasn't started yet
+  if (!gameStarted && activeGame.onCourtPlayerIds.length === 0) {
+    return (
+      <StartingLineup
+        roster={activeGame.roster}
+        onConfirm={(starterIds) => {
+          setOnCourtPlayers(starterIds);
+          startGameTimer();
+          setGameStarted(true);
+        }}
+      />
+    );
+  }
+
+  // If coming back to an already-started game
+  if (!gameStarted && activeGame.onCourtPlayerIds.length > 0) {
+    setGameStarted(true);
+  }
 
   const handlePlayerSelect = (playerId: string) => {
     setSelectedPlayer(playerId);
@@ -90,6 +123,8 @@ const LiveGame: React.FC = () => {
   const opponentQuarterScore = (activeGame.opponentScores || [])
     .filter(s => s.quarterId === activeGame.currentQuarter)
     .reduce((sum, s) => sum + s.points, 0);
+
+  const onCourtIds = activeGame.onCourtPlayerIds || [];
 
   return (
     <div className="flex flex-col h-full">
@@ -177,31 +212,37 @@ const LiveGame: React.FC = () => {
         </Button>
       </div>
 
-      {/* Player grid */}
+      {/* Player grid - show on-court indicator */}
       <div className="px-3 pt-3">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
           {!selectedPlayer ? '1. Selecciona jugadora' : pendingShot ? '3. ¿Canasta o Fallo?' : '2. Toca zona en cancha'}
         </p>
         <div className="grid grid-cols-4 gap-2">
-          {activeGame.roster.map(player => (
-            <button
-              key={player.id}
-              onClick={() => handlePlayerSelect(player.id)}
-              className={`flex flex-col items-center py-2 px-1 rounded-lg tap-feedback min-h-[52px] transition-colors ${
-                selectedPlayer === player.id
-                  ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
-                  : 'bg-card text-card-foreground hover:bg-accent'
-              }`}
-            >
-              <span className="text-lg font-extrabold leading-none">{player.number}</span>
-              <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-center">{player.name.split(' ')[0]}</span>
-            </button>
-          ))}
+          {activeGame.roster.map(player => {
+            const isOnCourt = onCourtIds.includes(player.id);
+            return (
+              <button
+                key={player.id}
+                onClick={() => handlePlayerSelect(player.id)}
+                className={`flex flex-col items-center py-2 px-1 rounded-lg tap-feedback min-h-[52px] transition-colors relative ${
+                  selectedPlayer === player.id
+                    ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
+                    : 'bg-card text-card-foreground hover:bg-accent'
+                } ${!isOnCourt ? 'opacity-40' : ''}`}
+              >
+                <span className="text-lg font-extrabold leading-none">{player.number}</span>
+                <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-center">{player.name.split(' ')[0]}</span>
+                {isOnCourt && (
+                  <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success" />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Free throw button + FAB */}
-      <div className="flex items-center justify-start gap-3 px-3 pt-4 mb-1">
+      {/* Free throw + Actions + Substitution */}
+      <div className="flex items-center justify-start gap-2 px-3 pt-4 mb-1 flex-wrap">
         <button
           onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
           className={`px-4 py-2 rounded-lg text-sm font-bold tap-feedback border-2 ${
@@ -210,9 +251,19 @@ const LiveGame: React.FC = () => {
               : 'bg-card text-card-foreground border-border hover:border-primary'
           }`}
         >
-          🏀 Tiro Libre (1pt)
+          🏀 TL (1pt)
         </button>
         <QuickActionFAB disabled={!selectedPlayer} onAction={handleQuickAction} />
+        <SubstitutionDialog
+          roster={activeGame.roster}
+          onCourtIds={onCourtIds}
+          onSubstitute={(pIn, pOut) => {
+            recordSubstitution(pIn, pOut);
+            const nameIn = activeGame.roster.find(p => p.id === pIn);
+            const nameOut = activeGame.roster.find(p => p.id === pOut);
+            toast(`Cambio: #${nameIn?.number} entra ↔ #${nameOut?.number} sale`, { duration: 2000 });
+          }}
+        />
       </div>
 
       {/* Court */}
@@ -265,7 +316,10 @@ const LiveGame: React.FC = () => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>NO, Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={endGame}>SÍ, Finalizar</AlertDialogAction>
+                <AlertDialogAction onClick={() => {
+                  snapshotCourtTime();
+                  endGame();
+                }}>SÍ, Finalizar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
