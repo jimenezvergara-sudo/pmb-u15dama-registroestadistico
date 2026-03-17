@@ -112,7 +112,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-extrabold text-foreground">Líderes de Temporada</h2>
           <button
-            onClick={() => {/* handled via context */}}
+            onClick={onCategoryPress}
             className="text-[10px] font-bold text-accent-foreground bg-accent px-3 py-1 rounded-full"
           >
             📂 {activeCategory}

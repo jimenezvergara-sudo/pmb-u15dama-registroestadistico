@@ -52,7 +52,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16">
       
-      {tab === 'home' && <HomeScreen />}
+      {tab === 'home' && <HomeScreen onCategoryPress={() => setShowCategoryPicker(true)} />}
       {tab === 'live' && (activeGame ? <LiveGame /> : <NewGame />)}
       {tab === 'roster' && <RosterManager />}
       {tab === 'teams' && <TeamManager />}
