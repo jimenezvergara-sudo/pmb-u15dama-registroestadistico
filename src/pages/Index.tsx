@@ -8,17 +8,58 @@ import Dashboard from '@/components/Dashboard';
 import TournamentManager from '@/components/TournamentManager';
 import TeamManager from '@/components/TeamManager';
 import HomeScreen from '@/components/HomeScreen';
+import { CATEGORIES, Category } from '@/types/basketball';
+import logoBasqest from '@/assets/logo-basqest.png';
+
+const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSelect }) => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
+    <img src={logoBasqest} alt="BASQEST+" className="w-24 h-24 mb-4" />
+    <h1 className="text-3xl font-black text-primary tracking-tight mb-1">BASQEST+</h1>
+    <p className="text-sm text-muted-foreground font-semibold mb-8">Inteligencia Deportiva</p>
+    <p className="text-sm font-bold text-foreground mb-4">Selecciona la categoría</p>
+    <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
+      {CATEGORIES.map(c => (
+        <button
+          key={c}
+          onClick={() => onSelect(c)}
+          className="bg-primary text-primary-foreground font-bold text-lg py-4 rounded-xl tap-feedback hover:opacity-90 transition-opacity shadow-lg shadow-primary/30"
+        >
+          {c}
+        </button>
+      ))}
+    </div>
+  </div>
+);
 
 const AppContent: React.FC = () => {
-  const { activeGame } = useApp();
+  const { activeGame, activeCategory, setActiveCategory } = useApp();
   const [tab, setTab] = useState<TabId>('home');
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   React.useEffect(() => {
     if (activeGame) setTab('live');
   }, [activeGame?.id]);
 
+  if (showCategoryPicker) {
+    return (
+      <CategorySelector onSelect={(c) => {
+        setActiveCategory(c);
+        setShowCategoryPicker(false);
+      }} />
+    );
+  }
+
   return (
     <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16">
+      {/* Category badge */}
+      <div className="flex justify-center pt-1">
+        <button
+          onClick={() => setShowCategoryPicker(true)}
+          className="text-[10px] font-bold text-accent-foreground bg-accent px-3 py-1 rounded-full tap-feedback"
+        >
+          📂 {activeCategory}
+        </button>
+      </div>
       {tab === 'home' && <HomeScreen />}
       {tab === 'live' && (activeGame ? <LiveGame /> : <NewGame />)}
       {tab === 'roster' && <RosterManager />}

@@ -18,6 +18,10 @@ export interface Tournament {
   date: string;
 }
 
+export type Category = 'U13' | 'U15' | 'U17' | 'U19' | 'Adulto';
+
+export const CATEGORIES: Category[] = ['U13', 'U15', 'U17', 'U19', 'Adulto'];
+
 export interface ShotEvent {
   id: string;
   playerId: string;
@@ -61,4 +65,5 @@ export interface Game {
   opponentScores: OpponentScore[];
   currentQuarter: QuarterId;
   leg?: GameLeg;
+  category?: Category;
 }

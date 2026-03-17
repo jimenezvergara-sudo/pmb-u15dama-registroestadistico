@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, GameLeg } from '@/types/basketball';
+import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, GameLeg, Category } from '@/types/basketball';
 
 interface AppState {
   players: Player[];
@@ -7,6 +7,7 @@ interface AppState {
   teams: Team[];
   games: Game[];
   activeGame: Game | null;
+  activeCategory: Category;
 }
 
 interface AppContextValue extends AppState {
@@ -24,25 +25,42 @@ interface AppContextValue extends AppState {
   setActiveGame: (game: Game) => void;
   recordOpponentScore: (points: 1 | 2 | 3) => void;
   undoLastOpponentScore: () => void;
+  setActiveCategory: (c: Category) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 const genId = () => Math.random().toString(36).slice(2, 10);
 
+const STORAGE_KEY = 'basqest';
+
 const loadState = (): AppState => {
   try {
-    const raw = localStorage.getItem('hoopstats');
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return { ...parsed, teams: parsed.teams || [] };
+      return {
+        ...parsed,
+        teams: parsed.teams || [],
+        activeCategory: parsed.activeCategory || 'U15',
+      };
+    }
+    // Try migrating from old key
+    const old = localStorage.getItem('hoopstats');
+    if (old) {
+      const parsed = JSON.parse(old);
+      return {
+        ...parsed,
+        teams: parsed.teams || [],
+        activeCategory: parsed.activeCategory || 'U15',
+      };
     }
   } catch {}
-  return { players: [], tournaments: [], teams: [], games: [], activeGame: null };
+  return { players: [], tournaments: [], teams: [], games: [], activeGame: null, activeCategory: 'U15' };
 };
 
 const saveState = (s: AppState) => {
-  localStorage.setItem('hoopstats', JSON.stringify(s));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -92,9 +110,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       tournamentId,
       opponentTeamId,
       leg,
+      category: state.activeCategory,
     };
     update(s => ({ ...s, activeGame: game }));
-  }, [update]);
+  }, [update, state.activeCategory]);
 
   const endGame = useCallback(() => {
     update(s => {
@@ -154,12 +173,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, [update]);
 
+  const setActiveCategory = useCallback((c: Category) => {
+    update(s => ({ ...s, activeCategory: c }));
+  }, [update]);
+
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, removeGame, addTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
-      recordOpponentScore, undoLastOpponentScore,
+      recordOpponentScore, undoLastOpponentScore, setActiveCategory,
     }}>
       {children}
     </AppContext.Provider>
