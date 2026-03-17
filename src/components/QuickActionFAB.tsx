@@ -69,16 +69,17 @@ const QuickActionFAB: React.FC<Props> = ({ disabled, onAction }) => {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         disabled={disabled}
-        className={`w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-all tap-feedback touch-none ${
+        className={`px-4 py-2 rounded-lg text-sm font-bold tap-feedback border-2 touch-none flex items-center gap-1.5 ${
           disabled
-            ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed'
+            ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed border-border'
             : open
-              ? 'bg-destructive text-destructive-foreground'
-              : 'bg-primary/80 text-primary-foreground backdrop-blur-sm'
+              ? 'bg-destructive text-destructive-foreground border-destructive'
+              : 'bg-card text-card-foreground border-border hover:border-primary'
         }`}
         title="Acciones rápidas"
       >
-        {open ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+        {open ? <X className="w-4 h-4" /> : <Activity className="w-4 h-4" />}
+        {open ? 'Cerrar' : 'Acciones'}
       </button>
     </div>
   );
