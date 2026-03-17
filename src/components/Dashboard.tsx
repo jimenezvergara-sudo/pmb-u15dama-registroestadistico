@@ -7,7 +7,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Button } from '@/components/ui/button';
 import { Trash2, Target, CircleDot, Crosshair } from 'lucide-react';
 import { toast } from 'sonner';
-import logoPmb from '@/assets/logo-pmb.png';
+import logoBasqest from '@/assets/logo-basqest.png';
 
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
@@ -19,7 +19,6 @@ const Dashboard: React.FC = () => {
   const [filterPlayer, setFilterPlayer] = useState<string>('ALL');
   const [filterTeamId, setFilterTeamId] = useState<string>('ALL');
 
-  // Games filtered by tournament then by team
   const tournamentGames = useMemo(() => {
     let filtered = games;
     if (filterTournamentId !== 'ALL') filtered = filtered.filter(g => g.tournamentId === filterTournamentId);
@@ -50,7 +49,7 @@ const Dashboard: React.FC = () => {
   if (games.length === 0) {
     return (
       <div className="p-4 flex flex-col items-center justify-center h-full gap-4">
-        <img src={logoPmb} alt="Puerto Montt Basket" className="w-24 h-24 opacity-30" />
+        <img src={logoBasqest} alt="BASQEST+" className="w-24 h-24 opacity-30" />
         <p className="text-muted-foreground text-center">No hay partidos registrados aún</p>
       </div>
     );
@@ -82,7 +81,6 @@ const Dashboard: React.FC = () => {
     };
   });
 
-  // Box score sorted by PTS desc
   const boxScore = roster.map(player => {
     const playerShots = filteredShots.filter(s => s.playerId === player.id);
     const fieldShots = playerShots.filter(s => s.points >= 2);
@@ -107,12 +105,10 @@ const Dashboard: React.FC = () => {
   const totalPoints = filteredShots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
   const totalOpponent = filteredOpponentScores.reduce((sum, s) => sum + s.points, 0);
 
-  // PPG for aggregate mode
   const numGames = tournamentGames.length;
   const ppg = numGames > 0 ? (totalPoints / numGames).toFixed(1) : '0';
   const oppPpg = numGames > 0 ? (totalOpponent / numGames).toFixed(1) : '0';
 
-  // Efficiency leaders
   const efficiencyLeaders = (() => {
     const withTriples = boxScore.filter(r => r.threeA > 0).sort((a, b) => b.threePct - a.threePct || b.threeM - a.threeM);
     const withDoubles = boxScore.filter(r => r.twoA > 0).sort((a, b) => b.twoPct - a.twoPct || b.twoM - a.twoM);
@@ -124,10 +120,8 @@ const Dashboard: React.FC = () => {
     };
   })();
 
-  // Rival comparison (when filtering by team)
   const rivalGames = filterTeamId === 'ALL' ? [] : games.filter(g => g.opponentTeamId === filterTeamId);
 
-  // Unique opponent teams from games
   const opponentTeamIds = (() => {
     const ids = new Set<string>();
     games.forEach(g => { if (g.opponentTeamId) ids.add(g.opponentTeamId); });
@@ -138,7 +132,7 @@ const Dashboard: React.FC = () => {
     <div className="p-4 space-y-4 pb-24">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <img src={logoPmb} alt="Puerto Montt Basket" className="w-10 h-10" />
+        <img src={logoBasqest} alt="BASQEST+" className="w-10 h-10" />
         <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
       </div>
 
@@ -152,7 +146,6 @@ const Dashboard: React.FC = () => {
         {tournaments.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
       </select>
 
-      {/* Team filter */}
       {opponentTeamIds.length > 0 && (
         <select
           value={filterTeamId}
@@ -168,7 +161,6 @@ const Dashboard: React.FC = () => {
         </select>
       )}
 
-      {/* Game filter + delete */}
       <div className="flex gap-2">
         <select
           value={selectedGameId}
@@ -209,10 +201,10 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Score summary - PPG for aggregate */}
+      {/* Score summary */}
       <div className="bg-primary rounded-xl p-4 flex items-center justify-between">
         <div className="text-center flex-1">
-          <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">PMB</p>
+          <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">BASQEST+</p>
           <p className="text-4xl font-black text-primary-foreground">{isAggregate ? ppg : totalPoints}</p>
           {isAggregate && <p className="text-[9px] text-primary-foreground/50 font-bold">PPG</p>}
         </div>
@@ -229,7 +221,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Rival comparison when team filter active */}
+      {/* Rival comparison */}
       {filterTeamId !== 'ALL' && rivalGames.length >= 2 && (
         <div className="bg-card rounded-xl p-3">
           <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wider">Comparativa vs {teams.find(t => t.id === filterTeamId)?.clubName}</p>
@@ -258,20 +250,20 @@ const Dashboard: React.FC = () => {
           <ResponsiveContainer width="100%" height={140}>
             <AreaChart data={chartData}>
               <defs>
-                <linearGradient id="navyGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(220, 60%, 22%)" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="hsl(220, 60%, 22%)" stopOpacity={0.05} />
+                <linearGradient id="primaryGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(268, 76%, 52%)" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="hsl(268, 76%, 52%)" stopOpacity={0.05} />
                 </linearGradient>
                 <linearGradient id="rivalGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="hsl(0, 75%, 55%)" stopOpacity={0.3} />
                   <stop offset="100%" stopColor="hsl(0, 75%, 55%)" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 25%, 88%)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(250, 15%, 86%)" />
               <XAxis dataKey="quarter" tick={{ fontSize: 11, fontWeight: 700 }} />
               <YAxis tick={{ fontSize: 10 }} width={25} />
-              <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }} formatter={(val: number, name: string) => [`${val} pts`, name === 'points' ? 'PMB' : 'Rival']} />
-              <Area type="monotone" dataKey="points" stroke="hsl(220, 60%, 22%)" fill="url(#navyGrad)" strokeWidth={2.5} />
+              <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }} formatter={(val: number, name: string) => [`${val} pts`, name === 'points' ? 'BASQEST+' : 'Rival']} />
+              <Area type="monotone" dataKey="points" stroke="hsl(268, 76%, 52%)" fill="url(#primaryGrad)" strokeWidth={2.5} />
               <Area type="monotone" dataKey="rival" stroke="hsl(0, 75%, 55%)" fill="url(#rivalGrad)" strokeWidth={2} strokeDasharray="4 3" />
             </AreaChart>
           </ResponsiveContainer>

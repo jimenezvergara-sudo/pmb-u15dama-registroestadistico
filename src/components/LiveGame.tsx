@@ -5,7 +5,7 @@ import CourtDiagram from '@/components/CourtDiagram';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2 } from 'lucide-react';
-import logoPmb from '@/assets/logo-pmb.png';
+import logoBasqest from '@/assets/logo-basqest.png';
 
 const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
@@ -16,10 +16,9 @@ const LiveGame: React.FC = () => {
 
   if (!activeGame) return null;
 
-  // New flow: select player first, then zone, then result
   const handlePlayerSelect = (playerId: string) => {
     setSelectedPlayer(playerId);
-    setPendingShot(null); // reset zone when switching player
+    setPendingShot(null);
   };
 
   const handleZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
@@ -46,7 +45,6 @@ const LiveGame: React.FC = () => {
       action: { label: 'Deshacer', onClick: undoLastShot },
     });
     setPendingShot(null);
-    // Keep player selected for consecutive shots
   };
 
   const handleUndo = () => {
@@ -75,8 +73,8 @@ const LiveGame: React.FC = () => {
       <div className="bg-primary px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="text-center flex-1 flex flex-col items-center">
-            <img src={logoPmb} alt="PMB" className="w-6 h-6 mb-0.5" />
-            <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">PMB</p>
+            <img src={logoBasqest} alt="BASQEST+" className="w-6 h-6 mb-0.5" />
+            <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">BASQEST+</p>
             <p className="text-4xl font-black text-primary-foreground leading-none">{teamScore}</p>
           </div>
           <div className="text-center px-3">
@@ -152,7 +150,7 @@ const LiveGame: React.FC = () => {
         </Button>
       </div>
 
-      {/* Player grid FIRST - new flow */}
+      {/* Player grid FIRST */}
       <div className="px-3 pt-3">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
           {!selectedPlayer ? '1. Selecciona jugadora' : pendingShot ? '3. ¿Canasta o Fallo?' : '2. Toca zona en cancha'}
@@ -175,7 +173,7 @@ const LiveGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Made / Missed buttons - show when zone selected */}
+      {/* Made / Missed buttons */}
       {pendingShot && selectedPlayer && (
         <div className="px-3 pt-2">
           <div className="grid grid-cols-2 gap-3">
