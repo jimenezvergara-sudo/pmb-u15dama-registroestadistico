@@ -266,16 +266,16 @@ const LiveGame: React.FC = () => {
       </div>
 
       {/* Free throw + Actions + Substitution */}
-      <div className="flex items-center justify-start gap-2 px-3 pt-4 mb-1 flex-wrap">
+      <div className="flex items-center justify-start gap-1.5 px-3 pt-4 mb-1">
         <button
           onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
-          className={`px-4 py-2 rounded-lg text-sm font-bold tap-feedback border-2 ${
+          className={`px-3 py-2 rounded-lg text-xs font-bold tap-feedback border-2 ${
             pendingShot?.points === 1
               ? 'bg-primary text-primary-foreground border-primary'
               : 'bg-card text-card-foreground border-border hover:border-primary'
           }`}
         >
-          🏀 TL (1pt)
+          🏀 TL
         </button>
         <QuickActionFAB disabled={!selectedPlayer} onAction={handleQuickAction} />
         <SubstitutionDialog
