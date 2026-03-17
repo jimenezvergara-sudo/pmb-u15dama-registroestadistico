@@ -2,10 +2,22 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { QuarterId, QUARTER_LABELS } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
+import QuickActionFAB from '@/components/QuickActionFAB';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2 } from 'lucide-react';
 import logoBasqest from '@/assets/logo-basqest.png';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
@@ -13,6 +25,7 @@ const LiveGame: React.FC = () => {
   const { activeGame, setQuarter, recordShot, undoLastShot, endGame, recordOpponentScore, undoLastOpponentScore } = useApp();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [courtRotation, setCourtRotation] = useState(0);
 
   if (!activeGame) return null;
 
@@ -50,6 +63,17 @@ const LiveGame: React.FC = () => {
   const handleUndo = () => {
     undoLastShot();
     toast('Último tiro deshecho', { duration: 1000 });
+  };
+
+  const handleQuickAction = (action: 'rebound' | 'assist' | 'steal') => {
+    if (!selectedPlayer) {
+      toast('Selecciona una jugadora primero', { duration: 1500 });
+      return;
+    }
+    const player = activeGame.roster.find(p => p.id === selectedPlayer);
+    const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo' };
+    toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
+    // TODO: persist stat events when stat tracking is added to context
   };
 
   const teamScore = activeGame.shots
@@ -153,7 +177,7 @@ const LiveGame: React.FC = () => {
         </Button>
       </div>
 
-      {/* Player grid FIRST */}
+      {/* Player grid */}
       <div className="px-3 pt-3">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
           {!selectedPlayer ? '1. Selecciona jugadora' : pendingShot ? '3. ¿Canasta o Fallo?' : '2. Toca zona en cancha'}
@@ -176,8 +200,8 @@ const LiveGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Free throw button */}
-      <div className="flex justify-center px-2 pt-4 mb-1">
+      {/* Free throw button + FAB */}
+      <div className="flex items-center justify-center gap-3 px-2 pt-4 mb-1">
         <button
           onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
           className={`px-4 py-2 rounded-lg text-sm font-bold tap-feedback border-2 ${
@@ -188,6 +212,7 @@ const LiveGame: React.FC = () => {
         >
           🏀 Tiro Libre (1pt)
         </button>
+        <QuickActionFAB disabled={!selectedPlayer} onAction={handleQuickAction} />
       </div>
 
       {/* Court */}
@@ -195,10 +220,12 @@ const LiveGame: React.FC = () => {
         <CourtDiagram
           onZoneTap={handleZoneTap}
           shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
+          rotation={courtRotation}
+          onRotate={() => setCourtRotation(r => (r + 90) % 360)}
         />
       </div>
 
-      {/* Made / Missed + Actions - always visible at bottom */}
+      {/* Made / Missed + Actions */}
       <div className="relative z-10 bg-background pt-4 mt-4">
         {pendingShot && selectedPlayer && (
           <div className="px-3 pb-2">
@@ -223,16 +250,25 @@ const LiveGame: React.FC = () => {
           <Button variant="outline" size="sm" onClick={handleUndo} className="flex-1 gap-1">
             <Undo2 className="w-4 h-4" /> Deshacer
           </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              if (confirm('¿Finalizar partido?')) endGame();
-            }}
-            className="flex-1"
-          >
-            Finalizar
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="secondary" size="sm" className="flex-1">
+                Finalizar
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Estás seguro de que quieres finalizar el partido?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta acción guardará el partido con todas las estadísticas registradas. No podrás continuar anotando.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>NO, Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={endGame}>SÍ, Finalizar</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

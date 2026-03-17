@@ -279,7 +279,7 @@ const Dashboard: React.FC = () => {
             {roster.map(p => <option key={p.id} value={p.id}>#{p.number} {p.name}</option>)}
           </select>
         </div>
-        <CourtDiagram onZoneTap={() => {}} shots={filteredShots.filter(s => filterPlayer === 'ALL' || s.playerId === filterPlayer).map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))} />
+        <CourtDiagram onZoneTap={() => {}} shots={filteredShots.filter(s => filterPlayer === 'ALL' || s.playerId === filterPlayer).map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))} rotation={0} onRotate={() => {}} />
       </div>
 
       {/* Efficiency Leaders */}
