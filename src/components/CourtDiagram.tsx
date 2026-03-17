@@ -103,22 +103,19 @@ const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [], rotation, onRota
             );
           })}
 
-          {/* Shot markers - transformed to follow rotation */}
-          {shots.map((shot, i) => {
-            const { cx, cy } = transformShot(shot.x, shot.y, rotation);
-            return (
-              <circle
-                key={i}
-                cx={cx}
-                cy={cy}
-                r="4"
-                className={shot.made ? 'fill-shot-made' : 'fill-shot-missed'}
-                opacity={0.85}
-                stroke="white"
-                strokeWidth="1"
-              />
-            );
-          })}
+          {/* Shot markers - stored in SVG-native coords, rotate naturally with CSS */}
+          {shots.map((shot, i) => (
+            <circle
+              key={i}
+              cx={(shot.x / 100) * 300}
+              cy={(shot.y / 100) * 280}
+              r="4"
+              className={shot.made ? 'fill-shot-made' : 'fill-shot-missed'}
+              opacity={0.85}
+              stroke="white"
+              strokeWidth="1"
+            />
+          ))}
         </svg>
       </div>
     </div>
