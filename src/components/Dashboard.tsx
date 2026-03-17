@@ -364,6 +364,7 @@ const Dashboard: React.FC = () => {
                 <th className="text-center py-2 px-1 font-bold">REB</th>
                 <th className="text-center py-2 px-1 font-bold">AST</th>
                 <th className="text-center py-2 px-1 font-bold">STL</th>
+                <th className="text-center py-2 px-1 font-bold">MIN%</th>
               </tr>
             </thead>
             <tbody>
