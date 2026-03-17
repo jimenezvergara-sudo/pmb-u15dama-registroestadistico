@@ -352,49 +352,49 @@ const Dashboard: React.FC = () => {
           Box Score {isAggregate && tournamentGames.length > 1 ? `(${tournamentGames.length} partidos)` : ''}
         </p>
         <div className="overflow-x-auto -mx-3 px-3">
-          <table className="text-xs min-w-[600px]">
+          <table className="text-xs w-full min-w-[520px]">
             <thead>
               <tr className="text-muted-foreground border-b border-border">
-                <th className="text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[100px]">Jugadora</th>
-                <th className="text-center py-2 px-1 font-bold">PTS</th>
-                <th className="text-center py-2 px-1 font-bold">TC</th>
-                <th className="text-center py-2 px-1 font-bold">2PT</th>
-                <th className="text-center py-2 px-1 font-bold">3PT</th>
-                <th className="text-center py-2 px-1 font-bold">TL</th>
-                <th className="text-center py-2 px-1 font-bold">REB</th>
-                <th className="text-center py-2 px-1 font-bold">AST</th>
-                <th className="text-center py-2 px-1 font-bold">STL</th>
-                <th className="text-center py-2 px-1 font-bold">MIN%</th>
+                <th className="text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[70px]">Jug.</th>
+                <th className="text-center py-2 px-0.5 font-bold">TC</th>
+                <th className="text-center py-2 px-0.5 font-bold">2PT</th>
+                <th className="text-center py-2 px-0.5 font-bold">3PT</th>
+                <th className="text-center py-2 px-0.5 font-bold">TL</th>
+                <th className="text-center py-2 px-0.5 font-bold">PTS</th>
+                <th className="text-center py-2 px-0.5 font-bold">REB</th>
+                <th className="text-center py-2 px-0.5 font-bold">AST</th>
+                <th className="text-center py-2 px-0.5 font-bold">STL</th>
+                <th className="text-center py-2 px-0.5 font-bold">MIN%</th>
               </tr>
             </thead>
             <tbody>
               {boxScore.map(row => (
                 <tr key={row.player.id} className="border-b border-border/50">
                   <td className="py-2 pr-1 font-semibold sticky left-0 bg-card z-10">
-                    <span className="font-extrabold text-primary mr-1">#{row.player.number}</span>
-                    <span className="truncate">{row.player.name.split(' ')[0]}</span>
+                    <span className="font-extrabold text-primary mr-0.5">#{row.player.number}</span>
+                    <span className="truncate max-w-[45px] inline-block align-bottom">{row.player.name.split(' ')[0]}</span>
                   </td>
-                  <td className="text-center py-2 px-1 font-extrabold">{row.pts}</td>
-                  <td className="text-center py-2 px-1">
-                    <div>{row.fgm}/{row.fga}</div>
+                  <td className="text-center py-2 px-0.5">
+                    <div className="text-[10px]">{row.fgm}/{row.fga}</div>
                     <div className={`text-[9px] ${row.fgPct >= 50 ? 'text-success font-bold' : row.fgPct < 30 && row.fga > 0 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>{row.fgPct}%</div>
                   </td>
-                  <td className="text-center py-2 px-1">
-                    <div>{row.twoM}/{row.twoA}</div>
+                  <td className="text-center py-2 px-0.5">
+                    <div className="text-[10px]">{row.twoM}/{row.twoA}</div>
                     <div className={`text-[9px] ${row.twoPct >= 50 ? 'text-success font-bold' : row.twoA > 0 && row.twoPct < 30 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>{row.twoPct}%</div>
                   </td>
-                  <td className="text-center py-2 px-1">
-                    <div>{row.threeM}/{row.threeA}</div>
+                  <td className="text-center py-2 px-0.5">
+                    <div className="text-[10px]">{row.threeM}/{row.threeA}</div>
                     <div className={`text-[9px] ${row.threePct >= 40 ? 'text-success font-bold' : row.threeA > 0 && row.threePct < 25 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>{row.threePct}%</div>
                   </td>
-                  <td className="text-center py-2 px-1">
-                    <div>{row.ftM}/{row.ftA}</div>
+                  <td className="text-center py-2 px-0.5">
+                    <div className="text-[10px]">{row.ftM}/{row.ftA}</div>
                     <div className={`text-[9px] ${row.ftPct >= 75 ? 'text-success font-bold' : row.ftA > 0 && row.ftPct < 50 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>{row.ftPct}%</div>
                   </td>
-                  <td className="text-center py-2 px-1 font-semibold">{row.reb}</td>
-                  <td className="text-center py-2 px-1 font-semibold">{row.ast}</td>
-                  <td className="text-center py-2 px-1 font-semibold">{row.stl}</td>
-                  <td className="text-center py-2 px-1 font-semibold">
+                  <td className="text-center py-2 px-0.5 font-extrabold">{row.pts}</td>
+                  <td className="text-center py-2 px-0.5 font-semibold">{row.reb}</td>
+                  <td className="text-center py-2 px-0.5 font-semibold">{row.ast}</td>
+                  <td className="text-center py-2 px-0.5 font-semibold">{row.stl}</td>
+                  <td className="text-center py-2 px-0.5 font-semibold">
                     {row.courtTimePct > 0 ? `${row.courtTimePct}%` : '—'}
                   </td>
                 </tr>
