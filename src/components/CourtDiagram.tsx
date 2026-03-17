@@ -25,39 +25,15 @@ const ZONES: CourtZone[] = [
   { id: 'ft', points: 1, path: 'M 110,30 L 190,30 L 220,60 L 300,50 L 300,0 L 0,0 L 0,50 L 80,60 Z', label: 'Tiro Libre' },
 ];
 
-/** Transform shot coordinates based on rotation so markers follow the court visually */
-function transformShot(x: number, y: number, rotation: number): { cx: number; cy: number } {
-  // x,y are in 0-100 percentage space. Convert to SVG 300x280.
-  // When the court CSS rotates, shots inside the SVG rotate with it.
-  // But the shots were recorded relative to the un-rotated court.
-  // We need to counter-transform the shot coords so that when CSS rotation is applied,
-  // the shot appears at its correct visual position relative to the hoop.
-
-  // Normalize rotation
-  const r = ((rotation % 360) + 360) % 360;
-
-  let sx = x;
-  let sy = y;
-
-  if (r === 180) {
-    // Mirror both axes: new = total - original
-    sx = 100 - x;
-    sy = 100 - y;
-  } else if (r === 90) {
-    // 90° CW CSS rotation: counter-rotate coords by 90° CCW around center (50,50)
-    // For a non-square aspect ratio we need to account for it
-    sx = 50 + (y - 50);
-    sy = 50 - (x - 50);
-  } else if (r === 270) {
-    // 270° CW CSS rotation: counter-rotate coords by 270° CCW (= 90° CW)
-    sx = 50 - (y - 50);
-    sy = 50 + (x - 50);
-  }
-
-  return {
-    cx: (sx / 100) * 300,
-    cy: (sy / 100) * 280,
-  };
+/** Convert screen click to SVG-native coordinates, accounting for CSS rotation */
+function screenToSvg(svg: SVGSVGElement, clientX: number, clientY: number): { x: number; y: number } {
+  const pt = svg.createSVGPoint();
+  pt.x = clientX;
+  pt.y = clientY;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return { x: 0, y: 0 };
+  const svgPt = pt.matrixTransform(ctm.inverse());
+  return { x: (svgPt.x / 300) * 100, y: (svgPt.y / 280) * 100 };
 }
 
 interface Props {
@@ -72,9 +48,7 @@ const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [], rotation, onRota
   const handleClick = (zone: CourtZone, e: React.MouseEvent<SVGPathElement>) => {
     const svg = e.currentTarget.ownerSVGElement;
     if (!svg) return;
-    const rect = svg.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const { x, y } = screenToSvg(svg, e.clientX, e.clientY);
     onZoneTap({ x, y, points: zone.points });
   };
 
@@ -129,22 +103,19 @@ const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [], rotation, onRota
             );
           })}
 
-          {/* Shot markers - transformed to follow rotation */}
-          {shots.map((shot, i) => {
-            const { cx, cy } = transformShot(shot.x, shot.y, rotation);
-            return (
-              <circle
-                key={i}
-                cx={cx}
-                cy={cy}
-                r="4"
-                className={shot.made ? 'fill-shot-made' : 'fill-shot-missed'}
-                opacity={0.85}
-                stroke="white"
-                strokeWidth="1"
-              />
-            );
-          })}
+          {/* Shot markers - stored in SVG-native coords, rotate naturally with CSS */}
+          {shots.map((shot, i) => (
+            <circle
+              key={i}
+              cx={(shot.x / 100) * 300}
+              cy={(shot.y / 100) * 280}
+              r="4"
+              className={shot.made ? 'fill-shot-made' : 'fill-shot-missed'}
+              opacity={0.85}
+              stroke="white"
+              strokeWidth="1"
+            />
+          ))}
         </svg>
       </div>
     </div>
