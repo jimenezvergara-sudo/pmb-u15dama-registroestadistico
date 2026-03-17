@@ -394,6 +394,9 @@ const Dashboard: React.FC = () => {
                   <td className="text-center py-2 px-1 font-semibold">{row.reb}</td>
                   <td className="text-center py-2 px-1 font-semibold">{row.ast}</td>
                   <td className="text-center py-2 px-1 font-semibold">{row.stl}</td>
+                  <td className="text-center py-2 px-1 font-semibold">
+                    {row.courtTimePct > 0 ? `${row.courtTimePct}%` : '—'}
+                  </td>
                 </tr>
               ))}
             </tbody>
