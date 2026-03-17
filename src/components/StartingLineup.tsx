@@ -6,6 +6,10 @@ import { CheckCircle2, Circle } from 'lucide-react';
 interface Props {
   roster: Player[];
   onConfirm: (starterIds: string[]) => void;
+  title?: string;
+  subtitle?: string;
+  buttonLabel?: string;
+  preSelected?: string[];
 }
 
 const StartingLineup: React.FC<Props> = ({ roster, onConfirm }) => {
