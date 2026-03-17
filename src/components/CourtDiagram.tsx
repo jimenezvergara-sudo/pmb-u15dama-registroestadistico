@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { RotateCw } from 'lucide-react';
 
 interface CourtZone {
   id: string;
@@ -35,6 +36,8 @@ interface Props {
 }
 
 const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [] }) => {
+  const [rotation, setRotation] = useState(0);
+
   const handleClick = (zone: CourtZone, e: React.MouseEvent<SVGPathElement>) => {
     const svg = e.currentTarget.ownerSVGElement;
     if (!svg) return;
@@ -45,71 +48,75 @@ const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [] }) => {
   };
 
   return (
-    <div className="w-full aspect-[300/280] max-w-md mx-auto">
-      <svg viewBox="0 0 300 280" className="w-full h-full" style={{ touchAction: 'manipulation' }}>
-        {/* Court background */}
-        <rect x="0" y="0" width="300" height="280" rx="4" className="fill-court-bg" />
+    <div className="w-full max-w-md mx-auto relative">
+      <button
+        onClick={() => setRotation(r => (r + 90) % 360)}
+        className="absolute top-1 right-1 z-10 p-1.5 rounded-full bg-card/80 backdrop-blur-sm border border-border text-muted-foreground hover:text-foreground hover:bg-card transition-colors tap-feedback"
+        title="Rotar cancha"
+      >
+        <RotateCw className="w-4 h-4" />
+      </button>
+      <div className="aspect-[300/280]" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.3s ease' }}>
+        <svg viewBox="0 0 300 280" className="w-full h-full" style={{ touchAction: 'manipulation' }}>
+          {/* Court background */}
+          <rect x="0" y="0" width="300" height="280" rx="4" className="fill-court-bg" />
 
-        {/* Tap zones */}
-        {ZONES.map(zone => (
-          <path
-            key={zone.id}
-            d={zone.path}
-            className="fill-transparent hover:fill-primary/10 active:fill-primary/20 cursor-pointer transition-colors"
-            onClick={(e) => handleClick(zone, e)}
-          />
-        ))}
+          {/* Tap zones */}
+          {ZONES.map(zone => (
+            <path
+              key={zone.id}
+              d={zone.path}
+              className="fill-transparent hover:fill-primary/10 active:fill-primary/20 cursor-pointer transition-colors"
+              onClick={(e) => handleClick(zone, e)}
+            />
+          ))}
 
-        {/* Court lines */}
-        {/* Boundary */}
-        <rect x="0" y="0" width="300" height="280" rx="4" fill="none" className="stroke-court-line" strokeWidth="2" />
-        {/* Paint */}
-        <rect x="100" y="200" width="100" height="80" fill="none" className="stroke-court-line" strokeWidth="1.5" />
-        {/* Free-throw circle */}
-        <circle cx="150" cy="200" r="30" fill="none" className="stroke-court-line" strokeWidth="1.5" />
-        {/* Basket */}
-        <circle cx="150" cy="265" r="5" fill="none" className="stroke-court-line" strokeWidth="1.5" />
-        <line x1="140" y1="270" x2="160" y2="270" className="stroke-court-line" strokeWidth="1.5" />
-        {/* Three-point arc */}
-        <path d="M 40,280 L 40,170 Q 150,40 260,170 L 260,280" fill="none" className="stroke-court-line" strokeWidth="1.5" strokeDasharray="4 3" />
-        {/* Half-court line */}
-        <line x1="0" y1="0" x2="300" y2="0" className="stroke-court-line" strokeWidth="2" />
+          {/* Court lines */}
+          <rect x="0" y="0" width="300" height="280" rx="4" fill="none" className="stroke-court-line" strokeWidth="2" />
+          <rect x="100" y="200" width="100" height="80" fill="none" className="stroke-court-line" strokeWidth="1.5" />
+          <circle cx="150" cy="200" r="30" fill="none" className="stroke-court-line" strokeWidth="1.5" />
+          <circle cx="150" cy="265" r="5" fill="none" className="stroke-court-line" strokeWidth="1.5" />
+          <line x1="140" y1="270" x2="160" y2="270" className="stroke-court-line" strokeWidth="1.5" />
+          <path d="M 40,280 L 40,170 Q 150,40 260,170 L 260,280" fill="none" className="stroke-court-line" strokeWidth="1.5" strokeDasharray="4 3" />
+          <line x1="0" y1="0" x2="300" y2="0" className="stroke-court-line" strokeWidth="2" />
 
-        {/* Zone labels */}
-        {ZONES.map(zone => {
-          const coords = zone.path.match(/[\d.]+/g)?.map(Number) || [];
-          const xs = coords.filter((_, i) => i % 2 === 0);
-          const ys = coords.filter((_, i) => i % 2 === 1);
-          const cx = xs.reduce((a, b) => a + b, 0) / xs.length;
-          const cy = ys.reduce((a, b) => a + b, 0) / ys.length;
-          return (
-            <text
-              key={`label-${zone.id}`}
-              x={cx}
-              y={cy}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              className="fill-muted-foreground text-[7px] pointer-events-none select-none font-semibold"
-            >
-              {zone.points === 1 ? 'TL' : `${zone.points}pt`}
-            </text>
-          );
-        })}
+          {/* Zone labels - counter-rotate so text stays readable */}
+          {ZONES.map(zone => {
+            const coords = zone.path.match(/[\d.]+/g)?.map(Number) || [];
+            const xs = coords.filter((_, i) => i % 2 === 0);
+            const ys = coords.filter((_, i) => i % 2 === 1);
+            const cx = xs.reduce((a, b) => a + b, 0) / xs.length;
+            const cy = ys.reduce((a, b) => a + b, 0) / ys.length;
+            return (
+              <text
+                key={`label-${zone.id}`}
+                x={cx}
+                y={cy}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="fill-muted-foreground text-[7px] pointer-events-none select-none font-semibold"
+                transform={`rotate(${-rotation}, ${cx}, ${cy})`}
+              >
+                {zone.points === 1 ? 'TL' : `${zone.points}pt`}
+              </text>
+            );
+          })}
 
-        {/* Shot markers */}
-        {shots.map((shot, i) => (
-          <circle
-            key={i}
-            cx={(shot.x / 100) * 300}
-            cy={(shot.y / 100) * 280}
-            r="4"
-            className={shot.made ? 'fill-shot-made' : 'fill-shot-missed'}
-            opacity={0.85}
-            stroke="white"
-            strokeWidth="1"
-          />
-        ))}
-      </svg>
+          {/* Shot markers */}
+          {shots.map((shot, i) => (
+            <circle
+              key={i}
+              cx={(shot.x / 100) * 300}
+              cy={(shot.y / 100) * 280}
+              r="4"
+              className={shot.made ? 'fill-shot-made' : 'fill-shot-missed'}
+              opacity={0.85}
+              stroke="white"
+              strokeWidth="1"
+            />
+          ))}
+        </svg>
+      </div>
     </div>
   );
 };
