@@ -97,6 +97,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   const topFt = [...playerStats].filter(p => p.ftAttempts >= minFtAttempts).sort((a, b) => b.ftPct - a.ftPct || b.ftMade - a.ftMade)[0]
     || [...playerStats].filter(p => p.ftAttempts >= 1).sort((a, b) => b.ftPct - a.ftPct)[0];
 
+  // Leader: Most rebounds
+  const topReb = [...playerStats].filter(p => p.rebounds > 0).sort((a, b) => b.rebounds - a.rebounds)[0];
+  // Leader: Most assists
+  const topAst = [...playerStats].filter(p => p.assists > 0).sort((a, b) => b.assists - a.assists)[0];
+  // Leader: Most steals
+  const topStl = [...playerStats].filter(p => p.steals > 0).sort((a, b) => b.steals - a.steals)[0];
+
   interface LeaderCard {
     title: string;
     icon: React.ReactNode;
