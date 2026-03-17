@@ -3,6 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Trash2, Shield } from 'lucide-react';
+import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 
 const TeamManager: React.FC = () => {
   const { teams, addTeam, removeTeam } = useApp();
@@ -20,7 +21,10 @@ const TeamManager: React.FC = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <h2 className="text-xl font-extrabold text-foreground">Equipos Rivales</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-extrabold text-foreground">Equipos Rivales</h2>
+        <img src={logoHorizontal} alt="BASQEST+" className="h-8 object-contain" />
+      </div>
 
       <div className="space-y-2">
         <Input placeholder="Nombre del Club" value={clubName} onChange={e => setClubName(e.target.value)} />
