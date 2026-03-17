@@ -22,7 +22,7 @@ import {
 const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const LiveGame: React.FC = () => {
-  const { activeGame, setQuarter, recordShot, undoLastShot, endGame, recordOpponentScore, undoLastOpponentScore } = useApp();
+  const { activeGame, setQuarter, recordShot, undoLastShot, endGame, recordOpponentScore, undoLastOpponentScore, recordAction } = useApp();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [courtRotation, setCourtRotation] = useState(0);
@@ -70,10 +70,10 @@ const LiveGame: React.FC = () => {
       toast('Selecciona una jugadora primero', { duration: 1500 });
       return;
     }
+    recordAction(selectedPlayer, action);
     const player = activeGame.roster.find(p => p.id === selectedPlayer);
     const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida' };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
-    // TODO: persist stat events when stat tracking is added to context
   };
 
   const teamScore = activeGame.shots

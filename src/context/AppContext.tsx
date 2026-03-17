@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, GameLeg, Category } from '@/types/basketball';
+import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, GameLeg, Category, ActionType, GameAction } from '@/types/basketball';
 
 interface AppState {
   players: Player[];
@@ -26,6 +26,7 @@ interface AppContextValue extends AppState {
   recordOpponentScore: (points: 1 | 2 | 3) => void;
   undoLastOpponentScore: () => void;
   setActiveCategory: (c: Category) => void;
+  recordAction: (playerId: string, type: ActionType) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -106,6 +107,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       roster,
       shots: [],
       opponentScores: [],
+      actions: [],
       currentQuarter: 'Q1',
       tournamentId,
       opponentTeamId,
@@ -177,12 +179,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     update(s => ({ ...s, activeCategory: c }));
   }, [update]);
 
+  const recordAction = useCallback((playerId: string, type: ActionType) => {
+    update(s => {
+      if (!s.activeGame) return s;
+      const action: GameAction = {
+        id: genId(),
+        playerId,
+        quarterId: s.activeGame.currentQuarter,
+        type,
+        timestamp: Date.now(),
+      };
+      return { ...s, activeGame: { ...s.activeGame, actions: [...(s.activeGame.actions || []), action] } };
+    });
+  }, [update]);
+
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, removeGame, addTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
-      recordOpponentScore, undoLastOpponentScore, setActiveCategory,
+      recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
     }}>
       {children}
     </AppContext.Provider>
