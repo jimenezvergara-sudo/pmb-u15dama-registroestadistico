@@ -68,7 +68,7 @@ const loadState = (): AppState => {
       };
     }
   } catch {}
-  return { players: [], tournaments: [], teams: [], games: [], activeGame: null, activeCategory: 'U15', myTeamName: '' };
+  return { players: [], tournaments: [], teams: [], games: [], activeGame: null, activeCategory: 'U15', myTeamName: '', myTeamLogo: '' };
 };
 
 const saveState = (s: AppState) => {
