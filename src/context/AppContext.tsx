@@ -32,6 +32,7 @@ interface AppContextValue extends AppState {
   recordSubstitution: (playerIn: string, playerOut: string) => void;
   snapshotCourtTime: () => void;
   startGameTimer: () => void;
+  setMyTeamName: (name: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
