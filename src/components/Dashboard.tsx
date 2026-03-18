@@ -444,6 +444,15 @@ const Dashboard: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {editingGame && (
+        <GameEventEditor
+          game={editingGame}
+          open={!!editingGame}
+          onClose={() => setEditingGame(null)}
+          onSave={updateGame}
+        />
+      )}
     </div>
   );
 };
