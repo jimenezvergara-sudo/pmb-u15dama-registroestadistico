@@ -50,6 +50,7 @@ const loadState = (): AppState => {
         ...parsed,
         teams: parsed.teams || [],
         activeCategory: parsed.activeCategory || 'U15',
+        myTeamName: parsed.myTeamName || '',
       };
     }
     const old = localStorage.getItem('hoopstats');
@@ -59,6 +60,7 @@ const loadState = (): AppState => {
         ...parsed,
         teams: parsed.teams || [],
         activeCategory: parsed.activeCategory || 'U15',
+        myTeamName: parsed.myTeamName || '',
       };
     }
   } catch {}
