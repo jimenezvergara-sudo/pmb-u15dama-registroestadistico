@@ -53,30 +53,45 @@ const TeamManager: React.FC = () => {
       </div>
 
       {/* Mi equipo */}
-      <div className="bg-card rounded-lg px-3 py-3 flex items-center gap-3 border-2 border-primary/30">
-        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-          <Shield className="w-5 h-5 text-primary" />
+      <div className="bg-card rounded-xl px-4 py-4 border-2 border-primary/30 space-y-3">
+        <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Mi Equipo</p>
+        
+        <div className="flex items-center gap-4">
+          {/* Logo upload */}
+          <label className="relative cursor-pointer group shrink-0">
+            <input type="file" accept="image/png,image/jpeg" onChange={handleLogoUpload} className="hidden" />
+            {myTeamLogo ? (
+              <img src={myTeamLogo} alt="Logo" className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/40 group-hover:ring-primary transition-all" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex flex-col items-center justify-center ring-2 ring-dashed ring-primary/30 group-hover:ring-primary transition-all">
+                <Camera className="w-5 h-5 text-primary/60" />
+                <span className="text-[8px] text-primary/60 font-bold mt-0.5">LOGO</span>
+              </div>
+            )}
+          </label>
+
+          {/* Name */}
+          {editingMyTeam ? (
+            <div className="flex-1 flex gap-2">
+              <Input
+                value={myTeamInput}
+                onChange={e => setMyTeamInput(e.target.value)}
+                placeholder="Nombre de mi equipo"
+                className="h-9 text-sm"
+                autoFocus
+              />
+              <Button size="sm" className="h-9" onClick={() => {
+                setMyTeamName(myTeamInput.trim());
+                setEditingMyTeam(false);
+              }}>OK</Button>
+            </div>
+          ) : (
+            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setMyTeamInput(myTeamName); setEditingMyTeam(true); }}>
+              <p className="font-bold text-foreground text-lg truncate">{myTeamName || 'Toca para definir...'}</p>
+              <p className="text-[10px] text-muted-foreground">Toca el nombre para editar · el círculo para subir logo</p>
+            </div>
+          )}
         </div>
-        {editingMyTeam ? (
-          <div className="flex-1 flex gap-2">
-            <Input
-              value={myTeamInput}
-              onChange={e => setMyTeamInput(e.target.value)}
-              placeholder="Nombre de mi equipo"
-              className="h-8 text-sm"
-              autoFocus
-            />
-            <Button size="sm" className="h-8" onClick={() => {
-              setMyTeamName(myTeamInput.trim());
-              setEditingMyTeam(false);
-            }}>OK</Button>
-          </div>
-        ) : (
-          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setMyTeamInput(myTeamName); setEditingMyTeam(true); }}>
-            <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Mi Equipo</p>
-            <p className="font-semibold text-foreground truncate">{myTeamName || 'Toca para definir...'}</p>
-          </div>
-        )}
       </div>
 
       <h3 className="text-sm font-bold text-muted-foreground mt-4 mb-2">Equipos Rivales</h3>

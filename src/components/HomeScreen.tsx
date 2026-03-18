@@ -204,7 +204,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       )}
 
       {/* Stat cards */}
-      <div className={`grid grid-cols-3 gap-3 px-4 ${myTeamName ? 'mt-2' : '-mt-6'} relative z-10`}>
+      <div className={`grid grid-cols-3 gap-3 px-4 ${(myTeamName || myTeamLogo) ? 'mt-3' : '-mt-6'} relative z-10`}>
         {[
           { label: 'RÉCORD', value: `${wins}-${losses}` },
           { label: 'PTS/P', value: ptsPerGame },
