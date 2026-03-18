@@ -70,10 +70,12 @@ export async function generatePdfReport(
 
     // Decorative circles (brand flair)
     doc.setFillColor(255, 255, 255);
-    doc.setGState(new (doc as any).GState({ opacity: 0.06 }));
+    // @ts-ignore - GState is available at runtime
+    doc.setGState(new doc.GState({ opacity: 0.06 }));
     doc.circle(W - 30, 10, 35, 'F');
     doc.circle(W - 60, 25, 20, 'F');
-    doc.setGState(new (doc as any).GState({ opacity: 1 }));
+    // @ts-ignore
+    doc.setGState(new doc.GState({ opacity: 1 }));
 
     // App name
     doc.setTextColor(...WHITE);
