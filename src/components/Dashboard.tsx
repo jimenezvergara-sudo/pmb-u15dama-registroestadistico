@@ -5,8 +5,11 @@ import CourtDiagram from '@/components/CourtDiagram';
 import { Card, CardContent } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { Trash2, Target, CircleDot, Crosshair, FileDown } from 'lucide-react';
+import { Trash2, Target, CircleDot, Crosshair, FileDown, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+import logoBasqest from '@/assets/logo-basqest-full.png';
+import { generatePdfReport } from '@/utils/generatePdfReport';
+import GameEventEditor from '@/components/GameEventEditor';
 import logoBasqest from '@/assets/logo-basqest-full.png';
 import { generatePdfReport } from '@/utils/generatePdfReport';
 
