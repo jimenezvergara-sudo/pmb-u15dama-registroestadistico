@@ -508,9 +508,11 @@ export async function generatePdfReport(
       doc.roundedRect(groupX, barBaseY - teamH, barW, teamH, 1.5, 1.5, 'F');
       if (teamH > 4) {
         doc.setFillColor(...PURPLE_LIGHT);
-        doc.setGState(new (doc as any).GState({ opacity: 0.3 }));
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 0.3 }));
         doc.roundedRect(groupX + 1, barBaseY - teamH, barW - 2, teamH * 0.4, 1, 1, 'F');
-        doc.setGState(new (doc as any).GState({ opacity: 1 }));
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 1 }));
       }
 
       if (d.pts > 0) {
