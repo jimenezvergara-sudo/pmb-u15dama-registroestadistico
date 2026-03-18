@@ -169,9 +169,38 @@ const Dashboard: React.FC = () => {
   return (
     <div className="p-4 space-y-4 pb-24">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <img src={logoBasqest} alt="BASQEST+" className="w-10 h-10" />
-        <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <img src={logoBasqest} alt="BASQEST+" className="w-10 h-10" />
+          <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs font-bold"
+          onClick={() => {
+            const filterLabel = filterTournamentId === 'ALL'
+              ? 'Todos los torneos'
+              : tournaments.find(t => t.id === filterTournamentId)?.name || '';
+            const gameLabel = selectedGameId === 'ALL'
+              ? `Todos los partidos (${tournamentGames.length})`
+              : `vs ${selectedGame?.opponentName || ''}`;
+            generatePdfReport(games, tournamentGames, players, {
+              teamName: myTeamName,
+              teamLogo: myTeamLogo,
+              appLogo: logoBasqest,
+              category: activeCategory,
+              filterLabel,
+              gameLabel,
+              quarterFilter: filterQuarter,
+              playerFilter: filterPlayer,
+            });
+            toast.success('PDF descargado');
+          }}
+        >
+          <FileDown className="w-4 h-4" />
+          PDF
+        </Button>
       </div>
 
       {/* Filters */}
