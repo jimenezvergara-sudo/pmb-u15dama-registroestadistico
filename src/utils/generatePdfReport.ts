@@ -4,32 +4,39 @@ import { Game, Player, QuarterId, QUARTER_LABELS } from '@/types/basketball';
 
 interface ReportOptions {
   teamName: string;
-  teamLogo: string; // base64
-  appLogo: string; // base64 from import
+  teamLogo: string;
+  appLogo: string;
   category: string;
-  filterLabel: string; // e.g. "Todos los torneos" or tournament name
-  gameLabel: string; // e.g. "Todos los partidos (5)" or specific game
+  filterLabel: string;
+  gameLabel: string;
   quarterFilter: QuarterId | 'ALL';
-  playerFilter: string; // 'ALL' or player id
+  playerFilter: string;
 }
 
 interface BoxScoreRow {
-  name: string;
-  number: number;
-  pts: number;
+  name: string; number: number; pts: number;
   fgm: number; fga: number; fgPct: number;
   twoM: number; twoA: number; twoPct: number;
   threeM: number; threeA: number; threePct: number;
   ftM: number; ftA: number; ftPct: number;
   reb: number; ast: number; stl: number; pf: number;
-  courtTimePct: number;
 }
 
-const PRIMARY_COLOR: [number, number, number] = [122, 38, 225]; // #7A26E1
-const DARK_BG: [number, number, number] = [30, 20, 50];
-const GOLD: [number, number, number] = [255, 195, 0]; // #FFC300
+// ── Brand Palette (from CSS tokens) ──
+const PURPLE: [number, number, number] = [122, 38, 225];      // primary 268 76% 52%
+const PURPLE_LIGHT: [number, number, number] = [165, 100, 240]; // lighter purple
+const PURPLE_DARK: [number, number, number] = [60, 15, 120];    // deep purple
+const CYAN: [number, number, number] = [50, 217, 255];         // secondary 190 100% 60%
+const GOLD: [number, number, number] = [255, 195, 0];          // accent 45 100% 50%
+const SUCCESS: [number, number, number] = [16, 185, 129];      // success 160 84% 39%
+const DESTRUCTIVE: [number, number, number] = [217, 72, 72];   // destructive
 const WHITE: [number, number, number] = [255, 255, 255];
-const LIGHT_GRAY: [number, number, number] = [240, 240, 245];
+const NEAR_BLACK: [number, number, number] = [25, 15, 45];
+const BODY_BG: [number, number, number] = [245, 243, 250];     // soft lavender bg
+const CARD_BG: [number, number, number] = [237, 234, 245];
+const MUTED: [number, number, number] = [140, 130, 160];
+const TABLE_ALT: [number, number, number] = [248, 245, 255];
+const TABLE_BORDER: [number, number, number] = [215, 210, 230];
 
 export async function generatePdfReport(
   games: Game[],
@@ -38,64 +45,122 @@ export async function generatePdfReport(
   options: ReportOptions
 ) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
-  const pageW = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
-  const margin = 15;
+  const W = doc.internal.pageSize.getWidth();   // ~215.9
+  const H = doc.internal.pageSize.getHeight();  // ~279.4
+  const M = 14; // margin
   let y = 0;
 
-  // ── Helper: draw header band on each page ──
+  // ═══════════════ HELPERS ═══════════════
+
+  const drawPageBg = () => {
+    doc.setFillColor(...BODY_BG);
+    doc.rect(0, 0, W, H, 'F');
+  };
+
   const drawHeader = () => {
-    doc.setFillColor(...PRIMARY_COLOR);
-    doc.rect(0, 0, pageW, 38, 'F');
+    // Gradient-like header band with two layers
+    doc.setFillColor(...PURPLE_DARK);
+    doc.rect(0, 0, W, 42, 'F');
+    doc.setFillColor(...PURPLE);
+    doc.rect(0, 0, W, 36, 'F');
+
+    // Decorative accent stripe
+    doc.setFillColor(...GOLD);
+    doc.rect(0, 36, W, 1.5, 'F');
+
+    // Decorative circles (brand flair)
+    doc.setFillColor(255, 255, 255);
+    doc.setGState(new doc.GState({ opacity: 0.06 }));
+    doc.circle(W - 30, 10, 35, 'F');
+    doc.circle(W - 60, 25, 20, 'F');
+    doc.setGState(new doc.GState({ opacity: 1 }));
 
     // App name
     doc.setTextColor(...WHITE);
-    doc.setFontSize(22);
+    doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text('BASQEST+', margin, 18);
+    doc.text('BASQEST+', M, 16);
+
+    // Tagline with cyan accent
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    doc.text('Inteligencia Deportiva', margin, 25);
+    doc.setTextColor(...CYAN);
+    doc.text('Inteligencia Deportiva', M, 23);
 
-    // Team name capsule
+    // Team name in gold capsule
     if (options.teamName) {
-      doc.setFontSize(10);
+      const teamText = options.teamName.toUpperCase();
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.text(options.teamName, margin, 34);
+      const tw = doc.getTextWidth(teamText);
+      const capsuleW = tw + 10;
+      const capsuleX = M;
+      const capsuleY = 27;
+      doc.setFillColor(...GOLD);
+      doc.roundedRect(capsuleX, capsuleY, capsuleW, 7, 3.5, 3.5, 'F');
+      doc.setTextColor(...NEAR_BLACK);
+      doc.text(teamText, capsuleX + 5, capsuleY + 5.2);
     }
 
     // App logo
     if (options.appLogo) {
-      try { doc.addImage(options.appLogo, 'PNG', pageW - margin - 18, 5, 18, 18); } catch { }
+      try { doc.addImage(options.appLogo, 'PNG', W - M - 20, 4, 20, 20); } catch { /* skip */ }
     }
     // Team logo
     if (options.teamLogo) {
-      try { doc.addImage(options.teamLogo, 'PNG', pageW - margin - 18, 22, 12, 12); } catch { }
+      try {
+        // Circular clip effect: draw white circle bg then image
+        doc.setFillColor(...WHITE);
+        doc.circle(W - M - 10, 31, 7, 'F');
+        doc.addImage(options.teamLogo, 'PNG', W - M - 16, 25, 12, 12);
+      } catch { /* skip */ }
     }
 
-    y = 44;
+    y = 46;
   };
 
-  // ── Helper: footer ──
   const drawFooter = (pageNum: number) => {
+    // Footer bar
+    doc.setFillColor(...PURPLE_DARK);
+    doc.rect(0, H - 12, W, 12, 'F');
+    doc.setFillColor(...GOLD);
+    doc.rect(0, H - 12, W, 0.8, 'F');
+
     doc.setFontSize(7);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`BASQEST+ · ${options.category} · ${new Date().toLocaleDateString()}`, margin, pageH - 8);
-    doc.text(`Página ${pageNum}`, pageW - margin, pageH - 8, { align: 'right' });
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...CYAN);
+    doc.text('BASQEST+', M, H - 4);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(180, 175, 200);
+    doc.text(`${options.category} · ${new Date().toLocaleDateString()}`, M + 22, H - 4);
+    doc.text(`Página ${pageNum}`, W - M, H - 4, { align: 'right' });
+  };
+
+  const sectionTitle = (title: string, icon?: string) => {
+    doc.setFillColor(...PURPLE);
+    doc.roundedRect(M, y, 3, 7, 1.5, 1.5, 'F');
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...NEAR_BLACK);
+    doc.text(`${icon ? icon + ' ' : ''}${title}`, M + 6, y + 5.5);
+    y += 10;
   };
 
   // ═══════════════ PAGE 1: Overview ═══════════════
+  drawPageBg();
   drawHeader();
   let pageNum = 1;
 
-  // Filter info
-  doc.setFontSize(8);
-  doc.setTextColor(120, 120, 130);
+  // Filter badge
+  doc.setFillColor(...CARD_BG);
+  doc.roundedRect(M, y, W - M * 2, 7, 3, 3, 'F');
+  doc.setFontSize(7);
+  doc.setTextColor(...MUTED);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Filtro: ${options.filterLabel} · ${options.gameLabel}`, margin, y);
-  y += 6;
+  doc.text(`📋  ${options.filterLabel}  ·  ${options.gameLabel}`, M + 4, y + 5);
+  y += 12;
 
-  // ── Team summary ──
+  // ── Team summary cards ──
   const totalGames = filteredGames.length;
   const wins = filteredGames.filter(g => {
     const team = g.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
@@ -103,37 +168,37 @@ export async function generatePdfReport(
     return team > opp;
   }).length;
   const losses = totalGames - wins;
-
-  const totalTeamPts = filteredGames.reduce(
-    (sum, g) => sum + g.shots.filter(s => s.made).reduce((a, s) => a + s.points, 0), 0
-  );
-  const totalOppPts = filteredGames.reduce(
-    (sum, g) => sum + (g.opponentScores || []).reduce((a, s) => a + s.points, 0), 0
-  );
+  const totalTeamPts = filteredGames.reduce((sum, g) => sum + g.shots.filter(s => s.made).reduce((a, s) => a + s.points, 0), 0);
+  const totalOppPts = filteredGames.reduce((sum, g) => sum + (g.opponentScores || []).reduce((a, s) => a + s.points, 0), 0);
   const ppg = totalGames > 0 ? (totalTeamPts / totalGames).toFixed(1) : '0';
   const oppPpg = totalGames > 0 ? (totalOppPts / totalGames).toFixed(1) : '0';
 
-  // Summary cards
-  doc.setFillColor(...LIGHT_GRAY);
-  const cardW = (pageW - margin * 2 - 10) / 3;
+  const cardW = (W - M * 2 - 8) / 3;
   const cards = [
-    { label: 'RÉCORD', value: `${wins}-${losses}` },
-    { label: 'PTS/P', value: ppg },
-    { label: 'PTS/C', value: oppPpg },
+    { label: 'RÉCORD', value: `${wins}-${losses}`, color: GOLD },
+    { label: 'PTS/PARTIDO', value: ppg, color: CYAN },
+    { label: 'PTS/CONTRA', value: oppPpg, color: PURPLE_LIGHT },
   ];
   cards.forEach((c, i) => {
-    const cx = margin + i * (cardW + 5);
-    doc.setFillColor(...LIGHT_GRAY);
-    doc.roundedRect(cx, y, cardW, 22, 3, 3, 'F');
-    doc.setFontSize(7);
-    doc.setTextColor(130, 130, 140);
+    const cx = M + i * (cardW + 4);
+    // Card bg
+    doc.setFillColor(...WHITE);
+    doc.roundedRect(cx, y, cardW, 26, 4, 4, 'F');
+    // Top accent line
+    doc.setFillColor(...c.color);
+    doc.roundedRect(cx + 8, y, cardW - 16, 2, 1, 1, 'F');
+    // Label
+    doc.setFontSize(6.5);
+    doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
-    doc.text(c.label, cx + cardW / 2, y + 8, { align: 'center' });
-    doc.setFontSize(18);
-    doc.setTextColor(30, 20, 50);
-    doc.text(c.value, cx + cardW / 2, y + 19, { align: 'center' });
+    doc.text(c.label, cx + cardW / 2, y + 10, { align: 'center' });
+    // Value
+    doc.setFontSize(20);
+    doc.setTextColor(...NEAR_BLACK);
+    doc.setFont('helvetica', 'bold');
+    doc.text(c.value, cx + cardW / 2, y + 22, { align: 'center' });
   });
-  y += 28;
+  y += 32;
 
   // ── Season leaders ──
   const allShots = filteredGames.flatMap(g => g.shots);
@@ -145,16 +210,18 @@ export async function generatePdfReport(
   const playerStats = roster.map(p => {
     const shots = allShots.filter(s => s.playerId === p.id);
     const pts = shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
-    const triplesMade = shots.filter(s => s.points === 3 && s.made).length;
-    const triplesAtt = shots.filter(s => s.points === 3).length;
-    const doblesMade = shots.filter(s => s.points === 2 && s.made).length;
-    const doblesAtt = shots.filter(s => s.points === 2).length;
-    const ftMade = shots.filter(s => s.points === 1 && s.made).length;
-    const ftAtt = shots.filter(s => s.points === 1).length;
-    const reb = allActions.filter(a => a.playerId === p.id && a.type === 'rebound').length;
-    const ast = allActions.filter(a => a.playerId === p.id && a.type === 'assist').length;
-    const stl = allActions.filter(a => a.playerId === p.id && a.type === 'steal').length;
-    return { ...p, pts, triplesMade, triplesAtt, doblesMade, doblesAtt, ftMade, ftAtt, reb, ast, stl };
+    return {
+      ...p, pts,
+      triplesMade: shots.filter(s => s.points === 3 && s.made).length,
+      triplesAtt: shots.filter(s => s.points === 3).length,
+      doblesMade: shots.filter(s => s.points === 2 && s.made).length,
+      doblesAtt: shots.filter(s => s.points === 2).length,
+      ftMade: shots.filter(s => s.points === 1 && s.made).length,
+      ftAtt: shots.filter(s => s.points === 1).length,
+      reb: allActions.filter(a => a.playerId === p.id && a.type === 'rebound').length,
+      ast: allActions.filter(a => a.playerId === p.id && a.type === 'assist').length,
+      stl: allActions.filter(a => a.playerId === p.id && a.type === 'steal').length,
+    };
   });
 
   const topScorer = [...playerStats].sort((a, b) => b.pts - a.pts)[0];
@@ -164,116 +231,107 @@ export async function generatePdfReport(
   const topAst = [...playerStats].filter(p => p.ast > 0).sort((a, b) => b.ast - a.ast)[0];
   const topStl = [...playerStats].filter(p => p.stl > 0).sort((a, b) => b.stl - a.stl)[0];
 
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...DARK_BG);
-  doc.text('Líderes de Temporada', margin, y + 4);
-  y += 10;
+  sectionTitle('Líderes de Temporada');
 
   const leaderItems = [
-    { label: 'Puntos', player: topScorer, value: topScorer?.pts },
-    { label: 'Triples', player: topThrees, value: topThrees?.triplesMade },
-    { label: 'Dobles', player: topDoubles, value: topDoubles?.doblesMade },
-    { label: 'Rebotes', player: topReb, value: topReb?.reb },
-    { label: 'Asistencias', player: topAst, value: topAst?.ast },
-    { label: 'Robos', player: topStl, value: topStl?.stl },
+    { label: 'PUNTOS', player: topScorer, value: topScorer?.pts, accent: GOLD },
+    { label: 'TRIPLES', player: topThrees, value: topThrees?.triplesMade, accent: CYAN },
+    { label: 'DOBLES', player: topDoubles, value: topDoubles?.doblesMade, accent: PURPLE_LIGHT },
+    { label: 'REBOTES', player: topReb, value: topReb?.reb, accent: SUCCESS },
+    { label: 'ASISTENCIAS', player: topAst, value: topAst?.ast, accent: CYAN },
+    { label: 'ROBOS', player: topStl, value: topStl?.stl, accent: GOLD },
   ];
 
-  const colW = (pageW - margin * 2 - 10) / 3;
+  const lColW = (W - M * 2 - 8) / 3;
   leaderItems.forEach((item, i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
-    const lx = margin + col * (colW + 5);
-    const ly = y + row * 20;
+    const lx = M + col * (lColW + 4);
+    const ly = y + row * 22;
 
-    doc.setFillColor(245, 242, 255);
-    doc.roundedRect(lx, ly, colW, 17, 2, 2, 'F');
+    // Card
+    doc.setFillColor(...WHITE);
+    doc.roundedRect(lx, ly, lColW, 19, 3, 3, 'F');
+    // Left accent bar
+    doc.setFillColor(...item.accent);
+    doc.roundedRect(lx, ly + 3, 2.5, 13, 1.2, 1.2, 'F');
 
-    doc.setFontSize(7);
-    doc.setTextColor(...PRIMARY_COLOR);
+    doc.setFontSize(6.5);
+    doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
-    doc.text(item.label.toUpperCase(), lx + 4, ly + 6);
+    doc.text(item.label, lx + 6, ly + 6);
 
     if (item.player) {
-      doc.setFontSize(9);
-      doc.setTextColor(...DARK_BG);
-      doc.text(`#${item.player.number} ${item.player.name}`, lx + 4, ly + 12);
-      doc.setFontSize(14);
-      doc.setTextColor(...PRIMARY_COLOR);
-      doc.text(`${item.value}`, lx + colW - 4, ly + 12, { align: 'right' });
+      doc.setFontSize(8.5);
+      doc.setTextColor(...NEAR_BLACK);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`#${item.player.number} ${item.player.name}`, lx + 6, ly + 12.5);
+      // Value badge
+      doc.setFillColor(...item.accent);
+      const valStr = `${item.value}`;
+      const valW = Math.max(doc.getTextWidth(valStr) + 5, 10);
+      doc.roundedRect(lx + lColW - valW - 3, ly + 8, valW, 8, 3, 3, 'F');
+      doc.setFontSize(10);
+      doc.setTextColor(...(item.accent === GOLD ? NEAR_BLACK : WHITE));
+      doc.text(valStr, lx + lColW - valW / 2 - 0.5, ly + 14, { align: 'center' });
     } else {
       doc.setFontSize(8);
-      doc.setTextColor(160, 160, 170);
-      doc.text('—', lx + 4, ly + 12);
+      doc.setTextColor(...MUTED);
+      doc.text('Sin datos', lx + 6, ly + 13);
     }
   });
-  y += Math.ceil(leaderItems.length / 3) * 20 + 6;
+  y += Math.ceil(leaderItems.length / 3) * 22 + 6;
 
-  // ── Games results list ──
+  // ── Results table ──
   if (filteredGames.length > 0) {
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...DARK_BG);
-    doc.text('Resultados', margin, y + 4);
-    y += 8;
+    sectionTitle('Resultados');
 
     const gameRows = filteredGames.map(g => {
       const teamPts = g.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
       const oppPts = (g.opponentScores || []).reduce((sum, s) => sum + s.points, 0);
       const won = teamPts > oppPts;
       const legLabel = g.leg ? ` (${g.leg === 'ida' ? 'Ida' : 'Vuelta'})` : '';
-      return [
-        new Date(g.date).toLocaleDateString(),
-        `vs ${g.opponentName}${legLabel}`,
-        `${teamPts} - ${oppPts}`,
-        won ? 'V' : 'D',
-      ];
+      return [new Date(g.date).toLocaleDateString(), `vs ${g.opponentName}${legLabel}`, `${teamPts} - ${oppPts}`, won ? 'V' : 'D'];
     });
 
     autoTable(doc, {
       startY: y,
-      head: [['Fecha', 'Partido', 'Score', 'R']],
+      head: [['Fecha', 'Partido', 'Score', '']],
       body: gameRows,
-      margin: { left: margin, right: margin },
-      styles: { fontSize: 8, cellPadding: 2, font: 'helvetica' },
-      headStyles: { fillColor: PRIMARY_COLOR, textColor: WHITE, fontStyle: 'bold', fontSize: 8 },
-      columnStyles: {
-        3: {
-          halign: 'center',
-          fontStyle: 'bold',
-        },
-      },
+      margin: { left: M, right: M },
+      styles: { fontSize: 8, cellPadding: 3, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.3 },
+      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 8 },
+      bodyStyles: { fillColor: WHITE },
+      alternateRowStyles: { fillColor: TABLE_ALT },
+      columnStyles: { 3: { halign: 'center', fontStyle: 'bold', cellWidth: 12 } },
       didParseCell: (data) => {
         if (data.section === 'body' && data.column.index === 3) {
           const val = data.cell.raw as string;
-          data.cell.styles.textColor = val === 'V' ? [34, 139, 34] : [200, 50, 50];
+          data.cell.styles.textColor = val === 'V' ? [...SUCCESS] : [...DESTRUCTIVE];
         }
       },
       theme: 'grid',
     });
-
-    y = (doc as any).lastAutoTable.finalY + 8;
+    y = (doc as any).lastAutoTable.finalY + 6;
   }
 
   drawFooter(pageNum);
 
   // ═══════════════ PAGE 2: Box Score ═══════════════
   doc.addPage();
+  drawPageBg();
   pageNum++;
   drawHeader();
 
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...DARK_BG);
-  doc.text('Box Score', margin, y + 4);
+  sectionTitle('Box Score');
+
   if (options.quarterFilter !== 'ALL') {
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Filtro: ${QUARTER_LABELS[options.quarterFilter]}`, margin + 28, y + 4);
+    doc.setTextColor(...MUTED);
+    doc.text(`Filtro de cuarto: ${QUARTER_LABELS[options.quarterFilter]}`, M + 6, y - 4);
   }
-  y += 8;
 
-  // Build box score data
   const filteredShots = allShots.filter(s => {
     if (options.quarterFilter !== 'ALL' && s.quarterId !== options.quarterFilter) return false;
     if (options.playerFilter !== 'ALL' && s.playerId !== options.playerFilter) return false;
@@ -293,18 +351,16 @@ export async function generatePdfReport(
     const ftA = pShots.filter(s => s.points === 1).length;
     const ftM = pShots.filter(s => s.points === 1 && s.made).length;
     const pActions = allActions.filter(a => a.playerId === player.id);
-    const reb = pActions.filter(a => a.type === 'rebound').length;
-    const ast = pActions.filter(a => a.type === 'assist').length;
-    const stl = pActions.filter(a => a.type === 'steal').length;
-    const pf = pActions.filter(a => a.type === 'foul').length;
-
     return {
-      name: player.name, number: player.number,
-      pts, fgm, fga, fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
+      name: player.name, number: player.number, pts, fgm, fga,
+      fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
       twoM, twoA, twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threeM, threeA, threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
       ftM, ftA, ftPct: ftA > 0 ? Math.round((ftM / ftA) * 100) : 0,
-      reb, ast, stl, pf, courtTimePct: 0,
+      reb: pActions.filter(a => a.type === 'rebound').length,
+      ast: pActions.filter(a => a.type === 'assist').length,
+      stl: pActions.filter(a => a.type === 'steal').length,
+      pf: pActions.filter(a => a.type === 'foul').length,
     };
   }).sort((a, b) => b.pts - a.pts);
 
@@ -314,87 +370,78 @@ export async function generatePdfReport(
     `${r.twoM}/${r.twoA}`, `${r.twoPct}%`,
     `${r.threeM}/${r.threeA}`, `${r.threePct}%`,
     `${r.ftM}/${r.ftA}`, `${r.ftPct}%`,
-    `${r.pts}`,
-    `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.pf}`,
+    `${r.pts}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.pf}`,
   ]);
 
   autoTable(doc, {
     startY: y,
     head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'REB', 'AST', 'STL', 'PF']],
     body: tableBody,
-    margin: { left: margin, right: margin },
-    styles: { fontSize: 7, cellPadding: 1.5, font: 'helvetica', overflow: 'linebreak' },
-    headStyles: { fillColor: PRIMARY_COLOR, textColor: WHITE, fontStyle: 'bold', fontSize: 7 },
+    margin: { left: M, right: M },
+    styles: { fontSize: 7, cellPadding: 1.8, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2 },
+    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 7 },
+    bodyStyles: { fillColor: WHITE },
+    alternateRowStyles: { fillColor: TABLE_ALT },
     columnStyles: {
-      0: { cellWidth: 32 },
-      9: { fontStyle: 'bold', halign: 'center' },
-      10: { halign: 'center' },
-      11: { halign: 'center' },
-      12: { halign: 'center' },
-      13: { halign: 'center' },
-      1: { halign: 'center' }, 2: { halign: 'center' },
-      3: { halign: 'center' }, 4: { halign: 'center' },
-      5: { halign: 'center' }, 6: { halign: 'center' },
-      7: { halign: 'center' }, 8: { halign: 'center' },
+      0: { cellWidth: 30, fontStyle: 'bold' },
+      9: { fontStyle: 'bold', halign: 'center', fillColor: [245, 240, 255] },
+      1: { halign: 'center' }, 2: { halign: 'center' }, 3: { halign: 'center' }, 4: { halign: 'center' },
+      5: { halign: 'center' }, 6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
+      10: { halign: 'center' }, 11: { halign: 'center' }, 12: { halign: 'center' }, 13: { halign: 'center' },
     },
-    alternateRowStyles: { fillColor: [248, 245, 255] },
     theme: 'grid',
     didParseCell: (data) => {
       if (data.section === 'body') {
-        // Color % columns based on thresholds
-        const colIdx = data.column.index;
+        const ci = data.column.index;
         const val = parseInt(data.cell.raw as string);
-        if ([2, 4, 6, 8].includes(colIdx) && !isNaN(val)) {
-          if (colIdx === 6 && val >= 40) data.cell.styles.textColor = [34, 139, 34]; // 3PT
-          else if (colIdx === 6 && val < 25 && val > 0) data.cell.styles.textColor = [200, 50, 50];
-          else if ([2, 4].includes(colIdx) && val >= 50) data.cell.styles.textColor = [34, 139, 34];
-          else if ([2, 4].includes(colIdx) && val < 30 && val > 0) data.cell.styles.textColor = [200, 50, 50];
-          else if (colIdx === 8 && val >= 75) data.cell.styles.textColor = [34, 139, 34];
-          else if (colIdx === 8 && val < 50 && val > 0) data.cell.styles.textColor = [200, 50, 50];
+        if ([2, 4, 6, 8].includes(ci) && !isNaN(val)) {
+          if (ci === 6 && val >= 40) data.cell.styles.textColor = [...SUCCESS];
+          else if (ci === 6 && val < 25 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+          else if ([2, 4].includes(ci) && val >= 50) data.cell.styles.textColor = [...SUCCESS];
+          else if ([2, 4].includes(ci) && val < 30 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+          else if (ci === 8 && val >= 75) data.cell.styles.textColor = [...SUCCESS];
+          else if (ci === 8 && val < 50 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
         }
+        // Highlight PTS column
+        if (ci === 9) data.cell.styles.textColor = [...PURPLE];
       }
     },
   });
 
-  y = (doc as any).lastAutoTable.finalY + 10;
+  y = (doc as any).lastAutoTable.finalY + 8;
 
-  // ── Team totals row ──
-  const teamTotals = boxRows.reduce((acc, r) => ({
-    pts: acc.pts + r.pts, fgm: acc.fgm + r.fgm, fga: acc.fga + r.fga,
-    twoM: acc.twoM + r.twoM, twoA: acc.twoA + r.twoA,
-    threeM: acc.threeM + r.threeM, threeA: acc.threeA + r.threeA,
-    ftM: acc.ftM + r.ftM, ftA: acc.ftA + r.ftA,
-    reb: acc.reb + r.reb, ast: acc.ast + r.ast, stl: acc.stl + r.stl, pf: acc.pf + r.pf,
+  // ── Team totals ──
+  const tt = boxRows.reduce((a, r) => ({
+    pts: a.pts + r.pts, fgm: a.fgm + r.fgm, fga: a.fga + r.fga,
+    twoM: a.twoM + r.twoM, twoA: a.twoA + r.twoA,
+    threeM: a.threeM + r.threeM, threeA: a.threeA + r.threeA,
+    ftM: a.ftM + r.ftM, ftA: a.ftA + r.ftA,
+    reb: a.reb + r.reb, ast: a.ast + r.ast, stl: a.stl + r.stl, pf: a.pf + r.pf,
   }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, ast: 0, stl: 0, pf: 0 });
 
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...DARK_BG);
-  doc.text('Totales del Equipo', margin, y);
-  y += 5;
-
-  const totalsData = [
-    ['PTS', `${teamTotals.pts}`],
-    ['TC', `${teamTotals.fgm}/${teamTotals.fga} (${teamTotals.fga > 0 ? Math.round((teamTotals.fgm / teamTotals.fga) * 100) : 0}%)`],
-    ['2PT', `${teamTotals.twoM}/${teamTotals.twoA} (${teamTotals.twoA > 0 ? Math.round((teamTotals.twoM / teamTotals.twoA) * 100) : 0}%)`],
-    ['3PT', `${teamTotals.threeM}/${teamTotals.threeA} (${teamTotals.threeA > 0 ? Math.round((teamTotals.threeM / teamTotals.threeA) * 100) : 0}%)`],
-    ['TL', `${teamTotals.ftM}/${teamTotals.ftA} (${teamTotals.ftA > 0 ? Math.round((teamTotals.ftM / teamTotals.ftA) * 100) : 0}%)`],
-    ['REB', `${teamTotals.reb}`],
-    ['AST', `${teamTotals.ast}`],
-    ['STL', `${teamTotals.stl}`],
-    ['PF', `${teamTotals.pf}`],
+  // Totals bar
+  doc.setFillColor(...PURPLE_DARK);
+  doc.roundedRect(M, y, W - M * 2, 18, 4, 4, 'F');
+  const totItems = [
+    { l: 'PTS', v: `${tt.pts}`, c: GOLD },
+    { l: 'TC', v: `${tt.fga > 0 ? Math.round((tt.fgm / tt.fga) * 100) : 0}%`, c: WHITE },
+    { l: '2PT', v: `${tt.twoA > 0 ? Math.round((tt.twoM / tt.twoA) * 100) : 0}%`, c: WHITE },
+    { l: '3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
+    { l: 'TL', v: `${tt.ftA > 0 ? Math.round((tt.ftM / tt.ftA) * 100) : 0}%`, c: WHITE },
+    { l: 'REB', v: `${tt.reb}`, c: WHITE },
+    { l: 'AST', v: `${tt.ast}`, c: WHITE },
+    { l: 'STL', v: `${tt.stl}`, c: WHITE },
   ];
-
-  autoTable(doc, {
-    startY: y,
-    body: totalsData,
-    margin: { left: margin, right: margin },
-    styles: { fontSize: 8, cellPadding: 2, font: 'helvetica' },
-    columnStyles: {
-      0: { fontStyle: 'bold', textColor: PRIMARY_COLOR, cellWidth: 20 },
-      1: { fontStyle: 'bold' },
-    },
-    theme: 'plain',
+  const totW = (W - M * 2) / totItems.length;
+  totItems.forEach((t, i) => {
+    const tx = M + i * totW;
+    doc.setFontSize(5.5);
+    doc.setTextColor(180, 170, 210);
+    doc.setFont('helvetica', 'bold');
+    doc.text(t.l, tx + totW / 2, y + 6, { align: 'center' });
+    doc.setFontSize(11);
+    doc.setTextColor(...t.c);
+    doc.text(t.v, tx + totW / 2, y + 14, { align: 'center' });
   });
 
   drawFooter(pageNum);
@@ -404,16 +451,13 @@ export async function generatePdfReport(
   const activeQuarters = ALL_QUARTERS.filter(q => allShots.some(s => s.quarterId === q));
 
   doc.addPage();
+  drawPageBg();
   pageNum++;
   drawHeader();
 
   // ── Points per Quarter bar chart ──
   if (activeQuarters.length > 1) {
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...DARK_BG);
-    doc.text('Puntos por Cuarto', margin, y + 4);
-    y += 10;
+    sectionTitle('Puntos por Cuarto');
 
     const qData = activeQuarters.map(q => {
       const qShots = allShots.filter(s => s.quarterId === q);
@@ -422,239 +466,268 @@ export async function generatePdfReport(
       return { label: QUARTER_LABELS[q], pts, opp };
     });
 
-    const chartX = margin;
-    const chartW = pageW - margin * 2;
-    const chartH = 55;
+    const chartX = M;
+    const chartW = W - M * 2;
+    const chartH = 58;
     const maxVal = Math.max(...qData.map(d => Math.max(d.pts, d.opp)), 1);
     const barGroupW = chartW / qData.length;
-    const barW = barGroupW * 0.3;
-    const gap = 3;
+    const barW = barGroupW * 0.28;
+    const gap = 4;
 
-    // Background
-    doc.setFillColor(248, 245, 255);
-    doc.roundedRect(chartX, y, chartW, chartH + 18, 3, 3, 'F');
+    // Chart background card
+    doc.setFillColor(...WHITE);
+    doc.roundedRect(chartX, y, chartW, chartH + 22, 5, 5, 'F');
+    // Subtle inner shadow
+    doc.setDrawColor(...TABLE_BORDER);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(chartX, y, chartW, chartH + 22, 5, 5, 'S');
 
     // Grid lines
-    doc.setDrawColor(220, 220, 230);
-    doc.setLineWidth(0.2);
     for (let i = 0; i <= 4; i++) {
-      const gy = y + 5 + (chartH * (1 - i / 4));
-      doc.line(chartX + 5, gy, chartX + chartW - 5, gy);
+      const gy = y + 8 + (chartH * (1 - i / 4));
+      doc.setDrawColor(235, 232, 245);
+      doc.setLineWidth(0.15);
+      doc.line(chartX + 14, gy, chartX + chartW - 8, gy);
       doc.setFontSize(6);
-      doc.setTextColor(160, 160, 170);
-      doc.text(`${Math.round(maxVal * i / 4)}`, chartX + 2, gy + 1.5);
+      doc.setTextColor(...MUTED);
+      doc.text(`${Math.round(maxVal * i / 4)}`, chartX + 4, gy + 1.5);
     }
 
-    // Bars
+    // Bars with gradient effect
     qData.forEach((d, i) => {
-      const groupX = chartX + 12 + i * barGroupW;
-      const barBaseY = y + 5 + chartH;
+      const groupX = chartX + 18 + i * barGroupW;
+      const barBaseY = y + 8 + chartH;
 
-      // Team bar
-      const teamH = (d.pts / maxVal) * chartH;
-      doc.setFillColor(...PRIMARY_COLOR);
-      doc.roundedRect(groupX, barBaseY - teamH, barW, teamH, 1, 1, 'F');
+      // Team bar (purple with lighter top)
+      const teamH = Math.max((d.pts / maxVal) * chartH, 0.5);
+      doc.setFillColor(...PURPLE);
+      doc.roundedRect(groupX, barBaseY - teamH, barW, teamH, 1.5, 1.5, 'F');
+      if (teamH > 4) {
+        doc.setFillColor(...PURPLE_LIGHT);
+        doc.setGState(new doc.GState({ opacity: 0.3 }));
+        doc.roundedRect(groupX + 1, barBaseY - teamH, barW - 2, teamH * 0.4, 1, 1, 'F');
+        doc.setGState(new doc.GState({ opacity: 1 }));
+      }
 
-      // Value on top
       if (d.pts > 0) {
         doc.setFontSize(7);
-        doc.setTextColor(...PRIMARY_COLOR);
+        doc.setTextColor(...PURPLE);
         doc.setFont('helvetica', 'bold');
         doc.text(`${d.pts}`, groupX + barW / 2, barBaseY - teamH - 2, { align: 'center' });
       }
 
-      // Opponent bar
-      const oppH = (d.opp / maxVal) * chartH;
-      doc.setFillColor(220, 80, 80);
-      doc.roundedRect(groupX + barW + gap, barBaseY - oppH, barW, oppH, 1, 1, 'F');
+      // Opponent bar (coral/red)
+      const oppH = Math.max((d.opp / maxVal) * chartH, 0.5);
+      doc.setFillColor(...DESTRUCTIVE);
+      doc.roundedRect(groupX + barW + gap, barBaseY - oppH, barW, oppH, 1.5, 1.5, 'F');
 
       if (d.opp > 0) {
         doc.setFontSize(7);
-        doc.setTextColor(200, 50, 50);
+        doc.setTextColor(...DESTRUCTIVE);
         doc.text(`${d.opp}`, groupX + barW + gap + barW / 2, barBaseY - oppH - 2, { align: 'center' });
       }
 
       // Quarter label
-      doc.setFontSize(8);
-      doc.setTextColor(...DARK_BG);
+      doc.setFontSize(9);
+      doc.setTextColor(...NEAR_BLACK);
       doc.setFont('helvetica', 'bold');
-      doc.text(d.label, groupX + barW + gap / 2, barBaseY + 6, { align: 'center' });
+      doc.text(d.label, groupX + barW + gap / 2, barBaseY + 7, { align: 'center' });
     });
 
     // Legend
-    const legendY = y + chartH + 12;
-    doc.setFillColor(...PRIMARY_COLOR);
-    doc.rect(chartX + chartW - 55, legendY, 4, 4, 'F');
+    const legendY = y + chartH + 14;
+    doc.setFillColor(...PURPLE);
+    doc.roundedRect(chartX + chartW - 60, legendY, 5, 5, 1.5, 1.5, 'F');
     doc.setFontSize(7);
-    doc.setTextColor(...DARK_BG);
+    doc.setTextColor(...NEAR_BLACK);
     doc.setFont('helvetica', 'normal');
-    doc.text('Equipo', chartX + chartW - 49, legendY + 3.5);
-    doc.setFillColor(220, 80, 80);
-    doc.rect(chartX + chartW - 28, legendY, 4, 4, 'F');
-    doc.text('Rival', chartX + chartW - 22, legendY + 3.5);
+    doc.text('Equipo', chartX + chartW - 53, legendY + 4);
+    doc.setFillColor(...DESTRUCTIVE);
+    doc.roundedRect(chartX + chartW - 28, legendY, 5, 5, 1.5, 1.5, 'F');
+    doc.text('Rival', chartX + chartW - 21, legendY + 4);
 
-    y += chartH + 24;
+    y += chartH + 28;
 
-    // Quarter data table
-    const qTableData = qData.map(d => [d.label, `${d.pts}`, `${d.opp}`, `${d.pts - d.opp > 0 ? '+' : ''}${d.pts - d.opp}`]);
+    // Quarter comparison table
+    const qTableData = qData.map(d => {
+      const diff = d.pts - d.opp;
+      return [d.label, `${d.pts}`, `${d.opp}`, `${diff > 0 ? '+' : ''}${diff}`];
+    });
+
     autoTable(doc, {
       startY: y,
-      head: [['Cuarto', 'Equipo', 'Rival', 'Dif']],
+      head: [['Cuarto', 'Equipo', 'Rival', 'Diferencia']],
       body: qTableData,
-      margin: { left: margin, right: margin },
-      styles: { fontSize: 8, cellPadding: 2, font: 'helvetica', halign: 'center' },
-      headStyles: { fillColor: PRIMARY_COLOR, textColor: WHITE, fontStyle: 'bold', fontSize: 8 },
-      alternateRowStyles: { fillColor: [248, 245, 255] },
+      margin: { left: M, right: M },
+      styles: { fontSize: 8, cellPadding: 3, font: 'helvetica', halign: 'center', lineColor: TABLE_BORDER, lineWidth: 0.2 },
+      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 8 },
+      bodyStyles: { fillColor: WHITE },
+      alternateRowStyles: { fillColor: TABLE_ALT },
       theme: 'grid',
       didParseCell: (data) => {
         if (data.section === 'body' && data.column.index === 3) {
           const val = parseInt(data.cell.raw as string);
-          data.cell.styles.textColor = val > 0 ? [34, 139, 34] : val < 0 ? [200, 50, 50] : [100, 100, 100];
+          data.cell.styles.textColor = val > 0 ? [...SUCCESS] : val < 0 ? [...DESTRUCTIVE] : [...MUTED];
           data.cell.styles.fontStyle = 'bold';
         }
       },
     });
-    y = (doc as any).lastAutoTable.finalY + 10;
+    y = (doc as any).lastAutoTable.finalY + 12;
   }
 
   // ── Shot Chart ──
   const shotsForChart = filteredShots.filter(s => options.playerFilter === 'ALL' || s.playerId === options.playerFilter);
 
   if (shotsForChart.length > 0) {
-    // Check if we need a new page
-    if (y > pageH - 120) {
+    if (y > H - 130) {
       drawFooter(pageNum);
       doc.addPage();
+      drawPageBg();
       pageNum++;
       drawHeader();
     }
 
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...DARK_BG);
-    doc.text('Shot Chart', margin, y + 4);
+    sectionTitle('Shot Chart');
 
-    // Stats summary next to title
+    // Stats badges
     const totalAtt = shotsForChart.length;
     const totalMade = shotsForChart.filter(s => s.made).length;
     const totalPct = totalAtt > 0 ? Math.round((totalMade / totalAtt) * 100) : 0;
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(120, 120, 130);
-    doc.text(`${totalMade}/${totalAtt} (${totalPct}%)`, margin + 30, y + 4);
-    y += 10;
 
-    // Draw half-court
-    const courtW = 120;
-    const courtH = 112; // proportional to 300x280 SVG
-    const courtX = (pageW - courtW) / 2;
+    const statBadges = [
+      { l: 'Intentos', v: `${totalAtt}`, c: PURPLE },
+      { l: 'Aciertos', v: `${totalMade}`, c: SUCCESS },
+      { l: 'Eficiencia', v: `${totalPct}%`, c: GOLD },
+    ];
+    statBadges.forEach((b, i) => {
+      const bx = M + i * 35;
+      doc.setFillColor(...WHITE);
+      doc.roundedRect(bx, y, 32, 14, 3, 3, 'F');
+      doc.setFontSize(6);
+      doc.setTextColor(...MUTED);
+      doc.setFont('helvetica', 'bold');
+      doc.text(b.l, bx + 16, y + 5, { align: 'center' });
+      doc.setFontSize(10);
+      doc.setTextColor(...b.c);
+      doc.text(b.v, bx + 16, y + 12, { align: 'center' });
+    });
+    y += 18;
+
+    // Court
+    const courtW = 130;
+    const courtH = 121;
+    const courtX = (W - courtW) / 2;
     const courtY = y;
 
-    // Court background
-    doc.setFillColor(245, 240, 230);
-    doc.roundedRect(courtX, courtY, courtW, courtH, 2, 2, 'F');
+    // Court outer card
+    doc.setFillColor(...WHITE);
+    doc.roundedRect(courtX - 5, courtY - 5, courtW + 10, courtH + 10, 5, 5, 'F');
 
-    // Court outline
-    doc.setDrawColor(180, 160, 140);
-    doc.setLineWidth(0.5);
-    doc.rect(courtX, courtY, courtW, courtH);
+    // Court surface
+    doc.setFillColor(225, 200, 165); // hardwood tone
+    doc.rect(courtX, courtY, courtW, courtH, 'F');
 
-    // Paint area (scaled from SVG: x100-200, y200-280 in 300x280)
-    const scaleX = (v: number) => courtX + (v / 300) * courtW;
-    const scaleY = (v: number) => courtY + (v / 280) * courtH;
+    // Court markings
+    doc.setDrawColor(190, 165, 130);
+    doc.setLineWidth(0.6);
+    doc.rect(courtX, courtY, courtW, courtH); // outline
 
-    // Paint rectangle
-    doc.setFillColor(235, 225, 210);
-    doc.rect(scaleX(100), scaleY(200), (100 / 300) * courtW, (80 / 280) * courtH, 'F');
-    doc.setDrawColor(180, 160, 140);
-    doc.rect(scaleX(100), scaleY(200), (100 / 300) * courtW, (80 / 280) * courtH);
+    const sx = (v: number) => courtX + (v / 300) * courtW;
+    const sy = (v: number) => courtY + (v / 280) * courtH;
 
-    // Free throw circle (approximate)
-    const ftCenterX = scaleX(150);
-    const ftCenterY = scaleY(200);
-    doc.setDrawColor(180, 160, 140);
-    doc.circle(ftCenterX, ftCenterY, (40 / 300) * courtW);
+    // Paint
+    doc.setFillColor(215, 185, 150);
+    const paintX = sx(100);
+    const paintY = sy(200);
+    const paintW = (100 / 300) * courtW;
+    const paintH = (80 / 280) * courtH;
+    doc.rect(paintX, paintY, paintW, paintH, 'F');
+    doc.rect(paintX, paintY, paintW, paintH);
 
-    // Three-point arc (approximate with lines)
-    doc.setDrawColor(180, 160, 140);
-    doc.setLineWidth(0.4);
-    // Left side
-    doc.line(scaleX(40), scaleY(280), scaleX(40), scaleY(170));
-    // Right side
-    doc.line(scaleX(260), scaleY(280), scaleX(260), scaleY(170));
-    // Arc (approximate with a curve)
-    const arcPoints: [number, number][] = [];
-    for (let angle = 0; angle <= 180; angle += 10) {
+    // FT circle
+    doc.circle(sx(150), sy(200), (40 / 300) * courtW);
+
+    // 3PT lines
+    doc.line(sx(40), sy(280), sx(40), sy(170));
+    doc.line(sx(260), sy(280), sx(260), sy(170));
+
+    // 3PT arc
+    for (let angle = 0; angle <= 180; angle += 8) {
       const rad = (angle * Math.PI) / 180;
-      const ax = 150 + 110 * Math.cos(rad);
-      const ay = 170 - 110 * Math.sin(rad) + 50;
-      arcPoints.push([scaleX(ax), scaleY(ay)]);
-    }
-    for (let i = 0; i < arcPoints.length - 1; i++) {
-      doc.line(arcPoints[i][0], arcPoints[i][1], arcPoints[i + 1][0], arcPoints[i + 1][1]);
+      const rad2 = ((angle + 8) * Math.PI) / 180;
+      const x1 = 150 + 110 * Math.cos(rad), y1 = 220 - 110 * Math.sin(rad);
+      const x2 = 150 + 110 * Math.cos(rad2), y2 = 220 - 110 * Math.sin(rad2);
+      doc.line(sx(x1), sy(y1), sx(x2), sy(y2));
     }
 
     // Basket
-    doc.setFillColor(...PRIMARY_COLOR);
-    doc.circle(scaleX(150), scaleY(268), 1.5, 'F');
+    doc.setFillColor(...GOLD);
+    doc.circle(sx(150), sy(270), 2, 'F');
+    doc.setDrawColor(...GOLD);
+    doc.circle(sx(150), sy(270), 3.5);
 
     // Plot shots
     shotsForChart.forEach(s => {
-      const sx = courtX + (s.x / 100) * courtW;
-      const sy = courtY + (s.y / 100) * courtH;
-      const radius = 1.8;
+      const px = courtX + (s.x / 100) * courtW;
+      const py = courtY + (s.y / 100) * courtH;
 
       if (s.made) {
-        // Green filled circle
-        doc.setFillColor(34, 180, 34);
-        doc.circle(sx, sy, radius, 'F');
+        doc.setFillColor(...SUCCESS);
+        doc.setGState(new doc.GState({ opacity: 0.85 }));
+        doc.circle(px, py, 2.2, 'F');
+        doc.setGState(new doc.GState({ opacity: 1 }));
+        // White inner dot
+        doc.setFillColor(...WHITE);
+        doc.circle(px, py, 0.7, 'F');
       } else {
-        // Red X
-        doc.setDrawColor(220, 60, 60);
-        doc.setLineWidth(0.5);
-        const d = radius * 0.8;
-        doc.line(sx - d, sy - d, sx + d, sy + d);
-        doc.line(sx - d, sy + d, sx + d, sy - d);
+        doc.setDrawColor(...DESTRUCTIVE);
+        doc.setLineWidth(0.6);
+        const d = 1.6;
+        doc.line(px - d, py - d, px + d, py + d);
+        doc.line(px - d, py + d, px + d, py - d);
       }
     });
 
-    y = courtY + courtH + 6;
+    y = courtY + courtH + 10;
 
-    // Shot chart legend
-    doc.setFontSize(7);
-    doc.setTextColor(...DARK_BG);
+    // Legend
+    doc.setFillColor(...SUCCESS);
+    doc.circle(M + 4, y + 1.5, 2.2, 'F');
+    doc.setFillColor(...WHITE);
+    doc.circle(M + 4, y + 1.5, 0.7, 'F');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...NEAR_BLACK);
     doc.setFont('helvetica', 'normal');
+    doc.text('Acierto', M + 9, y + 3);
 
-    doc.setFillColor(34, 180, 34);
-    doc.circle(courtX + 5, y + 1.5, 1.5, 'F');
-    doc.text('Acierto', courtX + 9, y + 3);
+    doc.setDrawColor(...DESTRUCTIVE);
+    doc.setLineWidth(0.6);
+    doc.line(M + 28, y, M + 31.5, y + 3);
+    doc.line(M + 28, y + 3, M + 31.5, y);
+    doc.text('Fallo', M + 35, y + 3);
 
-    doc.setDrawColor(220, 60, 60);
-    doc.setLineWidth(0.5);
-    doc.line(courtX + 30, y, courtX + 33, y + 3);
-    doc.line(courtX + 30, y + 3, courtX + 33, y);
-    doc.setTextColor(...DARK_BG);
-    doc.text('Fallo', courtX + 36, y + 3);
+    y += 8;
 
-    // Shot breakdown by zone
-    y += 10;
-    const twoShots = shotsForChart.filter(s => s.points === 2);
-    const threeShots = shotsForChart.filter(s => s.points === 3);
-    const ftShots = shotsForChart.filter(s => s.points === 1);
+    // Shot type breakdown
+    const twoS = shotsForChart.filter(s => s.points === 2);
+    const threeS = shotsForChart.filter(s => s.points === 3);
+    const ftS = shotsForChart.filter(s => s.points === 1);
 
-    const breakdownData = [
-      ['2PT', `${twoShots.filter(s => s.made).length}/${twoShots.length}`, `${twoShots.length > 0 ? Math.round((twoShots.filter(s => s.made).length / twoShots.length) * 100) : 0}%`],
-      ['3PT', `${threeShots.filter(s => s.made).length}/${threeShots.length}`, `${threeShots.length > 0 ? Math.round((threeShots.filter(s => s.made).length / threeShots.length) * 100) : 0}%`],
-      ['TL', `${ftShots.filter(s => s.made).length}/${ftShots.length}`, `${ftShots.length > 0 ? Math.round((ftShots.filter(s => s.made).length / ftShots.length) * 100) : 0}%`],
+    const breakdown = [
+      ['2PT', `${twoS.filter(s => s.made).length}/${twoS.length}`, `${twoS.length > 0 ? Math.round((twoS.filter(s => s.made).length / twoS.length) * 100) : 0}%`],
+      ['3PT', `${threeS.filter(s => s.made).length}/${threeS.length}`, `${threeS.length > 0 ? Math.round((threeS.filter(s => s.made).length / threeS.length) * 100) : 0}%`],
+      ['TL', `${ftS.filter(s => s.made).length}/${ftS.length}`, `${ftS.length > 0 ? Math.round((ftS.filter(s => s.made).length / ftS.length) * 100) : 0}%`],
     ];
 
     autoTable(doc, {
       startY: y,
-      head: [['Tipo', 'Aciertos/Intentos', 'Eficiencia']],
-      body: breakdownData,
-      margin: { left: margin, right: margin },
-      styles: { fontSize: 9, cellPadding: 3, font: 'helvetica', halign: 'center' },
-      headStyles: { fillColor: PRIMARY_COLOR, textColor: WHITE, fontStyle: 'bold' },
+      head: [['Tipo', 'Aciertos / Intentos', 'Eficiencia']],
+      body: breakdown,
+      margin: { left: M + 20, right: M + 20 },
+      styles: { fontSize: 9, cellPadding: 3, font: 'helvetica', halign: 'center', lineColor: TABLE_BORDER, lineWidth: 0.2 },
+      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold' },
+      bodyStyles: { fillColor: WHITE },
+      alternateRowStyles: { fillColor: TABLE_ALT },
       theme: 'grid',
     });
   }
