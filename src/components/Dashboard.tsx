@@ -5,9 +5,10 @@ import CourtDiagram from '@/components/CourtDiagram';
 import { Card, CardContent } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { Trash2, Target, CircleDot, Crosshair } from 'lucide-react';
+import { Trash2, Target, CircleDot, Crosshair, FileDown } from 'lucide-react';
 import { toast } from 'sonner';
 import logoBasqest from '@/assets/logo-basqest-full.png';
+import { generatePdfReport } from '@/utils/generatePdfReport';
 
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
