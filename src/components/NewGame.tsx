@@ -36,6 +36,7 @@ const NewGame: React.FC = () => {
       tournamentId || undefined,
       selectedTeamId || undefined,
       leg || undefined,
+      isHome,
     );
   };
 
