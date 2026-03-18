@@ -6,9 +6,33 @@ import { Plus, Trash2, Shield, Camera } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 
 const TeamManager: React.FC = () => {
-  const { teams, addTeam, removeTeam, myTeamName, setMyTeamName } = useApp();
+  const { teams, addTeam, removeTeam, myTeamName, setMyTeamName, myTeamLogo, setMyTeamLogo } = useApp();
   const [editingMyTeam, setEditingMyTeam] = useState(false);
   const [myTeamInput, setMyTeamInput] = useState(myTeamName);
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 200;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d')!;
+        const scale = Math.max(size / img.width, size / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+        setMyTeamLogo(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
   const [clubName, setClubName] = useState('');
   const [city, setCity] = useState('');
   const [region, setRegion] = useState('');
