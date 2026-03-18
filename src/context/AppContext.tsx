@@ -53,6 +53,7 @@ const loadState = (): AppState => {
         teams: parsed.teams || [],
         activeCategory: parsed.activeCategory || 'U15',
         myTeamName: parsed.myTeamName || '',
+        myTeamLogo: parsed.myTeamLogo || '',
       };
     }
     const old = localStorage.getItem('hoopstats');
