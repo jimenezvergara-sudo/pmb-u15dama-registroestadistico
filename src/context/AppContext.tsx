@@ -9,6 +9,7 @@ interface AppState {
   activeGame: Game | null;
   activeCategory: Category;
   myTeamName: string;
+  myTeamLogo: string;
 }
 
 interface AppContextValue extends AppState {
@@ -33,6 +34,7 @@ interface AppContextValue extends AppState {
   snapshotCourtTime: () => void;
   startGameTimer: () => void;
   setMyTeamName: (name: string) => void;
+  setMyTeamLogo: (logo: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -51,6 +53,7 @@ const loadState = (): AppState => {
         teams: parsed.teams || [],
         activeCategory: parsed.activeCategory || 'U15',
         myTeamName: parsed.myTeamName || '',
+        myTeamLogo: parsed.myTeamLogo || '',
       };
     }
     const old = localStorage.getItem('hoopstats');
@@ -61,10 +64,11 @@ const loadState = (): AppState => {
         teams: parsed.teams || [],
         activeCategory: parsed.activeCategory || 'U15',
         myTeamName: parsed.myTeamName || '',
+        myTeamLogo: parsed.myTeamLogo || '',
       };
     }
   } catch {}
-  return { players: [], tournaments: [], teams: [], games: [], activeGame: null, activeCategory: 'U15', myTeamName: '' };
+  return { players: [], tournaments: [], teams: [], games: [], activeGame: null, activeCategory: 'U15', myTeamName: '', myTeamLogo: '' };
 };
 
 const saveState = (s: AppState) => {
@@ -267,13 +271,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     update(s => ({ ...s, myTeamName: name }));
   }, [update]);
 
+  const setMyTeamLogo = useCallback((logo: string) => {
+    update(s => ({ ...s, myTeamLogo: logo }));
+  }, [update]);
+
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, removeGame, addTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
-      setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer, setMyTeamName,
+      setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer, setMyTeamName, setMyTeamLogo,
     }}>
       {children}
     </AppContext.Provider>
