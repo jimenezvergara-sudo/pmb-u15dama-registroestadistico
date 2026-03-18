@@ -70,10 +70,10 @@ export async function generatePdfReport(
 
     // Decorative circles (brand flair)
     doc.setFillColor(255, 255, 255);
-    doc.setGState((doc as any).GState({ opacity: 0.06 }));
+    doc.setGState(new (doc as any).GState({ opacity: 0.06 }));
     doc.circle(W - 30, 10, 35, 'F');
     doc.circle(W - 60, 25, 20, 'F');
-    doc.setGState((doc as any).GState({ opacity: 1 }));
+    doc.setGState(new (doc as any).GState({ opacity: 1 }));
 
     // App name
     doc.setTextColor(...WHITE);
@@ -504,9 +504,9 @@ export async function generatePdfReport(
       doc.roundedRect(groupX, barBaseY - teamH, barW, teamH, 1.5, 1.5, 'F');
       if (teamH > 4) {
         doc.setFillColor(...PURPLE_LIGHT);
-        doc.setGState((doc as any).GState({ opacity: 0.3 }));
+        doc.setGState(new (doc as any).GState({ opacity: 0.3 }));
         doc.roundedRect(groupX + 1, barBaseY - teamH, barW - 2, teamH * 0.4, 1, 1, 'F');
-        doc.setGState((doc as any).GState({ opacity: 1 }));
+        doc.setGState(new (doc as any).GState({ opacity: 1 }));
       }
 
       if (d.pts > 0) {
@@ -673,9 +673,9 @@ export async function generatePdfReport(
 
       if (s.made) {
         doc.setFillColor(...SUCCESS);
-        doc.setGState((doc as any).GState({ opacity: 0.85 }));
+        doc.setGState(new (doc as any).GState({ opacity: 0.85 }));
         doc.circle(px, py, 2.2, 'F');
-        doc.setGState((doc as any).GState({ opacity: 1 }));
+        doc.setGState(new (doc as any).GState({ opacity: 1 }));
         // White inner dot
         doc.setFillColor(...WHITE);
         doc.circle(px, py, 0.7, 'F');
