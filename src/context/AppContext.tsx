@@ -16,6 +16,7 @@ interface AppContextValue extends AppState {
   addPlayer: (p: Omit<Player, 'id'>) => void;
   removePlayer: (id: string) => void;
   removeGame: (id: string) => void;
+  updateGame: (game: Game) => void;
   addTournament: (t: Omit<Tournament, 'id'>) => void;
   addTeam: (t: Omit<Team, 'id'>) => void;
   removeTeam: (id: string) => void;
@@ -109,6 +110,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const removeGame = useCallback((id: string) => {
     update(s => ({ ...s, games: s.games.filter(g => g.id !== id) }));
+  }, [update]);
+
+  const updateGame = useCallback((game: Game) => {
+    update(s => ({ ...s, games: s.games.map(g => g.id === game.id ? game : g) }));
   }, [update]);
 
   const addTournament = useCallback((t: Omit<Tournament, 'id'>) => {
@@ -278,7 +283,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      ...state, addPlayer, removePlayer, removeGame, addTournament,
+      ...state, addPlayer, removePlayer, removeGame, updateGame, addTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,

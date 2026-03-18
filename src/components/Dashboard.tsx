@@ -5,15 +5,17 @@ import CourtDiagram from '@/components/CourtDiagram';
 import { Card, CardContent } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { Trash2, Target, CircleDot, Crosshair, FileDown } from 'lucide-react';
+import { Trash2, Target, CircleDot, Crosshair, FileDown, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import logoBasqest from '@/assets/logo-basqest-full.png';
 import { generatePdfReport } from '@/utils/generatePdfReport';
+import GameEventEditor from '@/components/GameEventEditor';
 
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const Dashboard: React.FC = () => {
-  const { games, tournaments, removeGame, teams, activeCategory, myTeamName, myTeamLogo, players } = useApp();
+  const { games, tournaments, removeGame, updateGame, teams, activeCategory, myTeamName, myTeamLogo, players } = useApp();
+  const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [filterTournamentId, setFilterTournamentId] = useState<string>('ALL');
   const [selectedGameId, setSelectedGameId] = useState<string>('ALL');
   const [filterQuarter, setFilterQuarter] = useState<QuarterId | 'ALL'>('ALL');
@@ -249,15 +251,20 @@ const Dashboard: React.FC = () => {
             );
           })}
         </select>
-        {selectedGameId !== 'ALL' && (
-          <Button variant="destructive" size="icon" className="h-10 w-10 shrink-0" onClick={() => {
-            if (confirm('¿Eliminar este partido? Se borrará de todas las estadísticas.')) {
-              removeGame(selectedGameId); setSelectedGameId('ALL');
-              toast('Partido eliminado', { duration: 2000 });
-            }
-          }}>
-            <Trash2 className="w-4 h-4" />
-          </Button>
+        {selectedGameId !== 'ALL' && selectedGame && (
+          <>
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => setEditingGame(selectedGame)}>
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button variant="destructive" size="icon" className="h-10 w-10 shrink-0" onClick={() => {
+              if (confirm('¿Eliminar este partido? Se borrará de todas las estadísticas.')) {
+                removeGame(selectedGameId); setSelectedGameId('ALL');
+                toast('Partido eliminado', { duration: 2000 });
+              }
+            }}>
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </>
         )}
       </div>
 
@@ -437,6 +444,15 @@ const Dashboard: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {editingGame && (
+        <GameEventEditor
+          game={editingGame}
+          open={!!editingGame}
+          onClose={() => setEditingGame(null)}
+          onSave={updateGame}
+        />
+      )}
     </div>
   );
 };
