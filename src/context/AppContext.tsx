@@ -8,6 +8,7 @@ interface AppState {
   games: Game[];
   activeGame: Game | null;
   activeCategory: Category;
+  myTeamName: string;
 }
 
 interface AppContextValue extends AppState {
