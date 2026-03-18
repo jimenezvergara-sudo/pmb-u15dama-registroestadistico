@@ -6,7 +6,9 @@ import { Plus, Trash2, Shield } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 
 const TeamManager: React.FC = () => {
-  const { teams, addTeam, removeTeam } = useApp();
+  const { teams, addTeam, removeTeam, myTeamName, setMyTeamName } = useApp();
+  const [editingMyTeam, setEditingMyTeam] = useState(false);
+  const [myTeamInput, setMyTeamInput] = useState(myTeamName);
   const [clubName, setClubName] = useState('');
   const [city, setCity] = useState('');
   const [region, setRegion] = useState('');
