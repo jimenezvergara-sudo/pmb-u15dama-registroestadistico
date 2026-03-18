@@ -9,7 +9,7 @@ interface HomeScreenProps {
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
-  const { games, players, activeCategory, myTeamName } = useApp();
+  const { games, players, activeCategory, myTeamName, myTeamLogo } = useApp();
 
   const totalGames = games.length;
 
