@@ -80,6 +80,22 @@ const NewGame: React.FC = () => {
           />
         )}
 
+        {/* Home/Away selector */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsHome(isHome === true ? undefined : true)}
+            className={`flex-1 h-10 rounded-md border text-sm font-semibold transition-colors ${isHome === true ? 'bg-primary text-primary-foreground border-primary' : 'border-input bg-background text-foreground'}`}
+          >
+            🏠 Local
+          </button>
+          <button
+            onClick={() => setIsHome(isHome === false ? undefined : false)}
+            className={`flex-1 h-10 rounded-md border text-sm font-semibold transition-colors ${isHome === false ? 'bg-primary text-primary-foreground border-primary' : 'border-input bg-background text-foreground'}`}
+          >
+            ✈️ Visita
+          </button>
+        </div>
+
         {/* Leg selector */}
         <select
           value={leg}

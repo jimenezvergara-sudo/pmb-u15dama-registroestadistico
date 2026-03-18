@@ -85,6 +85,7 @@ export interface Game {
   substitutions: SubstitutionEvent[];
   currentQuarter: QuarterId;
   leg?: GameLeg;
+  isHome?: boolean;
   category?: Category;
   onCourtPlayerIds: string[];
   courtTimeMs: Record<string, number>;
