@@ -251,15 +251,20 @@ const Dashboard: React.FC = () => {
             );
           })}
         </select>
-        {selectedGameId !== 'ALL' && (
-          <Button variant="destructive" size="icon" className="h-10 w-10 shrink-0" onClick={() => {
-            if (confirm('¿Eliminar este partido? Se borrará de todas las estadísticas.')) {
-              removeGame(selectedGameId); setSelectedGameId('ALL');
-              toast('Partido eliminado', { duration: 2000 });
-            }
-          }}>
-            <Trash2 className="w-4 h-4" />
-          </Button>
+        {selectedGameId !== 'ALL' && selectedGame && (
+          <>
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => setEditingGame(selectedGame)}>
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button variant="destructive" size="icon" className="h-10 w-10 shrink-0" onClick={() => {
+              if (confirm('¿Eliminar este partido? Se borrará de todas las estadísticas.')) {
+                removeGame(selectedGameId); setSelectedGameId('ALL');
+                toast('Partido eliminado', { duration: 2000 });
+              }
+            }}>
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </>
         )}
       </div>
 
