@@ -19,7 +19,7 @@ interface AppContextValue extends AppState {
   addTournament: (t: Omit<Tournament, 'id'>) => void;
   addTeam: (t: Omit<Team, 'id'>) => void;
   removeTeam: (id: string) => void;
-  startGame: (opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg) => void;
+  startGame: (opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg, isHome?: boolean) => void;
   endGame: () => void;
   setQuarter: (q: QuarterId) => void;
   recordShot: (shot: Omit<ShotEvent, 'id' | 'timestamp' | 'quarterId'>) => void;
