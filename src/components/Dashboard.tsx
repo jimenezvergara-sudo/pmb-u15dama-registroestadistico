@@ -241,9 +241,10 @@ const Dashboard: React.FC = () => {
             const teamPts = g.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
             const oppPts = (g.opponentScores || []).reduce((sum, s) => sum + s.points, 0);
             const legLabel = g.leg ? ` (${g.leg === 'ida' ? 'Ida' : 'Vuelta'})` : '';
+            const homeLabel = g.isHome === true ? ' (L)' : g.isHome === false ? ' (V)' : '';
             return (
               <option key={g.id} value={g.id}>
-                vs {g.opponentName}{legLabel} ({teamPts}-{oppPts}) — {new Date(g.date).toLocaleDateString()}
+                vs {g.opponentName}{homeLabel}{legLabel} ({teamPts}-{oppPts}) — {new Date(g.date).toLocaleDateString()}
               </option>
             );
           })}

@@ -70,10 +70,12 @@ export async function generatePdfReport(
 
     // Decorative circles (brand flair)
     doc.setFillColor(255, 255, 255);
-    doc.setGState(new (doc as any).GState({ opacity: 0.06 }));
+    // @ts-ignore - GState is available at runtime
+    doc.setGState(new doc.GState({ opacity: 0.06 }));
     doc.circle(W - 30, 10, 35, 'F');
     doc.circle(W - 60, 25, 20, 'F');
-    doc.setGState(new (doc as any).GState({ opacity: 1 }));
+    // @ts-ignore
+    doc.setGState(new doc.GState({ opacity: 1 }));
 
     // App name
     doc.setTextColor(...WHITE);
@@ -291,21 +293,23 @@ export async function generatePdfReport(
       const oppPts = (g.opponentScores || []).reduce((sum, s) => sum + s.points, 0);
       const won = teamPts > oppPts;
       const legLabel = g.leg ? ` (${g.leg === 'ida' ? 'Ida' : 'Vuelta'})` : '';
-      return [new Date(g.date).toLocaleDateString(), `vs ${g.opponentName}${legLabel}`, `${teamPts} - ${oppPts}`, won ? 'V' : 'D'];
+      const homeLabel = g.isHome === true ? ' (L)' : g.isHome === false ? ' (V)' : '';
+      const teamCol = `${options.teamName || 'BASQEST+'}${homeLabel}`;
+      const oppCol = `${g.opponentName}${g.isHome === true ? ' (V)' : g.isHome === false ? ' (L)' : ''}${legLabel}`;
+      return [new Date(g.date).toLocaleDateString(), teamCol, oppCol, `${teamPts} - ${oppPts}`, won ? 'V' : 'D'];
     });
-
     autoTable(doc, {
       startY: y,
-      head: [['Fecha', 'Partido', 'Score', '']],
+      head: [['Fecha', 'Mi Equipo', 'Rival', 'Score', '']],
       body: gameRows,
       margin: { left: M, right: M },
       styles: { fontSize: 8, cellPadding: 3, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.3 },
       headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 8 },
       bodyStyles: { fillColor: WHITE },
       alternateRowStyles: { fillColor: TABLE_ALT },
-      columnStyles: { 3: { halign: 'center', fontStyle: 'bold', cellWidth: 12 } },
+      columnStyles: { 4: { halign: 'center', fontStyle: 'bold', cellWidth: 12 } },
       didParseCell: (data) => {
-        if (data.section === 'body' && data.column.index === 3) {
+        if (data.section === 'body' && data.column.index === 4) {
           const val = data.cell.raw as string;
           data.cell.styles.textColor = val === 'V' ? [...SUCCESS] : [...DESTRUCTIVE];
         }
@@ -504,9 +508,11 @@ export async function generatePdfReport(
       doc.roundedRect(groupX, barBaseY - teamH, barW, teamH, 1.5, 1.5, 'F');
       if (teamH > 4) {
         doc.setFillColor(...PURPLE_LIGHT);
-        doc.setGState(new (doc as any).GState({ opacity: 0.3 }));
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 0.3 }));
         doc.roundedRect(groupX + 1, barBaseY - teamH, barW - 2, teamH * 0.4, 1, 1, 'F');
-        doc.setGState(new (doc as any).GState({ opacity: 1 }));
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 1 }));
       }
 
       if (d.pts > 0) {
@@ -673,9 +679,11 @@ export async function generatePdfReport(
 
       if (s.made) {
         doc.setFillColor(...SUCCESS);
-        doc.setGState(new (doc as any).GState({ opacity: 0.85 }));
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 0.85 }));
         doc.circle(px, py, 2.2, 'F');
-        doc.setGState(new (doc as any).GState({ opacity: 1 }));
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 1 }));
         // White inner dot
         doc.setFillColor(...WHITE);
         doc.circle(px, py, 0.7, 'F');

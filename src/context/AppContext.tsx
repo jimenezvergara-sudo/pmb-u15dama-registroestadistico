@@ -19,7 +19,7 @@ interface AppContextValue extends AppState {
   addTournament: (t: Omit<Tournament, 'id'>) => void;
   addTeam: (t: Omit<Team, 'id'>) => void;
   removeTeam: (id: string) => void;
-  startGame: (opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg) => void;
+  startGame: (opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg, isHome?: boolean) => void;
   endGame: () => void;
   setQuarter: (q: QuarterId) => void;
   recordShot: (shot: Omit<ShotEvent, 'id' | 'timestamp' | 'quarterId'>) => void;
@@ -123,7 +123,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     update(s => ({ ...s, teams: s.teams.filter(t => t.id !== id) }));
   }, [update]);
 
-  const startGame = useCallback((opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg) => {
+  const startGame = useCallback((opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg, isHome?: boolean) => {
     const game: Game = {
       id: genId(),
       opponentName,
@@ -137,6 +137,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       tournamentId,
       opponentTeamId,
       leg,
+      isHome,
       category: state.activeCategory,
       onCourtPlayerIds: [],
       courtTimeMs: {},

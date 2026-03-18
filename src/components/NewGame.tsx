@@ -13,6 +13,7 @@ const NewGame: React.FC = () => {
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set());
   const [tournamentId, setTournamentId] = useState<string>('');
   const [leg, setLeg] = useState<GameLeg | ''>('');
+  const [isHome, setIsHome] = useState<boolean | undefined>(undefined);
 
   const togglePlayer = (id: string) => {
     setSelectedPlayers(prev => {
@@ -35,6 +36,7 @@ const NewGame: React.FC = () => {
       tournamentId || undefined,
       selectedTeamId || undefined,
       leg || undefined,
+      isHome,
     );
   };
 
@@ -77,6 +79,22 @@ const NewGame: React.FC = () => {
             onChange={e => setCustomOpponent(e.target.value)}
           />
         )}
+
+        {/* Home/Away selector */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsHome(isHome === true ? undefined : true)}
+            className={`flex-1 h-10 rounded-md border text-sm font-semibold transition-colors ${isHome === true ? 'bg-primary text-primary-foreground border-primary' : 'border-input bg-background text-foreground'}`}
+          >
+            🏠 Local
+          </button>
+          <button
+            onClick={() => setIsHome(isHome === false ? undefined : false)}
+            className={`flex-1 h-10 rounded-md border text-sm font-semibold transition-colors ${isHome === false ? 'bg-primary text-primary-foreground border-primary' : 'border-input bg-background text-foreground'}`}
+          >
+            ✈️ Visita
+          </button>
+        </div>
 
         {/* Leg selector */}
         <select
