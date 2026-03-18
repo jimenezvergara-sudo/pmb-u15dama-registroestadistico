@@ -263,6 +263,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, [update]);
 
+  const setMyTeamName = useCallback((name: string) => {
+    update(s => ({ ...s, myTeamName: name }));
+  }, [update]);
+
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, removeGame, addTournament,
