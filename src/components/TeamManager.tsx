@@ -6,7 +6,9 @@ import { Plus, Trash2, Shield } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 
 const TeamManager: React.FC = () => {
-  const { teams, addTeam, removeTeam } = useApp();
+  const { teams, addTeam, removeTeam, myTeamName, setMyTeamName } = useApp();
+  const [editingMyTeam, setEditingMyTeam] = useState(false);
+  const [myTeamInput, setMyTeamInput] = useState(myTeamName);
   const [clubName, setClubName] = useState('');
   const [city, setCity] = useState('');
   const [region, setRegion] = useState('');
@@ -21,10 +23,39 @@ const TeamManager: React.FC = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-extrabold text-foreground">Equipos Rivales</h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xl font-extrabold text-foreground">Equipos</h2>
         <img src={logoHorizontal} alt="BASQEST+" className="h-8 object-contain" />
       </div>
+
+      {/* Mi equipo */}
+      <div className="bg-card rounded-lg px-3 py-3 flex items-center gap-3 border-2 border-primary/30">
+        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+          <Shield className="w-5 h-5 text-primary" />
+        </div>
+        {editingMyTeam ? (
+          <div className="flex-1 flex gap-2">
+            <Input
+              value={myTeamInput}
+              onChange={e => setMyTeamInput(e.target.value)}
+              placeholder="Nombre de mi equipo"
+              className="h-8 text-sm"
+              autoFocus
+            />
+            <Button size="sm" className="h-8" onClick={() => {
+              setMyTeamName(myTeamInput.trim());
+              setEditingMyTeam(false);
+            }}>OK</Button>
+          </div>
+        ) : (
+          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setMyTeamInput(myTeamName); setEditingMyTeam(true); }}>
+            <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Mi Equipo</p>
+            <p className="font-semibold text-foreground truncate">{myTeamName || 'Toca para definir...'}</p>
+          </div>
+        )}
+      </div>
+
+      <h3 className="text-sm font-bold text-muted-foreground mt-4 mb-2">Equipos Rivales</h3>
 
       <div className="space-y-2">
         <Input placeholder="Nombre del Club" value={clubName} onChange={e => setClubName(e.target.value)} />

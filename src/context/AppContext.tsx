@@ -8,6 +8,7 @@ interface AppState {
   games: Game[];
   activeGame: Game | null;
   activeCategory: Category;
+  myTeamName: string;
 }
 
 interface AppContextValue extends AppState {
@@ -31,6 +32,7 @@ interface AppContextValue extends AppState {
   recordSubstitution: (playerIn: string, playerOut: string) => void;
   snapshotCourtTime: () => void;
   startGameTimer: () => void;
+  setMyTeamName: (name: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -48,6 +50,7 @@ const loadState = (): AppState => {
         ...parsed,
         teams: parsed.teams || [],
         activeCategory: parsed.activeCategory || 'U15',
+        myTeamName: parsed.myTeamName || '',
       };
     }
     const old = localStorage.getItem('hoopstats');
@@ -57,10 +60,11 @@ const loadState = (): AppState => {
         ...parsed,
         teams: parsed.teams || [],
         activeCategory: parsed.activeCategory || 'U15',
+        myTeamName: parsed.myTeamName || '',
       };
     }
   } catch {}
-  return { players: [], tournaments: [], teams: [], games: [], activeGame: null, activeCategory: 'U15' };
+  return { players: [], tournaments: [], teams: [], games: [], activeGame: null, activeCategory: 'U15', myTeamName: '' };
 };
 
 const saveState = (s: AppState) => {
@@ -259,13 +263,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, [update]);
 
+  const setMyTeamName = useCallback((name: string) => {
+    update(s => ({ ...s, myTeamName: name }));
+  }, [update]);
+
   return (
     <AppContext.Provider value={{
       ...state, addPlayer, removePlayer, removeGame, addTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
-      setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer,
+      setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer, setMyTeamName,
     }}>
       {children}
     </AppContext.Provider>
