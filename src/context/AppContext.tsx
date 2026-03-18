@@ -16,6 +16,7 @@ interface AppContextValue extends AppState {
   addPlayer: (p: Omit<Player, 'id'>) => void;
   removePlayer: (id: string) => void;
   removeGame: (id: string) => void;
+  updateGame: (game: Game) => void;
   addTournament: (t: Omit<Tournament, 'id'>) => void;
   addTeam: (t: Omit<Team, 'id'>) => void;
   removeTeam: (id: string) => void;
