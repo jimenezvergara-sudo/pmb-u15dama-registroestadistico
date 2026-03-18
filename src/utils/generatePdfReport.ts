@@ -298,8 +298,6 @@ export async function generatePdfReport(
       const oppCol = `${g.opponentName}${g.isHome === true ? ' (V)' : g.isHome === false ? ' (L)' : ''}${legLabel}`;
       return [new Date(g.date).toLocaleDateString(), teamCol, oppCol, `${teamPts} - ${oppPts}`, won ? 'V' : 'D'];
     });
-    });
-
     autoTable(doc, {
       startY: y,
       head: [['Fecha', 'Mi Equipo', 'Rival', 'Score', '']],
