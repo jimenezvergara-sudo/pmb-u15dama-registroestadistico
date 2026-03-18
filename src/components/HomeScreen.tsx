@@ -187,10 +187,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
         </div>
       </div>
 
-      {/* My team name */}
-      {myTeamName && (
-        <div className="px-4 mt-4 mb-1">
-          <h2 className="text-xl font-black text-foreground tracking-tight text-center">{myTeamName}</h2>
+      {/* Team capsule */}
+      {(myTeamName || myTeamLogo) && (
+        <div className="flex justify-center -mt-5 relative z-20">
+          <div className="bg-card rounded-full pl-1.5 pr-5 py-1.5 flex items-center gap-2.5 shadow-lg border border-border/60">
+            {myTeamLogo ? (
+              <img src={myTeamLogo} alt={myTeamName} className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/30" />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-primary" />
+              </div>
+            )}
+            <span className="font-extrabold text-foreground text-sm tracking-tight">{myTeamName}</span>
+          </div>
         </div>
       )}
 
