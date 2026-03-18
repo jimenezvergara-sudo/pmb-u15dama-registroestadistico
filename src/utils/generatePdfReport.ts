@@ -302,14 +302,14 @@ export async function generatePdfReport(
 
     autoTable(doc, {
       startY: y,
-      head: [['Fecha', 'Partido', 'Score', '']],
+      head: [['Fecha', 'Mi Equipo', 'Rival', 'Score', '']],
       body: gameRows,
       margin: { left: M, right: M },
       styles: { fontSize: 8, cellPadding: 3, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.3 },
       headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 8 },
       bodyStyles: { fillColor: WHITE },
       alternateRowStyles: { fillColor: TABLE_ALT },
-      columnStyles: { 3: { halign: 'center', fontStyle: 'bold', cellWidth: 12 } },
+      columnStyles: { 4: { halign: 'center', fontStyle: 'bold', cellWidth: 12 } },
       didParseCell: (data) => {
         if (data.section === 'body' && data.column.index === 3) {
           const val = data.cell.raw as string;
