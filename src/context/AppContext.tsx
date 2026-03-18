@@ -288,7 +288,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 };
 
-export const useApp = () => {
+export const useApp = (): AppContextValue => {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error('useApp must be inside AppProvider');
   return ctx;
