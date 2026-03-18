@@ -174,21 +174,28 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Header marquee */}
+      {/* Header marquee - App branding */}
       <div className="bg-primary px-5 pt-6 pb-10 rounded-b-3xl relative overflow-hidden">
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-primary-foreground/5" />
         <div className="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-primary-foreground/5" />
         <div className="flex items-center justify-between relative z-10">
           <div>
-            <h1 className="text-2xl font-black text-primary-foreground tracking-tight">{myTeamName || 'BASQEST+'}</h1>
+            <h1 className="text-2xl font-black text-primary-foreground tracking-tight">BASQEST+</h1>
             <p className="text-xs text-primary-foreground/50 font-semibold mt-0.5">Inteligencia Deportiva · {activeCategory}</p>
           </div>
           <img src={logoBasqest} alt="BASQEST+" className="w-14 h-14 rounded-xl shadow-lg ring-2 ring-primary-foreground/20" />
         </div>
       </div>
 
+      {/* My team name */}
+      {myTeamName && (
+        <div className="px-4 mt-4 mb-1">
+          <h2 className="text-xl font-black text-foreground tracking-tight text-center">{myTeamName}</h2>
+        </div>
+      )}
+
       {/* Stat cards */}
-      <div className="grid grid-cols-3 gap-3 px-4 -mt-6 relative z-10">
+      <div className={`grid grid-cols-3 gap-3 px-4 ${myTeamName ? 'mt-2' : '-mt-6'} relative z-10`}>
         {[
           { label: 'RÉCORD', value: `${wins}-${losses}` },
           { label: 'PTS/P', value: ptsPerGame },
