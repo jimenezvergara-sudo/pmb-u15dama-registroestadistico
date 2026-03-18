@@ -5,14 +5,15 @@ import CourtDiagram from '@/components/CourtDiagram';
 import { Card, CardContent } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { Trash2, Target, CircleDot, Crosshair } from 'lucide-react';
+import { Trash2, Target, CircleDot, Crosshair, FileDown } from 'lucide-react';
 import { toast } from 'sonner';
 import logoBasqest from '@/assets/logo-basqest-full.png';
+import { generatePdfReport } from '@/utils/generatePdfReport';
 
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const Dashboard: React.FC = () => {
-  const { games, tournaments, removeGame, teams } = useApp();
+  const { games, tournaments, removeGame, teams, activeCategory, myTeamName, myTeamLogo, players } = useApp();
   const [filterTournamentId, setFilterTournamentId] = useState<string>('ALL');
   const [selectedGameId, setSelectedGameId] = useState<string>('ALL');
   const [filterQuarter, setFilterQuarter] = useState<QuarterId | 'ALL'>('ALL');
@@ -168,9 +169,38 @@ const Dashboard: React.FC = () => {
   return (
     <div className="p-4 space-y-4 pb-24">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <img src={logoBasqest} alt="BASQEST+" className="w-10 h-10" />
-        <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <img src={logoBasqest} alt="BASQEST+" className="w-10 h-10" />
+          <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs font-bold"
+          onClick={() => {
+            const filterLabel = filterTournamentId === 'ALL'
+              ? 'Todos los torneos'
+              : tournaments.find(t => t.id === filterTournamentId)?.name || '';
+            const gameLabel = selectedGameId === 'ALL'
+              ? `Todos los partidos (${tournamentGames.length})`
+              : `vs ${selectedGame?.opponentName || ''}`;
+            generatePdfReport(games, tournamentGames, players, {
+              teamName: myTeamName,
+              teamLogo: myTeamLogo,
+              appLogo: logoBasqest,
+              category: activeCategory,
+              filterLabel,
+              gameLabel,
+              quarterFilter: filterQuarter,
+              playerFilter: filterPlayer,
+            });
+            toast.success('PDF descargado');
+          }}
+        >
+          <FileDown className="w-4 h-4" />
+          PDF
+        </Button>
       </div>
 
       {/* Filters */}
