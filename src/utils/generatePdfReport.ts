@@ -311,7 +311,7 @@ export async function generatePdfReport(
       alternateRowStyles: { fillColor: TABLE_ALT },
       columnStyles: { 4: { halign: 'center', fontStyle: 'bold', cellWidth: 12 } },
       didParseCell: (data) => {
-        if (data.section === 'body' && data.column.index === 3) {
+        if (data.section === 'body' && data.column.index === 4) {
           const val = data.cell.raw as string;
           data.cell.styles.textColor = val === 'V' ? [...SUCCESS] : [...DESTRUCTIVE];
         }
