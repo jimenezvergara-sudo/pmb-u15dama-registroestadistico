@@ -679,9 +679,11 @@ export async function generatePdfReport(
 
       if (s.made) {
         doc.setFillColor(...SUCCESS);
-        doc.setGState(new (doc as any).GState({ opacity: 0.85 }));
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 0.85 }));
         doc.circle(px, py, 2.2, 'F');
-        doc.setGState(new (doc as any).GState({ opacity: 1 }));
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 1 }));
         // White inner dot
         doc.setFillColor(...WHITE);
         doc.circle(px, py, 0.7, 'F');
