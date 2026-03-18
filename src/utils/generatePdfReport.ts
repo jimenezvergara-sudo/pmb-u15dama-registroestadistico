@@ -293,7 +293,11 @@ export async function generatePdfReport(
       const oppPts = (g.opponentScores || []).reduce((sum, s) => sum + s.points, 0);
       const won = teamPts > oppPts;
       const legLabel = g.leg ? ` (${g.leg === 'ida' ? 'Ida' : 'Vuelta'})` : '';
-      return [new Date(g.date).toLocaleDateString(), `vs ${g.opponentName}${legLabel}`, `${teamPts} - ${oppPts}`, won ? 'V' : 'D'];
+      const homeLabel = g.isHome === true ? ' (L)' : g.isHome === false ? ' (V)' : '';
+      const teamCol = `${options.teamName || 'BASQEST+'}${homeLabel}`;
+      const oppCol = `${g.opponentName}${g.isHome === true ? ' (V)' : g.isHome === false ? ' (L)' : ''}${legLabel}`;
+      return [new Date(g.date).toLocaleDateString(), teamCol, oppCol, `${teamPts} - ${oppPts}`, won ? 'V' : 'D'];
+    });
     });
 
     autoTable(doc, {
