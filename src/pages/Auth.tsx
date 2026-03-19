@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
-import logoBasqest from '@/assets/logo-basqest.png';
+import logoBasqest from '@/assets/logo-basqest-new.png';
 
 const Auth: React.FC = () => {
   const { signIn, signUp } = useAuth();
