@@ -36,7 +36,7 @@ const AdminPanel: React.FC = () => {
   const isGlobalRole = roles.includes('super_admin') || roles.includes('system_operator');
 
   useEffect(() => {
-    if (!isSuperAdmin) return;
+    if (!isGlobalRole) return;
     const fetchUsers = async () => {
       setLoading(true);
       const { data, error } = await supabase.rpc('admin_list_users');
@@ -44,7 +44,7 @@ const AdminPanel: React.FC = () => {
       setLoading(false);
     };
     fetchUsers();
-  }, [isSuperAdmin]);
+  }, [isGlobalRole]);
 
   if (!isSuperAdmin) {
     return (
