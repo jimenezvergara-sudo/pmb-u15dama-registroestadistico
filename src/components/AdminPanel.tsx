@@ -19,8 +19,11 @@ interface AdminUser {
 const roleBadgeVariant = (role: string) => {
   switch (role) {
     case 'super_admin': return 'destructive';
-    case 'club_admin': return 'default';
-    case 'coach': return 'secondary';
+    case 'system_operator': return 'destructive';
+    case 'club_admin_elite': return 'default';
+    case 'club_admin_pro': return 'default';
+    case 'club_staff': return 'secondary';
+    case 'fan': return 'outline';
     default: return 'outline';
   }
 };
