@@ -20,6 +20,12 @@ const baseTabs: { id: TabId; icon: React.ReactNode; label: string }[] = [
 ];
 
 const BottomNav: React.FC<Props> = ({ activeTab, onTabChange, hasActiveGame }) => {
+  const { roles } = useAuth();
+  const isSuperAdmin = roles.includes('super_admin');
+  const tabs = isSuperAdmin
+    ? [...baseTabs, { id: 'admin' as TabId, icon: <ShieldAlert className="w-5 h-5" />, label: 'Admin' }]
+    : baseTabs;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-bottom z-50">
       <div className="flex justify-around max-w-md mx-auto">
