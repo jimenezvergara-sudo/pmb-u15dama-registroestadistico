@@ -21,7 +21,7 @@ const baseTabs: { id: TabId; icon: React.ReactNode; label: string }[] = [
 
 const BottomNav: React.FC<Props> = ({ activeTab, onTabChange, hasActiveGame }) => {
   const { roles } = useAuth();
-  const isSuperAdmin = roles.includes('super_admin');
+  const isGlobalRole = roles.includes('super_admin') || roles.includes('system_operator');
   const tabs = isSuperAdmin
     ? [...baseTabs, { id: 'admin' as TabId, icon: <ShieldAlert className="w-5 h-5" />, label: 'Admin' }]
     : baseTabs;
