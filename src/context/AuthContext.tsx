@@ -16,6 +16,12 @@ interface AuthContextValue {
   user: User | null;
   profile: Profile | null;
   roles: Enums<'app_role'>[];
+  /** The effective roles used for UI rendering (respects impersonation) */
+  effectiveRoles: Enums<'app_role'>[];
+  /** Currently impersonated role, null = no impersonation */
+  impersonatedRole: Enums<'app_role'> | null;
+  /** Set a role to impersonate (super_admin only). Pass null to stop. */
+  setImpersonatedRole: (role: Enums<'app_role'> | null) => void;
   loading: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -29,7 +35,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<Enums<'app_role'>[]>([]);
+  const [impersonatedRole, setImpersonatedRole] = useState<Enums<'app_role'> | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isSuperAdmin = roles.includes('super_admin');
+  const effectiveRoles: Enums<'app_role'>[] = impersonatedRole && isSuperAdmin
+    ? [impersonatedRole]
+    : roles;
 
   const fetchProfile = useCallback(async (userId: string) => {
     const { data } = await supabase
@@ -101,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, roles, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, roles, effectiveRoles, impersonatedRole, setImpersonatedRole, loading, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

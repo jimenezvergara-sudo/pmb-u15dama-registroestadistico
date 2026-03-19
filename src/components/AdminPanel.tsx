@@ -3,7 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ShieldAlert, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ShieldAlert, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Constants } from '@/integrations/supabase/types';
+import type { Enums } from '@/integrations/supabase/types';
 
 interface AdminUser {
   user_id: string;
@@ -28,12 +32,24 @@ const roleBadgeVariant = (role: string) => {
   }
 };
 
+const roleLabels: Record<string, string> = {
+  super_admin: 'Super Admin',
+  system_operator: 'Operador Sistema',
+  club_admin_elite: 'Admin Elite',
+  club_admin_pro: 'Admin Pro',
+  club_staff: 'Staff Club',
+  fan: 'Fan',
+  coach: 'Entrenador',
+  club_admin: 'Admin Club',
+};
+
 const AdminPanel: React.FC = () => {
-  const { roles } = useAuth();
+  const { roles, impersonatedRole, setImpersonatedRole } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   const isGlobalRole = roles.includes('super_admin') || roles.includes('system_operator');
+  const isSuperAdmin = roles.includes('super_admin');
 
   useEffect(() => {
     if (!isGlobalRole) return;
@@ -58,6 +74,10 @@ const AdminPanel: React.FC = () => {
     );
   }
 
+  const clientRoles = Constants.public.Enums.app_role.filter(
+    r => !['super_admin', 'system_operator'].includes(r)
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <div className="bg-destructive px-5 pt-6 pb-6 rounded-b-3xl">
@@ -66,6 +86,55 @@ const AdminPanel: React.FC = () => {
           Gestión de usuarios y roles
         </p>
       </div>
+
+      {/* Impersonation bar — super_admin only */}
+      {isSuperAdmin && (
+        <div className="mx-4 mt-4 p-3 rounded-xl border border-border bg-muted/50">
+          <div className="flex items-center gap-2 mb-2">
+            {impersonatedRole ? (
+              <Eye className="w-4 h-4 text-primary" />
+            ) : (
+              <EyeOff className="w-4 h-4 text-muted-foreground" />
+            )}
+            <span className="text-xs font-bold text-foreground">Ver como otro rol</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select
+              value={impersonatedRole ?? 'none'}
+              onValueChange={(v) => setImpersonatedRole(v === 'none' ? null : v as Enums<'app_role'>)}
+            >
+              <SelectTrigger className="flex-1 h-9 text-xs">
+                <SelectValue placeholder="Seleccionar rol" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">
+                  <span className="font-semibold">Mi rol real (Super Admin)</span>
+                </SelectItem>
+                {clientRoles.map(r => (
+                  <SelectItem key={r} value={r}>
+                    {roleLabels[r] || r}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {impersonatedRole && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-9"
+                onClick={() => setImpersonatedRole(null)}
+              >
+                Restaurar
+              </Button>
+            )}
+          </div>
+          {impersonatedRole && (
+            <p className="text-[10px] text-primary font-semibold mt-2">
+              👁 Estás viendo la app como: <span className="font-black">{roleLabels[impersonatedRole] || impersonatedRole}</span>
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="px-4 mt-4 flex-1">
         <div className="flex items-center justify-between mb-3">
@@ -95,7 +164,7 @@ const AdminPanel: React.FC = () => {
               </TableHeader>
               <TableBody>
                 {users.map(u => (
-                  <TableRow key={u.user_id}>
+                  <TableRow key={`${u.user_id}-${u.role}`}>
                     <TableCell className="p-2 text-xs font-semibold">
                       {u.full_name || '—'}
                     </TableCell>
@@ -104,7 +173,7 @@ const AdminPanel: React.FC = () => {
                     </TableCell>
                     <TableCell className="p-2">
                       <Badge variant={roleBadgeVariant(u.role)} className="text-[10px]">
-                        {u.role}
+                        {roleLabels[u.role] || u.role}
                       </Badge>
                     </TableCell>
                     <TableCell className="p-2 text-xs">
