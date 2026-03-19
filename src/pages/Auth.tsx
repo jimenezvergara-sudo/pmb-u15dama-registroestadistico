@@ -47,7 +47,7 @@ const Auth: React.FC = () => {
       <Card className="w-full max-w-sm border-[hsl(268,76%,35%)] bg-[hsl(268,50%,12%)]/90 backdrop-blur-xl shadow-2xl shadow-[hsl(268,76%,20%)]/40 rounded-3xl">
         <CardHeader className="text-center space-y-3 pb-2">
           <div className="mx-auto">
-            <img src={logoBasqest} alt="BASQEST+" className="w-32 h-32 object-contain drop-shadow-lg" />
+            <img src={logoBasqest} alt="BASQEST+" className="w-32 h-32 object-contain drop-shadow-lg rounded-2xl" />
           </div>
         </CardHeader>
 
