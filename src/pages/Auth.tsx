@@ -44,7 +44,7 @@ const Auth: React.FC = () => {
       {/* Gold accent glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-[hsl(45,100%,50%)] opacity-10 rounded-full blur-3xl pointer-events-none" />
       
-      <Card className="w-full max-w-sm border-[hsl(268,76%,35%)] bg-[hsl(268,50%,12%)]/90 backdrop-blur-xl shadow-2xl shadow-[hsl(268,76%,20%)]/40">
+      <Card className="w-full max-w-sm border-[hsl(268,76%,35%)] bg-[hsl(268,50%,12%)]/90 backdrop-blur-xl shadow-2xl shadow-[hsl(268,76%,20%)]/40 rounded-3xl">
         <CardHeader className="text-center space-y-3 pb-2">
           <div className="mx-auto">
             <img src={logoBasqest} alt="BASQEST+" className="w-32 h-32 object-contain drop-shadow-lg" />
