@@ -164,7 +164,7 @@ const AdminPanel: React.FC = () => {
               </TableHeader>
               <TableBody>
                 {users.map(u => (
-                  <TableRow key={u.user_id}>
+                  <TableRow key={`${u.user_id}-${u.role}`}>
                     <TableCell className="p-2 text-xs font-semibold">
                       {u.full_name || '—'}
                     </TableCell>
