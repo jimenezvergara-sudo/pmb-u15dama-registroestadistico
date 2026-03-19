@@ -1,7 +1,8 @@
 import React from 'react';
-import { BarChart3, Users, Plus, Trophy, Home, Shield } from 'lucide-react';
+import { BarChart3, Users, Plus, Trophy, Home, Shield, ShieldAlert } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
-export type TabId = 'home' | 'live' | 'roster' | 'dashboard' | 'tournaments' | 'teams';
+export type TabId = 'home' | 'live' | 'roster' | 'dashboard' | 'tournaments' | 'teams' | 'admin';
 
 interface Props {
   activeTab: TabId;
@@ -9,7 +10,7 @@ interface Props {
   hasActiveGame: boolean;
 }
 
-const tabs: { id: TabId; icon: React.ReactNode; label: string }[] = [
+const baseTabs: { id: TabId; icon: React.ReactNode; label: string }[] = [
   { id: 'home', icon: <Home className="w-5 h-5" />, label: 'Inicio' },
   { id: 'live', icon: <Plus className="w-5 h-5" />, label: 'Partido' },
   { id: 'roster', icon: <Users className="w-5 h-5" />, label: 'Plantilla' },
@@ -19,6 +20,12 @@ const tabs: { id: TabId; icon: React.ReactNode; label: string }[] = [
 ];
 
 const BottomNav: React.FC<Props> = ({ activeTab, onTabChange, hasActiveGame }) => {
+  const { roles } = useAuth();
+  const isSuperAdmin = roles.includes('super_admin');
+  const tabs = isSuperAdmin
+    ? [...baseTabs, { id: 'admin' as TabId, icon: <ShieldAlert className="w-5 h-5" />, label: 'Admin' }]
+    : baseTabs;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-bottom z-50">
       <div className="flex justify-around max-w-md mx-auto">

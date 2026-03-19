@@ -8,6 +8,7 @@ import Dashboard from '@/components/Dashboard';
 import TournamentManager from '@/components/TournamentManager';
 import TeamManager from '@/components/TeamManager';
 import HomeScreen from '@/components/HomeScreen';
+import AdminPanel from '@/components/AdminPanel';
 import { CATEGORIES, Category } from '@/types/basketball';
 import logoBasqest from '@/assets/logo-basqest.png';
 
@@ -58,6 +59,7 @@ const AppContent: React.FC = () => {
       {tab === 'teams' && <TeamManager />}
       {tab === 'dashboard' && <Dashboard />}
       {tab === 'tournaments' && <TournamentManager />}
+      {tab === 'admin' && <AdminPanel />}
       <BottomNav activeTab={tab} onTabChange={setTab} hasActiveGame={!!activeGame} />
     </div>
   );

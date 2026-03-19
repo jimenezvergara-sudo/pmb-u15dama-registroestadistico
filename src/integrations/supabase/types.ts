@@ -67,6 +67,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_users: {
+        Args: never
+        Returns: {
+          club_id: string
+          created_at: string
+          email: string
+          email_confirmed_at: string
+          full_name: string
+          last_sign_in_at: string
+          role: string
+          user_id: string
+        }[]
+      }
       get_user_club_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
