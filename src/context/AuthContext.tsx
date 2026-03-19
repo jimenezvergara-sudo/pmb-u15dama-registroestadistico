@@ -16,6 +16,12 @@ interface AuthContextValue {
   user: User | null;
   profile: Profile | null;
   roles: Enums<'app_role'>[];
+  /** The effective roles used for UI rendering (respects impersonation) */
+  effectiveRoles: Enums<'app_role'>[];
+  /** Currently impersonated role, null = no impersonation */
+  impersonatedRole: Enums<'app_role'> | null;
+  /** Set a role to impersonate (super_admin only). Pass null to stop. */
+  setImpersonatedRole: (role: Enums<'app_role'> | null) => void;
   loading: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
