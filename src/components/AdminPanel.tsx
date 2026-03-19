@@ -33,7 +33,7 @@ const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const isSuperAdmin = roles.includes('super_admin');
+  const isGlobalRole = roles.includes('super_admin') || roles.includes('system_operator');
 
   useEffect(() => {
     if (!isSuperAdmin) return;
