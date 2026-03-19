@@ -1,7 +1,8 @@
 import React from 'react';
-import { BarChart3, Users, Plus, Trophy, Home, Shield } from 'lucide-react';
+import { BarChart3, Users, Plus, Trophy, Home, Shield, ShieldAlert } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
-export type TabId = 'home' | 'live' | 'roster' | 'dashboard' | 'tournaments' | 'teams';
+export type TabId = 'home' | 'live' | 'roster' | 'dashboard' | 'tournaments' | 'teams' | 'admin';
 
 interface Props {
   activeTab: TabId;
@@ -9,7 +10,7 @@ interface Props {
   hasActiveGame: boolean;
 }
 
-const tabs: { id: TabId; icon: React.ReactNode; label: string }[] = [
+const baseTabs: { id: TabId; icon: React.ReactNode; label: string }[] = [
   { id: 'home', icon: <Home className="w-5 h-5" />, label: 'Inicio' },
   { id: 'live', icon: <Plus className="w-5 h-5" />, label: 'Partido' },
   { id: 'roster', icon: <Users className="w-5 h-5" />, label: 'Plantilla' },
