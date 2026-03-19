@@ -11,6 +11,7 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   const { games, players, activeCategory, myTeamName, myTeamLogo } = useApp();
+  const { signOut, profile } = useAuth();
 
   const totalGames = games.length;
 
