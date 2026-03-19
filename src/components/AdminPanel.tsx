@@ -46,7 +46,7 @@ const AdminPanel: React.FC = () => {
     fetchUsers();
   }, [isGlobalRole]);
 
-  if (!isSuperAdmin) {
+  if (!isGlobalRole) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
         <ShieldAlert className="w-12 h-12 text-destructive mb-4" />
