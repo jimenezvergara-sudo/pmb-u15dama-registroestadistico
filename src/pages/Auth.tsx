@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
-import logoBasqest from '@/assets/logo-basqest.png';
+import logoBasqest from '@/assets/logo-basqest-new.png';
 
 const Auth: React.FC = () => {
   const { signIn, signUp } = useAuth();
@@ -46,18 +46,8 @@ const Auth: React.FC = () => {
       
       <Card className="w-full max-w-sm border-[hsl(268,76%,35%)] bg-[hsl(268,50%,12%)]/90 backdrop-blur-xl shadow-2xl shadow-[hsl(268,76%,20%)]/40">
         <CardHeader className="text-center space-y-3 pb-2">
-          <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-[hsl(45,100%,50%)] p-0.5">
-            <div className="w-full h-full rounded-2xl bg-[hsl(268,50%,12%)] flex items-center justify-center overflow-hidden">
-              <img src={logoBasqest} alt="BASQEST+" className="w-14 h-14 object-contain" />
-            </div>
-          </div>
-          <div>
-            <CardTitle className="text-2xl font-black tracking-tight bg-gradient-to-r from-[hsl(0,0%,100%)] to-[hsl(45,100%,70%)] bg-clip-text text-transparent">
-              BASQEST+
-            </CardTitle>
-            <CardDescription className="text-[hsl(45,100%,65%)] font-semibold text-xs tracking-widest uppercase mt-1">
-              Inteligencia Deportiva
-            </CardDescription>
+          <div className="mx-auto">
+            <img src={logoBasqest} alt="BASQEST+" className="w-32 h-32 object-contain drop-shadow-lg" />
           </div>
         </CardHeader>
 
