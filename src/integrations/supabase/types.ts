@@ -88,9 +88,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_global_role: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "super_admin" | "club_admin" | "coach" | "fan"
+      app_role:
+        | "super_admin"
+        | "club_admin"
+        | "coach"
+        | "fan"
+        | "system_operator"
+        | "club_admin_elite"
+        | "club_admin_pro"
+        | "club_staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -218,7 +227,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "club_admin", "coach", "fan"],
+      app_role: [
+        "super_admin",
+        "club_admin",
+        "coach",
+        "fan",
+        "system_operator",
+        "club_admin_elite",
+        "club_admin_pro",
+        "club_staff",
+      ],
     },
   },
 } as const

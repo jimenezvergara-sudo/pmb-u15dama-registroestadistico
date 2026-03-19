@@ -19,8 +19,11 @@ interface AdminUser {
 const roleBadgeVariant = (role: string) => {
   switch (role) {
     case 'super_admin': return 'destructive';
-    case 'club_admin': return 'default';
-    case 'coach': return 'secondary';
+    case 'system_operator': return 'destructive';
+    case 'club_admin_elite': return 'default';
+    case 'club_admin_pro': return 'default';
+    case 'club_staff': return 'secondary';
+    case 'fan': return 'outline';
     default: return 'outline';
   }
 };
@@ -30,10 +33,10 @@ const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const isSuperAdmin = roles.includes('super_admin');
+  const isGlobalRole = roles.includes('super_admin') || roles.includes('system_operator');
 
   useEffect(() => {
-    if (!isSuperAdmin) return;
+    if (!isGlobalRole) return;
     const fetchUsers = async () => {
       setLoading(true);
       const { data, error } = await supabase.rpc('admin_list_users');
@@ -41,9 +44,9 @@ const AdminPanel: React.FC = () => {
       setLoading(false);
     };
     fetchUsers();
-  }, [isSuperAdmin]);
+  }, [isGlobalRole]);
 
-  if (!isSuperAdmin) {
+  if (!isGlobalRole) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
         <ShieldAlert className="w-12 h-12 text-destructive mb-4" />
