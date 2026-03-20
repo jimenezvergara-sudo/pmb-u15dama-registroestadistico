@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -40,11 +41,12 @@ interface Props {
 
 const TournamentStandings: React.FC<Props> = ({ tournamentId, tournamentName, onBack }) => {
   const { effectiveRoles } = useAuth();
+  const { teams: appTeams, myTeamName } = useApp();
   const isGlobal = effectiveRoles.some(r => r === 'super_admin' || r === 'system_operator');
 
   const [teams, setTeams] = useState<TournamentTeam[]>([]);
   const [matches, setMatches] = useState<TournamentMatch[]>([]);
-  const [newTeamName, setNewTeamName] = useState('');
+  const [selectedAppTeamId, setSelectedAppTeamId] = useState('');
   const [showAddMatch, setShowAddMatch] = useState(false);
   const [matchForm, setMatchForm] = useState({ homeId: '', awayId: '', homeScore: 0, awayScore: 0 });
   const [loading, setLoading] = useState(true);
@@ -62,14 +64,25 @@ const TournamentStandings: React.FC<Props> = ({ tournamentId, tournamentName, on
 
   useEffect(() => { fetchData(); }, [tournamentId]);
 
+  // Build available teams list: "Mi equipo" + rival teams from AppContext
+  const availableTeams = [
+    ...(myTeamName ? [{ id: '__my_team__', label: myTeamName }] : []),
+    ...appTeams.map(t => ({ id: t.id, label: t.clubName })),
+  ];
+
+  // Filter out teams already added to this tournament
+  const alreadyAddedNames = new Set(teams.map(t => t.team_name));
+  const selectableTeams = availableTeams.filter(t => !alreadyAddedNames.has(t.label));
+
   const addTeam = async () => {
-    if (!newTeamName.trim()) return;
+    const selected = availableTeams.find(t => t.id === selectedAppTeamId);
+    if (!selected) return;
     const { error } = await supabase.from('tournament_teams').insert({
       tournament_id: tournamentId,
-      team_name: newTeamName.trim(),
+      team_name: selected.label,
     });
     if (error) { toast.error('Error al agregar equipo'); return; }
-    setNewTeamName('');
+    setSelectedAppTeamId('');
     fetchData();
     toast.success('Equipo agregado');
   };
@@ -181,11 +194,27 @@ const TournamentStandings: React.FC<Props> = ({ tournamentId, tournamentName, on
         <div className="space-y-3 border-t pt-4">
           <h3 className="text-sm font-bold text-foreground">Gestión del torneo</h3>
 
-          {/* Add team */}
-          <div className="flex gap-2">
-            <Input placeholder="Nombre del equipo" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} />
-            <Button onClick={addTeam} size="icon" className="shrink-0"><Plus className="w-4 h-4" /></Button>
-          </div>
+          {/* Add team from existing teams */}
+          {selectableTeams.length > 0 && (
+            <div className="flex gap-2">
+              <select
+                className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
+                value={selectedAppTeamId}
+                onChange={e => setSelectedAppTeamId(e.target.value)}
+              >
+                <option value="">Seleccionar equipo...</option>
+                {selectableTeams.map(t => (
+                  <option key={t.id} value={t.id}>{t.label}</option>
+                ))}
+              </select>
+              <Button onClick={addTeam} size="icon" className="shrink-0" disabled={!selectedAppTeamId}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+          {selectableTeams.length === 0 && teams.length > 0 && (
+            <p className="text-xs text-muted-foreground">Todos los equipos ya fueron agregados</p>
+          )}
 
           {/* Team list with remove */}
           {teams.length > 0 && (
