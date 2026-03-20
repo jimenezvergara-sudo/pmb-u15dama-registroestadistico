@@ -744,6 +744,47 @@ export async function generatePdfReport(
 
   drawFooter(pageNum);
 
+  // ═══════════════ PREMIUM BANNER ═══════════════
+  if (options.premiumBannerUrl) {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+        img.src = options.premiumBannerUrl!;
+      });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+      // Add on last page, above footer
+      const bannerW = W - M * 2;
+      const bannerH = Math.min(30, (img.naturalHeight / img.naturalWidth) * bannerW);
+      const bannerY = H - 28 - bannerH;
+
+      // Premium label
+      doc.setFillColor(...GOLD);
+      doc.roundedRect(M, bannerY - 6, 28, 5, 1, 1, 'F');
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...NEAR_BLACK);
+      doc.text('⭐ PREMIUM', M + 14, bannerY - 2.5, { align: 'center' });
+
+      // Banner image
+      doc.addImage(dataUrl, 'JPEG', M, bannerY, bannerW, bannerH);
+      doc.setDrawColor(...GOLD);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(M, bannerY, bannerW, bannerH, 2, 2, 'S');
+    } catch {
+      // silently skip if image fails to load
+    }
+  }
+
   // Save
   const fileName = `BASQEST_Report_${options.teamName || 'Stats'}_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(fileName);
