@@ -24,6 +24,21 @@ const Dashboard: React.FC = () => {
   const [filterQuarter, setFilterQuarter] = useState<QuarterId | 'ALL'>('ALL');
   const [filterPlayer, setFilterPlayer] = useState<string>('ALL');
   const [filterTeamId, setFilterTeamId] = useState<string>('ALL');
+  const [premiumBanner, setPremiumBanner] = useState<{ url: string; link: string } | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from('global_ads')
+      .select('image_url, destination_link')
+      .eq('active', true)
+      .order('priority', { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setPremiumBanner({ url: data[0].image_url, link: data[0].destination_link });
+        }
+      });
+  }, []);
 
   const tournamentGames = useMemo(() => {
     let filtered = games;
