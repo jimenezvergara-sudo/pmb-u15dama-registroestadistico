@@ -64,14 +64,25 @@ const TournamentStandings: React.FC<Props> = ({ tournamentId, tournamentName, on
 
   useEffect(() => { fetchData(); }, [tournamentId]);
 
+  // Build available teams list: "Mi equipo" + rival teams from AppContext
+  const availableTeams = [
+    ...(myTeamName ? [{ id: '__my_team__', label: myTeamName }] : []),
+    ...appTeams.map(t => ({ id: t.id, label: t.clubName })),
+  ];
+
+  // Filter out teams already added to this tournament
+  const alreadyAddedNames = new Set(teams.map(t => t.team_name));
+  const selectableTeams = availableTeams.filter(t => !alreadyAddedNames.has(t.label));
+
   const addTeam = async () => {
-    if (!newTeamName.trim()) return;
+    const selected = availableTeams.find(t => t.id === selectedAppTeamId);
+    if (!selected) return;
     const { error } = await supabase.from('tournament_teams').insert({
       tournament_id: tournamentId,
-      team_name: newTeamName.trim(),
+      team_name: selected.label,
     });
     if (error) { toast.error('Error al agregar equipo'); return; }
-    setNewTeamName('');
+    setSelectedAppTeamId('');
     fetchData();
     toast.success('Equipo agregado');
   };
