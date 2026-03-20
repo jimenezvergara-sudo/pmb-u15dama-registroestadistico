@@ -109,10 +109,10 @@ const ShareStatsButton: React.FC = () => {
 
             <div className="flex gap-2">
               <Button variant="outline" onClick={copyToClipboard} className="flex-1 gap-2 text-xs">
-                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
                 {copied ? 'Copiado' : 'Copiar'}
               </Button>
-              <Button onClick={shareWhatsApp} className="flex-1 gap-2 text-xs bg-green-600 hover:bg-green-700">
+              <Button onClick={shareWhatsApp} className="flex-1 gap-2 text-xs bg-[hsl(142,70%,35%)] hover:bg-[hsl(142,70%,30%)]">
                 <MessageCircle className="w-4 h-4" />
                 WhatsApp
               </Button>
