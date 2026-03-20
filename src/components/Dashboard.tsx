@@ -481,6 +481,9 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Banner publicitario después del Box Score */}
+      <AdBannerCarousel />
+
       {editingGame && (
         <GameEventEditor
           game={editingGame}
