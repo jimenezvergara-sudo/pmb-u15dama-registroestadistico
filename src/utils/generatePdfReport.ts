@@ -11,6 +11,8 @@ interface ReportOptions {
   gameLabel: string;
   quarterFilter: QuarterId | 'ALL';
   playerFilter: string;
+  premiumBannerUrl?: string;
+  premiumBannerLink?: string;
 }
 
 interface BoxScoreRow {
