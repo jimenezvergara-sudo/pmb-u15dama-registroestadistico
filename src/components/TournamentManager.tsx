@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Plus, Trophy, BarChart3 } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import TournamentStandings from '@/components/TournamentStandings';
+import AdBannerCarousel from '@/components/AdBannerCarousel';
 
 const TournamentManager: React.FC = () => {
   const { tournaments, addTournament } = useApp();
@@ -71,6 +72,9 @@ const TournamentManager: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Banner publicitario */}
+      <AdBannerCarousel />
     </div>
   );
 };

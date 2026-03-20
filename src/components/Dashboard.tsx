@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Game, QuarterId, QUARTER_LABELS } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
@@ -12,6 +12,7 @@ import logoBasqest from '@/assets/logo-basqest-full.png';
 import { generatePdfReport } from '@/utils/generatePdfReport';
 import GameEventEditor from '@/components/GameEventEditor';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
+import { supabase } from '@/integrations/supabase/client';
 
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
@@ -23,6 +24,21 @@ const Dashboard: React.FC = () => {
   const [filterQuarter, setFilterQuarter] = useState<QuarterId | 'ALL'>('ALL');
   const [filterPlayer, setFilterPlayer] = useState<string>('ALL');
   const [filterTeamId, setFilterTeamId] = useState<string>('ALL');
+  const [premiumBanner, setPremiumBanner] = useState<{ url: string; link: string } | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from('global_ads')
+      .select('image_url, destination_link')
+      .eq('active', true)
+      .order('priority', { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setPremiumBanner({ url: data[0].image_url, link: data[0].destination_link });
+        }
+      });
+  }, []);
 
   const tournamentGames = useMemo(() => {
     let filtered = games;
@@ -231,6 +247,8 @@ const Dashboard: React.FC = () => {
                 gameLabel,
                 quarterFilter: filterQuarter,
                 playerFilter: filterPlayer,
+                premiumBannerUrl: premiumBanner?.url,
+                premiumBannerLink: premiumBanner?.link,
               });
               toast.success('PDF descargado');
             }}
@@ -480,6 +498,9 @@ const Dashboard: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Banner publicitario después del Box Score */}
+      <AdBannerCarousel />
 
       {editingGame && (
         <GameEventEditor

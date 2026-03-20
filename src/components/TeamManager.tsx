@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Trash2, Shield, Camera } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
+import AdBannerCarousel from '@/components/AdBannerCarousel';
 
 const TeamManager: React.FC = () => {
   const { teams, addTeam, removeTeam, myTeamName, setMyTeamName, myTeamLogo, setMyTeamLogo } = useApp();
@@ -93,6 +94,9 @@ const TeamManager: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Banner publicitario */}
+      <AdBannerCarousel />
 
       <h3 className="text-sm font-bold text-muted-foreground mt-4 mb-2">Equipos Rivales</h3>
 
