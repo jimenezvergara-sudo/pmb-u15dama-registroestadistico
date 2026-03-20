@@ -49,7 +49,7 @@ const AdBannerCarousel: React.FC = () => {
         <img
           src={ad.image_url}
           alt="Sponsor"
-          className="w-full h-[120px] object-cover rounded-lg"
+          className="w-full h-[120px] object-contain rounded-lg bg-black/5"
           loading="lazy"
         />
       </a>
