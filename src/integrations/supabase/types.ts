@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      global_ads: {
+        Row: {
+          active: boolean
+          created_at: string
+          destination_link: string
+          id: string
+          image_url: string
+          priority: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          destination_link?: string
+          id?: string
+          image_url: string
+          priority?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          destination_link?: string
+          id?: string
+          image_url?: string
+          priority?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

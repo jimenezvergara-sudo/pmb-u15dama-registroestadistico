@@ -8,6 +8,7 @@ import { ShieldAlert, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Constants } from '@/integrations/supabase/types';
 import type { Enums } from '@/integrations/supabase/types';
+import AdManager from '@/components/AdManager';
 
 interface AdminUser {
   user_id: string;
@@ -193,6 +194,11 @@ const AdminPanel: React.FC = () => {
             </Table>
           </div>
         )}
+      </div>
+
+      {/* Ad Management */}
+      <div className="px-4 mt-6 mb-8">
+        <AdManager />
       </div>
     </div>
   );

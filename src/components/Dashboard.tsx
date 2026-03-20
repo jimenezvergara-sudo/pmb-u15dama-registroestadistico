@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import logoBasqest from '@/assets/logo-basqest-full.png';
 import { generatePdfReport } from '@/utils/generatePdfReport';
 import GameEventEditor from '@/components/GameEventEditor';
+import AdBannerCarousel from '@/components/AdBannerCarousel';
 
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
@@ -171,6 +172,9 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="p-4 space-y-4 pb-24">
+      {/* Ad Banner */}
+      <AdBannerCarousel />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
