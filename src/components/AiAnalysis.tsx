@@ -157,11 +157,16 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
 
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setAnalysis(null); }}>
         <DialogContent className="max-w-lg max-h-[85vh] p-0">
-          <DialogHeader className="p-4 pb-0">
+          <DialogHeader className="p-4 pb-0 flex flex-row items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-base font-extrabold">
               <Sparkles className="w-5 h-5 text-primary" />
               Análisis Inteligente
             </DialogTitle>
+            {analysis && (
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload}>
+                <Download className="w-4 h-4" />
+              </Button>
+            )}
           </DialogHeader>
           <ScrollArea className="px-4 pb-4 max-h-[70vh]">
             {loading ? (
