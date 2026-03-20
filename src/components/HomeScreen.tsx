@@ -1,7 +1,9 @@
 import React from 'react';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
+import ShareStatsButton from '@/components/ShareStatsButton';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
+import { usePageView } from '@/hooks/useAnalytics';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Target, CircleDot, Percent, Grab, Handshake, ShieldCheck, Shield, LogOut } from 'lucide-react';
 import logoBasqest from '@/assets/logo-basqest-new.png';
