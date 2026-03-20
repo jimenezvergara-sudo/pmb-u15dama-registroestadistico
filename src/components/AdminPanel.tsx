@@ -195,6 +195,11 @@ const AdminPanel: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Ad Management */}
+      <div className="px-4 mt-6 mb-8">
+        <AdManager />
+      </div>
     </div>
   );
 };
