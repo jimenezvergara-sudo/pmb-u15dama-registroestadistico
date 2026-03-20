@@ -57,6 +57,17 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<string | null>(null);
 
+  const handleDownload = () => {
+    if (!analysis) return;
+    const blob = new Blob([analysis], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analisis-ia-${gameLabel.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleAnalyze = async () => {
     setOpen(true);
     if (analysis) return; // already cached
