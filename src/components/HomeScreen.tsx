@@ -1,7 +1,9 @@
 import React from 'react';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
+import ShareStatsButton from '@/components/ShareStatsButton';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
+import { usePageView } from '@/hooks/useAnalytics';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Target, CircleDot, Percent, Grab, Handshake, ShieldCheck, Shield, LogOut } from 'lucide-react';
 import logoBasqest from '@/assets/logo-basqest-new.png';
@@ -12,7 +14,9 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   const { games, players, activeCategory, myTeamName, myTeamLogo } = useApp();
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, user } = useAuth();
+
+  usePageView({ page: 'home', userId: user?.id });
 
   const totalGames = games.length;
 
@@ -237,7 +241,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       {/* Leaders */}
       <div className="px-4 mt-8 flex-1">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-extrabold text-foreground">Líderes de Temporada</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-extrabold text-foreground">Líderes de Temporada</h2>
+            <ShareStatsButton />
+          </div>
           <button
             onClick={onCategoryPress}
             className="text-[10px] font-bold text-accent-foreground bg-accent px-3 py-1 rounded-full"

@@ -41,6 +41,53 @@ export type Database = {
         }
         Relationships: []
       }
+      page_views: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          is_public_view: boolean
+          page: string
+          referrer: string | null
+          session_id: string
+          share_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_public_view?: boolean
+          page: string
+          referrer?: string | null
+          session_id: string
+          share_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_public_view?: boolean
+          page?: string
+          referrer?: string | null
+          session_id?: string
+          share_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_views_share_id_fkey"
+            columns: ["share_id"]
+            isOneToOne: false
+            referencedRelation: "shared_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -67,6 +114,36 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shared_stats: {
+        Row: {
+          club_id: string
+          created_at: string
+          data: Json
+          expires_at: string | null
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          data: Json
+          expires_at?: string | null
+          id?: string
+          title?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          data?: Json
+          expires_at?: string | null
+          id?: string
+          title?: string
           user_id?: string
         }
         Relationships: []

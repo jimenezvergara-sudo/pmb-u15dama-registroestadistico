@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Constants } from '@/integrations/supabase/types';
 import type { Enums } from '@/integrations/supabase/types';
 import AdManager from '@/components/AdManager';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 
 interface AdminUser {
   user_id: string;
@@ -197,8 +198,13 @@ const AdminPanel: React.FC = () => {
       </div>
 
       {/* Ad Management */}
-      <div className="px-4 mt-6 mb-8">
+      <div className="px-4 mt-6">
         <AdManager />
+      </div>
+
+      {/* Analytics Dashboard */}
+      <div className="px-4 mt-6 mb-8">
+        <AnalyticsDashboard />
       </div>
     </div>
   );
