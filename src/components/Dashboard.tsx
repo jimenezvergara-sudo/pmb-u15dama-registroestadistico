@@ -247,6 +247,8 @@ const Dashboard: React.FC = () => {
                 gameLabel,
                 quarterFilter: filterQuarter,
                 playerFilter: filterPlayer,
+                premiumBannerUrl: premiumBanner?.url,
+                premiumBannerLink: premiumBanner?.link,
               });
               toast.success('PDF descargado');
             }}
