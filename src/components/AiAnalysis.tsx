@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -56,6 +56,17 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<string | null>(null);
+
+  const handleDownload = () => {
+    if (!analysis) return;
+    const blob = new Blob([analysis], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analisis-ia-${gameLabel.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleAnalyze = async () => {
     setOpen(true);
@@ -146,11 +157,16 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
 
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setAnalysis(null); }}>
         <DialogContent className="max-w-lg max-h-[85vh] p-0">
-          <DialogHeader className="p-4 pb-0">
+          <DialogHeader className="p-4 pb-0 flex flex-row items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-base font-extrabold">
               <Sparkles className="w-5 h-5 text-primary" />
               Análisis Inteligente
             </DialogTitle>
+            {analysis && (
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload}>
+                <Download className="w-4 h-4" />
+              </Button>
+            )}
           </DialogHeader>
           <ScrollArea className="px-4 pb-4 max-h-[70vh]">
             {loading ? (
