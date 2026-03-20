@@ -177,33 +177,64 @@ const Dashboard: React.FC = () => {
           <img src={logoBasqest} alt="BASQEST+" className="w-10 h-10" />
           <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs font-bold"
-          onClick={() => {
-            const filterLabel = filterTournamentId === 'ALL'
-              ? 'Todos los torneos'
-              : tournaments.find(t => t.id === filterTournamentId)?.name || '';
-            const gameLabel = selectedGameId === 'ALL'
-              ? `Todos los partidos (${tournamentGames.length})`
-              : `vs ${selectedGame?.opponentName || ''}`;
-            generatePdfReport(games, tournamentGames, players, {
-              teamName: myTeamName,
-              teamLogo: myTeamLogo,
-              appLogo: logoBasqest,
-              category: activeCategory,
-              filterLabel,
-              gameLabel,
-              quarterFilter: filterQuarter,
-              playerFilter: filterPlayer,
-            });
-            toast.success('PDF descargado');
-          }}
-        >
-          <FileDown className="w-4 h-4" />
-          PDF
-        </Button>
+        <div className="flex items-center gap-2">
+          <AiAnalysis
+            boxScore={boxScore.map(r => ({
+              playerName: r.player.name,
+              number: r.player.number,
+              pts: r.pts,
+              fgm: r.fgm,
+              fga: r.fga,
+              fgPct: r.fgPct,
+              twoM: r.twoM,
+              twoA: r.twoA,
+              twoPct: r.twoPct,
+              threeM: r.threeM,
+              threeA: r.threeA,
+              threePct: r.threePct,
+              ftM: r.ftM,
+              ftA: r.ftA,
+              ftPct: r.ftPct,
+              reb: r.reb,
+              ast: r.ast,
+              stl: r.stl,
+              pf: r.pf,
+              courtTimePct: r.courtTimePct,
+            }))}
+            chartData={chartData}
+            totalPoints={totalPoints}
+            totalOpponent={totalOpponent}
+            numGames={numGames}
+            gameLabel={selectedGameId === 'ALL' ? `Todos los partidos (${tournamentGames.length})` : `vs ${selectedGame?.opponentName || ''}`}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs font-bold"
+            onClick={() => {
+              const filterLabel = filterTournamentId === 'ALL'
+                ? 'Todos los torneos'
+                : tournaments.find(t => t.id === filterTournamentId)?.name || '';
+              const gameLabel = selectedGameId === 'ALL'
+                ? `Todos los partidos (${tournamentGames.length})`
+                : `vs ${selectedGame?.opponentName || ''}`;
+              generatePdfReport(games, tournamentGames, players, {
+                teamName: myTeamName,
+                teamLogo: myTeamLogo,
+                appLogo: logoBasqest,
+                category: activeCategory,
+                filterLabel,
+                gameLabel,
+                quarterFilter: filterQuarter,
+                playerFilter: filterPlayer,
+              });
+              toast.success('PDF descargado');
+            }}
+          >
+            <FileDown className="w-4 h-4" />
+            PDF
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
