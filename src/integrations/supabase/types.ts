@@ -44,6 +44,78 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_matches: {
+        Row: {
+          away_score: number
+          away_team_id: string
+          created_at: string
+          home_score: number
+          home_team_id: string
+          id: string
+          played_at: string
+          recorded_by: string | null
+          tournament_id: string
+        }
+        Insert: {
+          away_score?: number
+          away_team_id: string
+          created_at?: string
+          home_score?: number
+          home_team_id: string
+          id?: string
+          played_at?: string
+          recorded_by?: string | null
+          tournament_id: string
+        }
+        Update: {
+          away_score?: number
+          away_team_id?: string
+          created_at?: string
+          home_score?: number
+          home_team_id?: string
+          id?: string
+          played_at?: string
+          recorded_by?: string | null
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_matches_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_matches_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_teams: {
+        Row: {
+          created_at: string
+          id: string
+          team_name: string
+          tournament_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          team_name: string
+          tournament_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          team_name?: string
+          tournament_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

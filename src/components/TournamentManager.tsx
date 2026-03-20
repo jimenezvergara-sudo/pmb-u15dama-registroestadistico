@@ -2,18 +2,30 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Trophy } from 'lucide-react';
+import { Plus, Trophy, BarChart3 } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
+import TournamentStandings from '@/components/TournamentStandings';
 
 const TournamentManager: React.FC = () => {
   const { tournaments, addTournament } = useApp();
   const [name, setName] = useState('');
+  const [selectedTournament, setSelectedTournament] = useState<{ id: string; name: string } | null>(null);
 
   const handleAdd = () => {
     if (!name.trim()) return;
     addTournament({ name: name.trim(), date: new Date().toISOString() });
     setName('');
   };
+
+  if (selectedTournament) {
+    return (
+      <TournamentStandings
+        tournamentId={selectedTournament.id}
+        tournamentName={selectedTournament.name}
+        onBack={() => setSelectedTournament(null)}
+      />
+    );
+  }
 
   return (
     <div className="p-4 space-y-4">
@@ -48,6 +60,14 @@ const TournamentManager: React.FC = () => {
               <span className="font-semibold text-foreground">{t.name}</span>
               <p className="text-xs text-muted-foreground">{new Date(t.date).toLocaleDateString()}</p>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedTournament({ id: t.id, name: t.name })}
+              className="shrink-0"
+            >
+              <BarChart3 className="w-4 h-4 mr-1" /> Tabla
+            </Button>
           </div>
         ))}
       </div>
