@@ -1,4 +1,5 @@
 import React from 'react';
+import AdBannerCarousel from '@/components/AdBannerCarousel';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -265,6 +266,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
             </Card>
           ))}
         </div>
+      </div>
+
+      {/* Banner publicitario */}
+      <div className="px-4 pb-2">
+        <AdBannerCarousel />
       </div>
 
       <div className="px-4 py-6">
