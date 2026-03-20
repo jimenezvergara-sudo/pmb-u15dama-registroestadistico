@@ -41,11 +41,12 @@ interface Props {
 
 const TournamentStandings: React.FC<Props> = ({ tournamentId, tournamentName, onBack }) => {
   const { effectiveRoles } = useAuth();
+  const { teams: appTeams, myTeamName } = useApp();
   const isGlobal = effectiveRoles.some(r => r === 'super_admin' || r === 'system_operator');
 
   const [teams, setTeams] = useState<TournamentTeam[]>([]);
   const [matches, setMatches] = useState<TournamentMatch[]>([]);
-  const [newTeamName, setNewTeamName] = useState('');
+  const [selectedAppTeamId, setSelectedAppTeamId] = useState('');
   const [showAddMatch, setShowAddMatch] = useState(false);
   const [matchForm, setMatchForm] = useState({ homeId: '', awayId: '', homeScore: 0, awayScore: 0 });
   const [loading, setLoading] = useState(true);
