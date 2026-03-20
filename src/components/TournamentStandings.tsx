@@ -194,11 +194,27 @@ const TournamentStandings: React.FC<Props> = ({ tournamentId, tournamentName, on
         <div className="space-y-3 border-t pt-4">
           <h3 className="text-sm font-bold text-foreground">Gestión del torneo</h3>
 
-          {/* Add team */}
-          <div className="flex gap-2">
-            <Input placeholder="Nombre del equipo" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} />
-            <Button onClick={addTeam} size="icon" className="shrink-0"><Plus className="w-4 h-4" /></Button>
-          </div>
+          {/* Add team from existing teams */}
+          {selectableTeams.length > 0 && (
+            <div className="flex gap-2">
+              <select
+                className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
+                value={selectedAppTeamId}
+                onChange={e => setSelectedAppTeamId(e.target.value)}
+              >
+                <option value="">Seleccionar equipo...</option>
+                {selectableTeams.map(t => (
+                  <option key={t.id} value={t.id}>{t.label}</option>
+                ))}
+              </select>
+              <Button onClick={addTeam} size="icon" className="shrink-0" disabled={!selectedAppTeamId}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+          {selectableTeams.length === 0 && teams.length > 0 && (
+            <p className="text-xs text-muted-foreground">Todos los equipos ya fueron agregados</p>
+          )}
 
           {/* Team list with remove */}
           {teams.length > 0 && (
