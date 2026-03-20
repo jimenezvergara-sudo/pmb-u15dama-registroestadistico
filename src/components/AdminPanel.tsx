@@ -8,6 +8,7 @@ import { ShieldAlert, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Constants } from '@/integrations/supabase/types';
 import type { Enums } from '@/integrations/supabase/types';
+import AdManager from '@/components/AdManager';
 
 interface AdminUser {
   user_id: string;
