@@ -241,7 +241,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       {/* Leaders */}
       <div className="px-4 mt-8 flex-1">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-extrabold text-foreground">Líderes de Temporada</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-extrabold text-foreground">Líderes de Temporada</h2>
+            <ShareStatsButton />
+          </div>
           <button
             onClick={onCategoryPress}
             className="text-[10px] font-bold text-accent-foreground bg-accent px-3 py-1 rounded-full"
