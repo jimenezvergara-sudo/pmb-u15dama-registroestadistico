@@ -268,6 +268,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
         </div>
       </div>
 
+      {/* Banner publicitario */}
+      <div className="px-4 pb-2">
+        <AdBannerCarousel />
+      </div>
+
       <div className="px-4 py-6">
         <p className="text-[10px] text-muted-foreground text-center uppercase tracking-widest font-semibold">
           {totalGames} {totalGames === 1 ? 'partido jugado' : 'partidos jugados'}
