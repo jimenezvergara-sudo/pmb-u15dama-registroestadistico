@@ -72,6 +72,9 @@ const TournamentManager: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Banner publicitario */}
+      <AdBannerCarousel />
     </div>
   );
 };

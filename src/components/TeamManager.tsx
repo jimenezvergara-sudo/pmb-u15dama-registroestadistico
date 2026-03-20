@@ -95,6 +95,9 @@ const TeamManager: React.FC = () => {
         </div>
       </div>
 
+      {/* Banner publicitario */}
+      <AdBannerCarousel />
+
       <h3 className="text-sm font-bold text-muted-foreground mt-4 mb-2">Equipos Rivales</h3>
 
       <div className="space-y-2">
