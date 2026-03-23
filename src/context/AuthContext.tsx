@@ -9,6 +9,8 @@ interface Profile {
   full_name: string | null;
   club_id: string;
   avatar_url: string | null;
+  my_team_name?: string;
+  my_team_logo?: string;
 }
 
 interface AuthContextValue {
