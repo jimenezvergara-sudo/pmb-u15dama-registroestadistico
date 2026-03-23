@@ -41,6 +41,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
 
   const allShots = games.flatMap(g => g.shots);
 
+  // Build a unified player map from game rosters (IDs match shots)
+  const rosterPlayerMap = new Map<string, { name: string; number: number }>();
+  games.forEach(g => {
+    (g.roster || []).forEach(p => {
+      if (!rosterPlayerMap.has(p.id)) {
+        rosterPlayerMap.set(p.id, { name: p.name, number: p.number });
+      }
+    });
+  });
+
   // Team totals for 20% threshold
   const teamTotalDoubleAttempts = allShots.filter(s => s.points === 2).length;
   const teamTotalTripleAttempts = allShots.filter(s => s.points === 3).length;
@@ -54,7 +64,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
 
   const allActions = games.flatMap(g => g.actions || []);
 
-  const playerStats = players.map(p => {
+  // Use roster-derived players so IDs match shots/actions
+  const rosterPlayers = Array.from(rosterPlayerMap.entries()).map(([id, p]) => ({ id, ...p }));
+
+  const playerStats = rosterPlayers.map(p => {
     const shots = allShots.filter(s => s.playerId === p.id);
     const totalPts = shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
 
