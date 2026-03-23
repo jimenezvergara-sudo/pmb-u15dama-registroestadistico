@@ -14,6 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
+      club_games: {
+        Row: {
+          actions: Json
+          category: string
+          club_id: string
+          court_time_ms: Json
+          created_at: string
+          current_quarter: string
+          date: string
+          game_start_timestamp: number | null
+          id: string
+          is_home: boolean | null
+          last_timer_snapshot: number | null
+          leg: string | null
+          on_court_player_ids: Json
+          opponent_name: string
+          opponent_scores: Json
+          opponent_team_id: string | null
+          roster: Json
+          shots: Json
+          substitutions: Json
+          tournament_id: string | null
+          user_id: string
+        }
+        Insert: {
+          actions?: Json
+          category?: string
+          club_id: string
+          court_time_ms?: Json
+          created_at?: string
+          current_quarter?: string
+          date?: string
+          game_start_timestamp?: number | null
+          id?: string
+          is_home?: boolean | null
+          last_timer_snapshot?: number | null
+          leg?: string | null
+          on_court_player_ids?: Json
+          opponent_name: string
+          opponent_scores?: Json
+          opponent_team_id?: string | null
+          roster?: Json
+          shots?: Json
+          substitutions?: Json
+          tournament_id?: string | null
+          user_id: string
+        }
+        Update: {
+          actions?: Json
+          category?: string
+          club_id?: string
+          court_time_ms?: Json
+          created_at?: string
+          current_quarter?: string
+          date?: string
+          game_start_timestamp?: number | null
+          id?: string
+          is_home?: boolean | null
+          last_timer_snapshot?: number | null
+          leg?: string | null
+          on_court_player_ids?: Json
+          opponent_name?: string
+          opponent_scores?: Json
+          opponent_team_id?: string | null
+          roster?: Json
+          shots?: Json
+          substitutions?: Json
+          tournament_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      club_players: {
+        Row: {
+          club_id: string
+          created_at: string
+          id: string
+          name: string
+          number: number
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          id?: string
+          name: string
+          number: number
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          number?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      club_rival_teams: {
+        Row: {
+          city: string
+          club_id: string
+          club_name: string
+          created_at: string
+          id: string
+          region: string
+          user_id: string
+        }
+        Insert: {
+          city?: string
+          club_id: string
+          club_name: string
+          created_at?: string
+          id?: string
+          region?: string
+          user_id: string
+        }
+        Update: {
+          city?: string
+          club_id?: string
+          club_name?: string
+          created_at?: string
+          id?: string
+          region?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      club_tournaments: {
+        Row: {
+          club_id: string
+          created_at: string
+          date: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          date?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       global_ads: {
         Row: {
           active: boolean
@@ -95,6 +251,8 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          my_team_logo: string
+          my_team_name: string
           updated_at: string
           user_id: string
         }
@@ -104,6 +262,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          my_team_logo?: string
+          my_team_name?: string
           updated_at?: string
           user_id: string
         }
@@ -113,6 +273,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          my_team_logo?: string
+          my_team_name?: string
           updated_at?: string
           user_id?: string
         }
