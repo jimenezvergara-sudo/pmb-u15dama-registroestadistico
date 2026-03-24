@@ -223,6 +223,8 @@ const Dashboard: React.FC = () => {
               ftA: r.ftA,
               ftPct: r.ftPct,
               reb: r.reb,
+              oReb: r.oReb,
+              dReb: r.dReb,
               ast: r.ast,
               stl: r.stl,
               pf: r.pf,
