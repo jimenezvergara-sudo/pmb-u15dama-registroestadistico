@@ -36,6 +36,7 @@ const LiveGame: React.FC = () => {
   const [courtRotation, setCourtRotation] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [pendingQuarter, setPendingQuarter] = useState<QuarterId | null>(null);
+  const [showReport, setShowReport] = useState(false);
 
   // Periodically flush court time every 10s
   useEffect(() => {
