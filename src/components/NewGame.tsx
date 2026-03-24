@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Player, GameLeg } from '@/types/basketball';
-import { Play } from 'lucide-react';
+import { Player, GameLeg, Game } from '@/types/basketball';
+import { Play, ClipboardList } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
+import GameEventEditor from '@/components/GameEventEditor';
 
 const NewGame: React.FC = () => {
-  const { players, startGame, tournaments, teams } = useApp();
+  const { players, startGame, tournaments, teams, games, updateGame } = useApp();
+  const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [customOpponent, setCustomOpponent] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set());
