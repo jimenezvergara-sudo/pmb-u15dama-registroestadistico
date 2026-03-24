@@ -70,6 +70,19 @@ const TournamentManager: React.FC = () => {
             >
               <BarChart3 className="w-4 h-4 mr-1" /> Tabla
             </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="shrink-0 h-9 w-9 text-destructive hover:bg-destructive/10"
+              onClick={() => {
+                if (confirm(`¿Eliminar el torneo "${t.name}"?`)) {
+                  removeTournament(t.id);
+                  toast.success('Torneo eliminado');
+                }
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
         ))}
       </div>
