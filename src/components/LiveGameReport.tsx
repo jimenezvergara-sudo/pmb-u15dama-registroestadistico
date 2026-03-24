@@ -176,6 +176,8 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
                 <th className="text-left py-1 font-bold text-muted-foreground">JUG</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">PTS</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">TC</th>
+                <th className="text-center py-1 font-bold text-muted-foreground">RO</th>
+                <th className="text-center py-1 font-bold text-muted-foreground">RD</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">REB</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">AST</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">STL</th>
