@@ -354,6 +354,15 @@ export async function generatePdfReport(
   });
   y += Math.ceil(leaderItems.length / 3) * 22 + 6;
 
+  // Check if we need a new page for results
+  if (y > H - 60 && filteredGames.length > 0) {
+    drawFooter(pageNum);
+    doc.addPage();
+    drawPageBg();
+    pageNum++;
+    drawHeader();
+  }
+
   // ── Results table ──
   if (filteredGames.length > 0) {
     sectionTitle('Resultados');
