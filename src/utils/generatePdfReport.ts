@@ -470,8 +470,8 @@ export async function generatePdfReport(
     twoM: a.twoM + r.twoM, twoA: a.twoA + r.twoA,
     threeM: a.threeM + r.threeM, threeA: a.threeA + r.threeA,
     ftM: a.ftM + r.ftM, ftA: a.ftA + r.ftA,
-    reb: a.reb + r.reb, ast: a.ast + r.ast, stl: a.stl + r.stl, pf: a.pf + r.pf,
-  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, ast: 0, stl: 0, pf: 0 });
+    reb: a.reb + r.reb, oReb: a.oReb + r.oReb, dReb: a.dReb + r.dReb, ast: a.ast + r.ast, stl: a.stl + r.stl, pf: a.pf + r.pf,
+  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, oReb: 0, dReb: 0, ast: 0, stl: 0, pf: 0 });
 
   // Totals bar
   doc.setFillColor(...PURPLE_DARK);
