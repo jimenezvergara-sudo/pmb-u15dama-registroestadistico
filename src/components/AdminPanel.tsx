@@ -198,6 +198,13 @@ const AdminPanel: React.FC = () => {
         )}
       </div>
 
+      {/* Organization Management — super_admin only */}
+      {isSuperAdmin && (
+        <div className="px-4 mt-6">
+          <OrganizationManager />
+        </div>
+      )}
+
       {/* Ad Management */}
       <div className="px-4 mt-6">
         <AdManager />
