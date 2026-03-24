@@ -219,8 +219,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     { label: 'EF. POSESIÓN', value: `${pctPosesion}%` },
     { label: 'EF. DOBLES', value: `${pctDobles}%` },
     { label: 'EF. TL', value: `${pctTL}%` },
-    { label: 'eFG%', value: `${eFG}%` },
-    { label: 'TS%', value: `${tsPercent}%` },
+    {
+      label: 'eFG%', value: `${eFG}%`,
+      info: {
+        title: 'eFG% — Effective Field Goal Percentage',
+        description: 'El eFG% (Effective Field Goal Percentage) ajusta el porcentaje de tiros de campo para reflejar que los triples valen más que los dobles.\n\nFórmula:\n(Dobles anotados + 0.5 × Triples anotados) ÷ Total de tiros de campo intentados × 100\n\nEjemplo: Si una jugadora anota 4 dobles y 2 triples en 12 intentos de campo:\neFG% = (4 + 0.5 × 2) ÷ 12 × 100 = 41.7%',
+      },
+    },
+    {
+      label: 'TS%', value: `${tsPercent}%`,
+      info: {
+        title: 'TS% — True Shooting Percentage',
+        description: 'El True Shooting Percentage (TS%) es la métrica avanzada para medir la eficiencia anotadora, al incluir triples, tiros de campo de dos puntos y tiros libres en una sola fórmula.\n\nFórmula:\nPuntos convertidos ÷ (2 × (Tiros de campo intentados + 0.44 × Tiros libres intentados)) × 100\n\nEjemplo: Si una jugadora anota 20 puntos con 12 tiros de campo y 6 tiros libres intentados:\nTS% = 20 ÷ (2 × (12 + 0.44 × 6)) × 100 = 69.4%',
+      },
+    },
   ];
 
   return (
