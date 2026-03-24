@@ -54,7 +54,7 @@ export interface OpponentScore {
 
 export type GameLeg = 'ida' | 'vuelta';
 
-export type ActionType = 'rebound' | 'assist' | 'steal' | 'turnover' | 'foul';
+export type ActionType = 'rebound' | 'offensive_rebound' | 'defensive_rebound' | 'assist' | 'steal' | 'turnover' | 'foul';
 
 export interface GameAction {
   id: string;
