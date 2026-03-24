@@ -89,7 +89,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     const fieldAttempts = shots.filter(s => s.points >= 2).length;
     const fieldPct = fieldAttempts > 0 ? (fieldMade / fieldAttempts) * 100 : 0;
 
-    const rebounds = allActions.filter(a => a.playerId === p.id && a.type === 'rebound').length;
+    const rebounds = allActions.filter(a => a.playerId === p.id && (a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound')).length;
     const assists = allActions.filter(a => a.playerId === p.id && a.type === 'assist').length;
     const steals = allActions.filter(a => a.playerId === p.id && a.type === 'steal').length;
 

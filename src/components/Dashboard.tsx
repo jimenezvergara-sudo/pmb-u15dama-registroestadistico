@@ -122,7 +122,7 @@ const Dashboard: React.FC = () => {
     const ftM = playerShots.filter(s => s.points === 1 && s.made).length;
 
     const playerActions = allActions.filter(a => a.playerId === player.id);
-    const reb = playerActions.filter(a => a.type === 'rebound').length;
+    const reb = playerActions.filter(a => a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound').length;
     const ast = playerActions.filter(a => a.type === 'assist').length;
     const stl = playerActions.filter(a => a.type === 'steal').length;
     const pf = playerActions.filter(a => a.type === 'foul').length;

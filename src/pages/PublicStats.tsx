@@ -94,7 +94,7 @@ const PublicStats: React.FC = () => {
   const playerStats = players.map((p: any) => {
     const shots = allShots.filter((s: any) => s.playerId === p.id);
     const totalPts = shots.filter((s: any) => s.made).reduce((sum: number, s: any) => sum + s.points, 0);
-    const rebounds = allActions.filter((a: any) => a.playerId === p.id && a.type === 'rebound').length;
+    const rebounds = allActions.filter((a: any) => a.playerId === p.id && (a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound')).length;
     const assists = allActions.filter((a: any) => a.playerId === p.id && a.type === 'assist').length;
     const steals = allActions.filter((a: any) => a.playerId === p.id && a.type === 'steal').length;
     const fieldMade = shots.filter((s: any) => s.points >= 2 && s.made).length;
