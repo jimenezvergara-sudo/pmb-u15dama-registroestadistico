@@ -5,9 +5,10 @@ import CourtDiagram from '@/components/CourtDiagram';
 import QuickActionFAB from '@/components/QuickActionFAB';
 import SubstitutionDialog from '@/components/SubstitutionDialog';
 import StartingLineup from '@/components/StartingLineup';
+import LiveGameReport from '@/components/LiveGameReport';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Undo2 } from 'lucide-react';
+import { Undo2, BarChart3 } from 'lucide-react';
 import logoBasqest from '@/assets/logo-basqest.png';
 import {
   AlertDialog,
