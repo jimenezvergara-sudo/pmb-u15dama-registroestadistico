@@ -200,7 +200,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
         <div className="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-primary-foreground/5" />
         <div className="flex items-center justify-between relative z-10">
           <div>
-            <h1 className="text-2xl font-black text-primary-foreground tracking-tight">BASQEST+</h1>
+            <h1 className="text-2xl font-black text-primary-foreground tracking-tight">BASQUEST+</h1>
             <p className="text-xs text-primary-foreground/50 font-semibold mt-0.5">Inteligencia Deportiva · {activeCategory}</p>
             {profile?.full_name && (
               <p className="text-[10px] text-primary-foreground/40 font-medium mt-0.5">👋 {profile.full_name}</p>
