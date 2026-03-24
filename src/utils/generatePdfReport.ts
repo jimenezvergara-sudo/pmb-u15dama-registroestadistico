@@ -296,7 +296,7 @@ export async function generatePdfReport(
       const won = teamPts > oppPts;
       const legLabel = g.leg ? ` (${g.leg === 'ida' ? 'Ida' : 'Vuelta'})` : '';
       const homeLabel = g.isHome === true ? ' (L)' : g.isHome === false ? ' (V)' : '';
-      const teamCol = `${options.teamName || 'BASQEST+'}${homeLabel}`;
+      const teamCol = `${options.teamName || 'BASQUEST+'}${homeLabel}`;
       const oppCol = `${g.opponentName}${g.isHome === true ? ' (V)' : g.isHome === false ? ' (L)' : ''}${legLabel}`;
       return [new Date(g.date).toLocaleDateString(), teamCol, oppCol, `${teamPts} - ${oppPts}`, won ? 'V' : 'D'];
     });
