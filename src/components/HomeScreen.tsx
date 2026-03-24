@@ -5,7 +5,8 @@ import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { usePageView } from '@/hooks/useAnalytics';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Target, CircleDot, Percent, Grab, Handshake, ShieldCheck, Shield, LogOut } from 'lucide-react';
+import { Trophy, Target, CircleDot, Percent, Grab, Handshake, ShieldCheck, Shield, LogOut, Info } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import logoBasqest from '@/assets/logo-basqest-new.png';
 
 interface HomeScreenProps {
