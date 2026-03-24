@@ -289,8 +289,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       {/* Productividad del Equipo */}
       <div className="px-4 mt-4 relative z-10">
         <h2 className="text-base font-extrabold text-foreground mb-3">Productividad del Equipo</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          {productivityCards.map(stat => (
+        <div className="grid grid-cols-3 gap-3">
+          {productivityRow1.map(stat => (
             <Card key={stat.label} className="bg-card border-2 border-amber-400/70 shadow-xl">
               <CardContent className="p-3 text-center relative">
                 {stat.info && (
@@ -301,7 +301,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
                     <Info className="w-3.5 h-3.5" />
                   </button>
                 )}
-                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
+                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
+                <p className="text-2xl font-black text-foreground leading-tight mt-1">{stat.value}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-3 mt-3">
+          {productivityRow2.map(stat => (
+            <Card key={stat.label} className="bg-card border-2 border-amber-400/70 shadow-xl">
+              <CardContent className="p-3 text-center">
+                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
                 <p className="text-2xl font-black text-foreground leading-tight mt-1">{stat.value}</p>
               </CardContent>
             </Card>
