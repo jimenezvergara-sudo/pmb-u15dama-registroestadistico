@@ -392,6 +392,10 @@ const LiveGame: React.FC = () => {
           </AlertDialog>
         </div>
       </div>
+      {/* Live Game Report */}
+      {showReport && activeGame && (
+        <LiveGameReport game={activeGame} onClose={() => setShowReport(false)} />
+      )}
     </div>
   );
 };
