@@ -424,7 +424,7 @@ export async function generatePdfReport(
     `${r.twoM}/${r.twoA}`, `${r.twoPct}%`,
     `${r.threeM}/${r.threeA}`, `${r.threePct}%`,
     `${r.ftM}/${r.ftA}`, `${r.ftPct}%`,
-    `${r.pts}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.pf}`,
+    `${r.pts}`, `${r.oReb}`, `${r.dReb}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.pf}`,
   ]);
 
   autoTable(doc, {
