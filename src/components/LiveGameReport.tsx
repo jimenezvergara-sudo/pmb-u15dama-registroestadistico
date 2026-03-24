@@ -60,7 +60,7 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
     const fouls = pActions.filter(a => a.type === 'foul').length;
     const fg = shots.filter(s => s.points >= 2);
     const fgm = fg.filter(s => s.made).length;
-    return { ...p, pts, reb, ast, stl, tov, fouls, fgm, fga: fg.length };
+    return { ...p, pts, reb, oReb, dReb, ast, stl, tov, fouls, fgm, fga: fg.length };
   }).sort((a, b) => b.pts - a.pts);
 
   const handleShareWhatsApp = () => {
