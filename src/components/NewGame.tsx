@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Player, GameLeg } from '@/types/basketball';
-import { Play } from 'lucide-react';
+import { Player, GameLeg, Game } from '@/types/basketball';
+import { Play, ClipboardList } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
+import GameEventEditor from '@/components/GameEventEditor';
 
 const NewGame: React.FC = () => {
-  const { players, startGame, tournaments, teams } = useApp();
+  const { players, startGame, tournaments, teams, games, updateGame } = useApp();
+  const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [customOpponent, setCustomOpponent] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set());
@@ -155,6 +157,43 @@ const NewGame: React.FC = () => {
       >
         <Play className="w-5 h-5" /> Iniciar Partido
       </Button>
+
+      {/* Editar partido anterior */}
+      {games.length > 0 && (
+        <div className="space-y-2 pt-2 border-t border-border">
+          <p className="text-sm font-bold text-muted-foreground flex items-center gap-1.5">
+            <ClipboardList className="w-4 h-4" /> Editar acciones de partido anterior
+          </p>
+          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+            {games.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(g => {
+              const teamPts = g.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
+              const oppPts = (g.opponentScores || []).reduce((sum, s) => sum + s.points, 0);
+              return (
+                <button
+                  key={g.id}
+                  onClick={() => setEditingGame(g)}
+                  className="w-full flex items-center justify-between p-2.5 rounded-lg bg-card border border-border/60 hover:border-primary/40 transition-colors text-left tap-feedback"
+                >
+                  <div>
+                    <p className="text-xs font-bold text-foreground">vs {g.opponentName}</p>
+                    <p className="text-[10px] text-muted-foreground">{new Date(g.date).toLocaleDateString()}</p>
+                  </div>
+                  <span className="text-sm font-extrabold text-foreground">{teamPts} - {oppPts}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {editingGame && (
+        <GameEventEditor
+          game={editingGame}
+          open={!!editingGame}
+          onClose={() => setEditingGame(null)}
+          onSave={updateGame}
+        />
+      )}
     </div>
   );
 };
