@@ -22,6 +22,7 @@ interface AppContextValue extends Omit<AppState, 'loading'> {
   removeGame: (id: string) => void;
   updateGame: (game: Game) => void;
   addTournament: (t: Omit<Tournament, 'id'>) => void;
+  removeTournament: (id: string) => void;
   addTeam: (t: Omit<Team, 'id'>) => void;
   removeTeam: (id: string) => void;
   startGame: (opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg, isHome?: boolean) => void;
