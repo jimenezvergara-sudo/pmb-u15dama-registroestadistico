@@ -14,8 +14,8 @@ import logoBasqest from '@/assets/logo-basqest.png';
 
 const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSelect }) => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
-    <img src={logoBasqest} alt="BASQEST+" className="w-24 h-24 mb-4" />
-    <h1 className="text-3xl font-black text-primary tracking-tight mb-1">BASQEST+</h1>
+    <img src={logoBasqest} alt="BASQUEST+" className="w-24 h-24 mb-4" />
+    <h1 className="text-3xl font-black text-primary tracking-tight mb-1">BASQUEST+</h1>
     <p className="text-sm text-muted-foreground font-semibold mb-8">Inteligencia Deportiva</p>
     <p className="text-sm font-bold text-foreground mb-4">Selecciona la categoría</p>
     <div className="grid grid-cols-2 gap-3 w-full max-w-xs">

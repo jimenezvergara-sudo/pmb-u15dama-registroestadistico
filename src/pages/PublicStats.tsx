@@ -222,7 +222,7 @@ const PublicStats: React.FC = () => {
         <Link to="/">
           <Button variant="default" size="sm" className="gap-2">
             <img src={logoBasqest} alt="" className="w-4 h-4" />
-            Probar BASQEST+ Gratis
+            Probar BASQUEST+ Gratis
           </Button>
         </Link>
       </div>

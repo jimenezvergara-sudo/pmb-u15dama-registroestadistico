@@ -391,7 +391,7 @@ const Dashboard: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(250, 15%, 86%)" />
               <XAxis dataKey="quarter" tick={{ fontSize: 11, fontWeight: 700 }} />
               <YAxis tick={{ fontSize: 10 }} width={25} />
-              <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }} formatter={(val: number, name: string) => [`${val} pts`, name === 'points' ? 'BASQEST+' : 'Rival']} />
+              <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }} formatter={(val: number, name: string) => [`${val} pts`, name === 'points' ? 'BASQUEST+' : 'Rival']} />
               <Area type="monotone" dataKey="points" stroke="hsl(268, 76%, 52%)" fill="url(#primaryGrad)" strokeWidth={2.5} />
               <Area type="monotone" dataKey="rival" stroke="hsl(0, 75%, 55%)" fill="url(#rivalGrad)" strokeWidth={2} strokeDasharray="4 3" />
             </AreaChart>

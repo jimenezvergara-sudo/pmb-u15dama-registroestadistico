@@ -207,7 +207,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <img src={logoBasqest} alt="BASQEST+" className="w-14 h-14 rounded-xl shadow-lg ring-2 ring-primary-foreground/20" />
+            <img src={logoBasqest} alt="BASQUEST+" className="w-14 h-14 rounded-xl shadow-lg ring-2 ring-primary-foreground/20" />
             <button
               onClick={signOut}
               className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"

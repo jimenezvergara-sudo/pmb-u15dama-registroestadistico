@@ -786,6 +786,6 @@ export async function generatePdfReport(
   }
 
   // Save
-  const fileName = `BASQEST_Report_${options.teamName || 'Stats'}_${new Date().toISOString().slice(0, 10)}.pdf`;
+  const fileName = `BASQUEST_Report_${options.teamName || 'Stats'}_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(fileName);
 }

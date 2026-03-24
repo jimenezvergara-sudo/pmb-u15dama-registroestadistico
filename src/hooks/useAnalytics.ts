@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-const SESSION_KEY = 'basqest_session_id';
+const SESSION_KEY = 'basquest_session_id';
 
 const getSessionId = (): string => {
   let id = sessionStorage.getItem(SESSION_KEY);

@@ -73,7 +73,7 @@ const ShareStatsButton: React.FC = () => {
 
   const shareWhatsApp = () => {
     if (!shareUrl) return;
-    const text = `📊 Mira las estadísticas de ${myTeamName || 'mi equipo'} en BASQEST+:\n${shareUrl}`;
+    const text = `📊 Mira las estadísticas de ${myTeamName || 'mi equipo'} en BASQUEST+:\n${shareUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
