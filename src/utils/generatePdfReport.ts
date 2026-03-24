@@ -458,44 +458,55 @@ export async function generatePdfReport(
 
   const tableBody = boxRows.map(r => [
     `#${r.number} ${r.name}`,
+    `${r.pts}`,
     `${r.fgm}/${r.fga}`, `${r.fgPct}%`,
     `${r.twoM}/${r.twoA}`, `${r.twoPct}%`,
     `${r.threeM}/${r.threeA}`, `${r.threePct}%`,
     `${r.ftM}/${r.ftA}`, `${r.ftPct}%`,
-    `${r.pts}`, `${r.oReb}`, `${r.dReb}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.pf}`,
+    `${r.oReb}`, `${r.dReb}`, `${r.reb}`,
+    `${r.ast}`, `${r.stl}`, `${r.tov}`, `${r.pf}`,
+    `${r.eFg}%`, `${r.ts}%`,
   ]);
 
   autoTable(doc, {
     startY: y,
-    head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'PF']],
+    head: [['Jugadora', 'PTS', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG%', 'TS%']],
     body: tableBody,
     margin: { left: M, right: M },
-    styles: { fontSize: 7, cellPadding: 1.8, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2 },
-    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 7 },
+    styles: { fontSize: 6, cellPadding: 1.5, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2, overflow: 'ellipsize' },
+    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 6 },
     bodyStyles: { fillColor: WHITE },
     alternateRowStyles: { fillColor: TABLE_ALT },
     columnStyles: {
-      0: { cellWidth: 30, fontStyle: 'bold' },
-      9: { fontStyle: 'bold', halign: 'center', fillColor: [245, 240, 255] },
-      1: { halign: 'center' }, 2: { halign: 'center' }, 3: { halign: 'center' }, 4: { halign: 'center' },
-      5: { halign: 'center' }, 6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
+      0: { cellWidth: 26, fontStyle: 'bold' },
+      1: { fontStyle: 'bold', halign: 'center', fillColor: [245, 240, 255] },
+      2: { halign: 'center' }, 3: { halign: 'center' }, 4: { halign: 'center' }, 5: { halign: 'center' },
+      6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' }, 9: { halign: 'center' },
       10: { halign: 'center' }, 11: { halign: 'center' }, 12: { halign: 'center' }, 13: { halign: 'center' },
+      14: { halign: 'center' }, 15: { halign: 'center' }, 16: { halign: 'center' },
+      17: { halign: 'center', fontStyle: 'bold' }, 18: { halign: 'center', fontStyle: 'bold' },
     },
     theme: 'grid',
     didParseCell: (data) => {
       if (data.section === 'body') {
         const ci = data.column.index;
         const val = parseInt(data.cell.raw as string);
-        if ([2, 4, 6, 8].includes(ci) && !isNaN(val)) {
-          if (ci === 6 && val >= 40) data.cell.styles.textColor = [...SUCCESS];
-          else if (ci === 6 && val < 25 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
-          else if ([2, 4].includes(ci) && val >= 50) data.cell.styles.textColor = [...SUCCESS];
-          else if ([2, 4].includes(ci) && val < 30 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
-          else if (ci === 8 && val >= 75) data.cell.styles.textColor = [...SUCCESS];
-          else if (ci === 8 && val < 50 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+        // % columns: 3(TC%), 5(2PT%), 7(3PT%), 9(TL%)
+        if ([3, 5, 7, 9].includes(ci) && !isNaN(val)) {
+          if (ci === 7 && val >= 40) data.cell.styles.textColor = [...SUCCESS];
+          else if (ci === 7 && val < 25 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+          else if ([3, 5].includes(ci) && val >= 50) data.cell.styles.textColor = [...SUCCESS];
+          else if ([3, 5].includes(ci) && val < 30 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+          else if (ci === 9 && val >= 75) data.cell.styles.textColor = [...SUCCESS];
+          else if (ci === 9 && val < 50 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
         }
-        // Highlight PTS column
-        if (ci === 9) data.cell.styles.textColor = [...PURPLE];
+        // PTS column
+        if (ci === 1) data.cell.styles.textColor = [...PURPLE];
+        // eFG% and TS%
+        if ([17, 18].includes(ci) && !isNaN(val)) {
+          if (val >= 55) data.cell.styles.textColor = [...SUCCESS];
+          else if (val < 40 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+        }
       }
     },
   });
