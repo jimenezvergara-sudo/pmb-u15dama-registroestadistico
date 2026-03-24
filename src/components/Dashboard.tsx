@@ -150,6 +150,10 @@ const Dashboard: React.FC = () => {
       courtTimePct = gamesWithData > 0 ? Math.round(totalPct / gamesWithData) : 0;
     }
 
+    const eFG = fga > 0 ? Math.round(((twoM + 0.5 * threeM) / fga) * 100) : 0;
+    const tsDenom = 2 * (fga + 0.44 * ftA);
+    const ts = tsDenom > 0 ? Math.round((pts / tsDenom) * 100) : 0;
+
     return {
       player, pts, fga, fgm, twoA, twoM, threeA, threeM, ftA, ftM,
       reb, ast, stl, pf, courtTimePct,
@@ -157,6 +161,7 @@ const Dashboard: React.FC = () => {
       twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
       ftPct: ftA > 0 ? Math.round((ftM / ftA) * 100) : 0,
+      eFG, ts,
     };
   }).sort((a, b) => b.pts - a.pts);
 
