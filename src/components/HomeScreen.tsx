@@ -196,43 +196,51 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
 
   const totalShotsAll = allShots.length;
   const madeAll = allShots.filter(s => s.made).length;
-  const pctPosesion = totalShotsAll > 0 ? ((madeAll / totalShotsAll) * 100).toFixed(1) : '0.0';
+  const pctPosesion = totalShotsAll > 0 ? Math.round((madeAll / totalShotsAll) * 100) : 0;
 
   const doublesAttempted = allShots.filter(s => s.points === 2).length;
   const doublesMade = allShots.filter(s => s.points === 2 && s.made).length;
-  const pctDobles = doublesAttempted > 0 ? ((doublesMade / doublesAttempted) * 100).toFixed(1) : '0.0';
+  const pctDobles = doublesAttempted > 0 ? Math.round((doublesMade / doublesAttempted) * 100) : 0;
+
+  const triplesAttemptedAll = allShots.filter(s => s.points === 3).length;
+  const triplesMadeAll = allShots.filter(s => s.points === 3 && s.made).length;
+  const pctTriples = triplesAttemptedAll > 0 ? Math.round((triplesMadeAll / triplesAttemptedAll) * 100) : 0;
 
   const ftAttempted = allShots.filter(s => s.points === 1).length;
   const ftMadeAll = allShots.filter(s => s.points === 1 && s.made).length;
-  const pctTL = ftAttempted > 0 ? ((ftMadeAll / ftAttempted) * 100).toFixed(1) : '0.0';
+  const pctTL = ftAttempted > 0 ? Math.round((ftMadeAll / ftAttempted) * 100) : 0;
 
   const fga = allShots.filter(s => s.points >= 2).length;
   const twoMade = doublesMade;
-  const threeMade = allShots.filter(s => s.points === 3 && s.made).length;
-  const eFG = fga > 0 ? (((twoMade + 0.5 * threeMade) / fga) * 100).toFixed(1) : '0.0';
+  const threeMade = triplesMadeAll;
+  const eFG = fga > 0 ? Math.round(((twoMade + 0.5 * threeMade) / fga) * 100) : 0;
 
   const totalPtsAll = allShots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
   const tsDenom = 2 * (fga + 0.44 * ftAttempted);
-  const tsPercent = tsDenom > 0 ? ((totalPtsAll / tsDenom) * 100).toFixed(1) : '0.0';
+  const tsPercent = tsDenom > 0 ? Math.round((totalPtsAll / tsDenom) * 100) : 0;
 
-  const productivityCards = [
+  const productivityRow1 = [
     { label: 'EF. POSESIÓN', value: `${pctPosesion}%` },
-    { label: 'EF. DOBLES', value: `${pctDobles}%` },
-    { label: 'EF. TL', value: `${pctTL}%` },
     {
       label: 'eFG%', value: `${eFG}%`,
       info: {
         title: 'eFG% — Effective Field Goal Percentage',
-        description: 'El eFG% (Effective Field Goal Percentage) ajusta el porcentaje de tiros de campo para reflejar que los triples valen más que los dobles.\n\nFórmula:\n(Dobles anotados + 0.5 × Triples anotados) ÷ Total de tiros de campo intentados × 100\n\nEjemplo: Si una jugadora anota 4 dobles y 2 triples en 12 intentos de campo:\neFG% = (4 + 0.5 × 2) ÷ 12 × 100 = 41.7%',
+        description: 'El eFG% (Effective Field Goal Percentage) ajusta el porcentaje de tiros de campo para reflejar que los triples valen más que los dobles.\n\nFórmula:\n(Dobles anotados + 0.5 × Triples anotados) ÷ Total de tiros de campo intentados × 100',
       },
     },
     {
       label: 'TS%', value: `${tsPercent}%`,
       info: {
         title: 'TS% — True Shooting Percentage',
-        description: 'El True Shooting Percentage (TS%) es la métrica avanzada para medir la eficiencia anotadora, al incluir triples, tiros de campo de dos puntos y tiros libres en una sola fórmula.\n\nFórmula:\nPuntos convertidos ÷ (2 × (Tiros de campo intentados + 0.44 × Tiros libres intentados)) × 100\n\nEjemplo: Si una jugadora anota 20 puntos con 12 tiros de campo y 6 tiros libres intentados:\nTS% = 20 ÷ (2 × (12 + 0.44 × 6)) × 100 = 69.4%',
+        description: 'El True Shooting Percentage (TS%) es la métrica avanzada para medir la eficiencia anotadora, al incluir triples, tiros de campo de dos puntos y tiros libres en una sola fórmula.\n\nFórmula:\nPuntos convertidos ÷ (2 × (Tiros de campo intentados + 0.44 × Tiros libres intentados)) × 100',
       },
     },
+  ];
+
+  const productivityRow2 = [
+    { label: 'EF. DOBLES', value: `${pctDobles}%` },
+    { label: 'EF. TL', value: `${pctTL}%` },
+    { label: 'EF. TRIPLES', value: `${pctTriples}%` },
   ];
 
   return (
