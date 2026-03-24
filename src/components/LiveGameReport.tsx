@@ -51,7 +51,9 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
     const shots = allShots.filter(s => s.playerId === p.id);
     const pts = shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
     const pActions = allActions.filter(a => a.playerId === p.id);
-    const reb = pActions.filter(a => isRebound(a.type)).length;
+    const oReb = pActions.filter(a => a.type === 'offensive_rebound').length;
+    const dReb = pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length;
+    const reb = oReb + dReb;
     const ast = pActions.filter(a => a.type === 'assist').length;
     const stl = pActions.filter(a => a.type === 'steal').length;
     const tov = pActions.filter(a => a.type === 'turnover').length;
