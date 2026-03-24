@@ -498,7 +498,9 @@ const Dashboard: React.FC = () => {
                     <div className={`text-[9px] ${row.ftPct >= 75 ? 'text-success font-bold' : row.ftA > 0 && row.ftPct < 50 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>{row.ftPct}%</div>
                   </td>
                   <td className="text-center py-2 px-0.5 font-extrabold">{row.pts}</td>
-                  <td className="text-center py-2 px-0.5 font-semibold">{row.reb}</td>
+                  <td className="text-center py-2 px-0.5 font-semibold">{row.oReb}</td>
+                  <td className="text-center py-2 px-0.5 font-semibold">{row.dReb}</td>
+                  <td className="text-center py-2 px-0.5 font-bold">{row.reb}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">{row.ast}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">{row.stl}</td>
                   <td className={`text-center py-2 px-0.5 font-semibold ${row.pf >= 5 ? 'text-destructive font-bold' : row.pf === 4 ? 'text-amber-500 font-bold' : ''}`}>{row.pf}</td>
