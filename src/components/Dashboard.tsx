@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
   if (games.length === 0) {
     return (
       <div className="p-4 flex flex-col items-center justify-center h-full gap-4">
-        <img src={logoBasqest} alt="BASQEST+" className="w-24 h-24 opacity-30" />
+        <img src={logoBasqest} alt="BASQUEST+" className="w-24 h-24 opacity-30" />
         <p className="text-muted-foreground text-center">No hay partidos registrados aún</p>
       </div>
     );
