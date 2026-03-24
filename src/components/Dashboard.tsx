@@ -463,6 +463,8 @@ const Dashboard: React.FC = () => {
                 <th className="text-center py-2 px-0.5 font-bold">3PT</th>
                 <th className="text-center py-2 px-0.5 font-bold">TL</th>
                 <th className="text-center py-2 px-0.5 font-bold">PTS</th>
+                <th className="text-center py-2 px-0.5 font-bold">RO</th>
+                <th className="text-center py-2 px-0.5 font-bold">RD</th>
                 <th className="text-center py-2 px-0.5 font-bold">REB</th>
                 <th className="text-center py-2 px-0.5 font-bold">AST</th>
                 <th className="text-center py-2 px-0.5 font-bold">STL</th>
