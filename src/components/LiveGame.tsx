@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { QuarterId, QUARTER_LABELS } from '@/types/basketball';
+import { QuarterId, QUARTER_LABELS, ActionType } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
 import QuickActionFAB from '@/components/QuickActionFAB';
 import SubstitutionDialog from '@/components/SubstitutionDialog';
