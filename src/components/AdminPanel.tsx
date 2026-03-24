@@ -10,6 +10,7 @@ import { Constants } from '@/integrations/supabase/types';
 import type { Enums } from '@/integrations/supabase/types';
 import AdManager from '@/components/AdManager';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import OrganizationManager from '@/components/OrganizationManager';
 
 interface AdminUser {
   user_id: string;
