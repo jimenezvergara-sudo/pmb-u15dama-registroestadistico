@@ -364,6 +364,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
           {totalGames} {totalGames === 1 ? 'partido jugado' : 'partidos jugados'}
         </p>
       </div>
+      {/* Info Dialog */}
+      <Dialog open={!!infoDialog} onOpenChange={(open) => !open && setInfoDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold">{infoDialog?.title}</DialogTitle>
+            <DialogDescription className="whitespace-pre-line text-sm mt-2">
+              {infoDialog?.description}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
