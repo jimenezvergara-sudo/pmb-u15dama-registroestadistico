@@ -133,7 +133,7 @@ export async function generatePdfReport(
     doc.setFontSize(7);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...CYAN);
-    doc.text('BASQEST+', M, H - 4);
+    doc.text('BASQUEST+', M, H - 4);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(180, 175, 200);
     doc.text(`${options.category} · ${new Date().toLocaleDateString()}`, M + 22, H - 4);
