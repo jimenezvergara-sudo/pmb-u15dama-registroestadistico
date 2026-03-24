@@ -150,6 +150,10 @@ const Dashboard: React.FC = () => {
       courtTimePct = gamesWithData > 0 ? Math.round(totalPct / gamesWithData) : 0;
     }
 
+    const eFG = fga > 0 ? Math.round(((twoM + 0.5 * threeM) / fga) * 100) : 0;
+    const tsDenom = 2 * (fga + 0.44 * ftA);
+    const ts = tsDenom > 0 ? Math.round((pts / tsDenom) * 100) : 0;
+
     return {
       player, pts, fga, fgm, twoA, twoM, threeA, threeM, ftA, ftM,
       reb, ast, stl, pf, courtTimePct,
@@ -157,6 +161,7 @@ const Dashboard: React.FC = () => {
       twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
       ftPct: ftA > 0 ? Math.round((ftM / ftA) * 100) : 0,
+      eFG, ts,
     };
   }).sort((a, b) => b.pts - a.pts);
 
@@ -458,6 +463,8 @@ const Dashboard: React.FC = () => {
                 <th className="text-center py-2 px-0.5 font-bold">AST</th>
                 <th className="text-center py-2 px-0.5 font-bold">STL</th>
                 <th className="text-center py-2 px-0.5 font-bold">PF</th>
+                <th className="text-center py-2 px-0.5 font-bold">eFG%</th>
+                <th className="text-center py-2 px-0.5 font-bold">TS%</th>
                 <th className="text-center py-2 px-0.5 font-bold">MIN%</th>
               </tr>
             </thead>
@@ -489,6 +496,8 @@ const Dashboard: React.FC = () => {
                   <td className="text-center py-2 px-0.5 font-semibold">{row.ast}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">{row.stl}</td>
                   <td className={`text-center py-2 px-0.5 font-semibold ${row.pf >= 5 ? 'text-destructive font-bold' : row.pf === 4 ? 'text-amber-500 font-bold' : ''}`}>{row.pf}</td>
+                  <td className={`text-center py-2 px-0.5 font-semibold ${row.eFG >= 50 ? 'text-success font-bold' : row.fga > 0 && row.eFG < 30 ? 'text-destructive font-bold' : ''}`}>{row.fga > 0 ? `${row.eFG}%` : '—'}</td>
+                  <td className={`text-center py-2 px-0.5 font-semibold ${row.ts >= 55 ? 'text-success font-bold' : row.fga > 0 && row.ts < 40 ? 'text-destructive font-bold' : ''}`}>{row.fga > 0 || row.ftA > 0 ? `${row.ts}%` : '—'}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">
                     {row.courtTimePct > 0 ? `${row.courtTimePct}%` : '—'}
                   </td>

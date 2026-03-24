@@ -235,8 +235,56 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
         </div>
       )}
 
+      {/* Productividad del Equipo */}
+      {(() => {
+        const totalShotsAll = allShots.length;
+        const madeAll = allShots.filter(s => s.made).length;
+        const pctPosesion = totalShotsAll > 0 ? ((madeAll / totalShotsAll) * 100).toFixed(1) : '0.0';
+
+        const doublesAttempted = allShots.filter(s => s.points === 2).length;
+        const doublesMade = allShots.filter(s => s.points === 2 && s.made).length;
+        const pctDobles = doublesAttempted > 0 ? ((doublesMade / doublesAttempted) * 100).toFixed(1) : '0.0';
+
+        const ftAttempted = allShots.filter(s => s.points === 1).length;
+        const ftMadeAll = allShots.filter(s => s.points === 1 && s.made).length;
+        const pctTL = ftAttempted > 0 ? ((ftMadeAll / ftAttempted) * 100).toFixed(1) : '0.0';
+
+        const fga = allShots.filter(s => s.points >= 2).length;
+        const twoMade = doublesMade;
+        const threeMade = allShots.filter(s => s.points === 3 && s.made).length;
+        const eFG = fga > 0 ? (((twoMade + 0.5 * threeMade) / fga) * 100).toFixed(1) : '0.0';
+
+        const totalPtsAll = allShots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
+        const tsDenom = 2 * (fga + 0.44 * ftAttempted);
+        const tsPercent = tsDenom > 0 ? ((totalPtsAll / tsDenom) * 100).toFixed(1) : '0.0';
+
+        const prodCards = [
+          { label: 'EF. POSESIÓN', value: `${pctPosesion}%` },
+          { label: 'EF. DOBLES', value: `${pctDobles}%` },
+          { label: 'EF. TL', value: `${pctTL}%` },
+          { label: 'eFG%', value: `${eFG}%` },
+          { label: 'TS%', value: `${tsPercent}%` },
+        ];
+
+        return (
+          <div className={`px-4 ${(myTeamName || myTeamLogo) ? 'mt-3' : '-mt-6'} relative z-10`}>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2 text-center">Productividad del Equipo</p>
+            <div className="grid grid-cols-5 gap-2">
+              {prodCards.map(stat => (
+                <Card key={stat.label} className="bg-card border border-primary/30 shadow-md">
+                  <CardContent className="p-2 text-center">
+                    <p className="text-[7px] font-bold text-muted-foreground uppercase tracking-wider leading-tight">{stat.label}</p>
+                    <p className="text-lg font-black text-primary leading-tight mt-0.5">{stat.value}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Stat cards */}
-      <div className={`grid grid-cols-3 gap-3 px-4 ${(myTeamName || myTeamLogo) ? 'mt-3' : '-mt-6'} relative z-10`}>
+      <div className="grid grid-cols-3 gap-3 px-4 mt-3 relative z-10">
         {[
           { label: 'RÉCORD', value: `${wins}-${losses}` },
           { label: 'PTS/P', value: ptsPerGame },
