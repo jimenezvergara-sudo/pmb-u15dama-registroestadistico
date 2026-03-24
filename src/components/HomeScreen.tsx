@@ -266,7 +266,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
 
       {/* Productividad del Equipo */}
       <div className="px-4 mt-4 relative z-10">
-        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2 text-center">Productividad del Equipo</p>
+        <h2 className="text-base font-extrabold text-foreground mb-3">Productividad del Equipo</h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {productivityCards.map(stat => (
             <Card key={stat.label} className="bg-card border border-primary/30 shadow-md">
