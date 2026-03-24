@@ -190,7 +190,9 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
                   <td className="py-1 font-bold truncate max-w-[80px]">#{p.number} {p.name.split(' ')[0]}</td>
                   <td className="text-center font-black">{p.pts}</td>
                   <td className="text-center">{p.fgm}/{p.fga}</td>
-                  <td className="text-center">{p.reb}</td>
+                  <td className="text-center">{p.oReb}</td>
+                  <td className="text-center">{p.dReb}</td>
+                  <td className="text-center font-bold">{p.reb}</td>
                   <td className="text-center">{p.ast}</td>
                   <td className="text-center">{p.stl}</td>
                   <td className="text-center">{p.fouls}</td>
