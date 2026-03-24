@@ -496,6 +496,8 @@ const Dashboard: React.FC = () => {
                   <td className="text-center py-2 px-0.5 font-semibold">{row.ast}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">{row.stl}</td>
                   <td className={`text-center py-2 px-0.5 font-semibold ${row.pf >= 5 ? 'text-destructive font-bold' : row.pf === 4 ? 'text-amber-500 font-bold' : ''}`}>{row.pf}</td>
+                  <td className={`text-center py-2 px-0.5 font-semibold ${row.eFG >= 50 ? 'text-success font-bold' : row.fga > 0 && row.eFG < 30 ? 'text-destructive font-bold' : ''}`}>{row.fga > 0 ? `${row.eFG}%` : '—'}</td>
+                  <td className={`text-center py-2 px-0.5 font-semibold ${row.ts >= 55 ? 'text-success font-bold' : row.fga > 0 && row.ts < 40 ? 'text-destructive font-bold' : ''}`}>{row.fga > 0 || row.ftA > 0 ? `${row.ts}%` : '—'}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">
                     {row.courtTimePct > 0 ? `${row.courtTimePct}%` : '—'}
                   </td>
