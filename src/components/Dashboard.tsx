@@ -194,7 +194,7 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src={logoBasqest} alt="BASQEST+" className="w-10 h-10" />
+          <img src={logoBasqest} alt="BASQUEST+" className="w-10 h-10" />
           <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
         </div>
         <div className="flex items-center gap-2">
