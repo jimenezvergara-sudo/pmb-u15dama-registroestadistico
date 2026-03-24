@@ -810,24 +810,39 @@ export async function generatePdfReport(
       ctx.drawImage(img, 0, 0);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 
-      // Add on last page, above footer
       const bannerW = W - M * 2;
       const bannerH = Math.min(30, (img.naturalHeight / img.naturalWidth) * bannerW);
-      const bannerY = H - 28 - bannerH;
+
+      // Check if there's room on the current page (above footer)
+      const spaceNeeded = bannerH + 14; // banner + label + margin
+      const availableSpace = H - 16 - y; // 16 = footer height + margin
+
+      if (availableSpace < spaceNeeded) {
+        // Add a new page for the banner
+        doc.addPage();
+        drawPageBg();
+        pageNum++;
+        drawHeader();
+        // y is set by drawHeader to 46
+        y = 46;
+      }
 
       // Premium label
       doc.setFillColor(...GOLD);
-      doc.roundedRect(M, bannerY - 6, 28, 5, 1, 1, 'F');
+      doc.roundedRect(M, y, 28, 5, 1, 1, 'F');
       doc.setFontSize(6);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...NEAR_BLACK);
-      doc.text('⭐ PREMIUM', M + 14, bannerY - 2.5, { align: 'center' });
+      doc.text('⭐ PREMIUM', M + 14, y + 3.5, { align: 'center' });
+      y += 7;
 
       // Banner image
-      doc.addImage(dataUrl, 'JPEG', M, bannerY, bannerW, bannerH);
+      doc.addImage(dataUrl, 'JPEG', M, y, bannerW, bannerH);
       doc.setDrawColor(...GOLD);
       doc.setLineWidth(0.5);
-      doc.roundedRect(M, bannerY, bannerW, bannerH, 2, 2, 'S');
+      doc.roundedRect(M, y, bannerW, bannerH, 2, 2, 'S');
+
+      drawFooter(pageNum);
     } catch {
       // silently skip if image fails to load
     }
