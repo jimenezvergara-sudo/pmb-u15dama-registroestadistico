@@ -482,6 +482,8 @@ export async function generatePdfReport(
     { l: '2PT', v: `${tt.twoA > 0 ? Math.round((tt.twoM / tt.twoA) * 100) : 0}%`, c: WHITE },
     { l: '3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
     { l: 'TL', v: `${tt.ftA > 0 ? Math.round((tt.ftM / tt.ftA) * 100) : 0}%`, c: WHITE },
+    { l: 'RO', v: `${tt.oReb}`, c: WHITE },
+    { l: 'RD', v: `${tt.dReb}`, c: WHITE },
     { l: 'REB', v: `${tt.reb}`, c: WHITE },
     { l: 'AST', v: `${tt.ast}`, c: WHITE },
     { l: 'STL', v: `${tt.stl}`, c: WHITE },
