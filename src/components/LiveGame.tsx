@@ -231,6 +231,13 @@ const LiveGame: React.FC = () => {
               OT
             </button>
           </div>
+          <button
+            onClick={() => setShowReport(true)}
+            className="px-2.5 py-1 rounded text-xs font-bold tap-feedback bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1"
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            📊 Informe
+          </button>
         </div>
       </div>
 
