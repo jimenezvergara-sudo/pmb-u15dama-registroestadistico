@@ -76,15 +76,21 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
 
   const handleDownloadPdf = async () => {
     try {
-      await generatePdfReport({
-        games: [game],
-        players: game.roster,
-        teamName: myTeamName,
-        teamLogo: myTeamLogo,
-        appLogo: logoBasqest,
-        category: activeCategory,
-        filterLabel: `Informe en Vivo — ${QUARTER_LABELS[game.currentQuarter]}`,
-      });
+      await generatePdfReport(
+        [game],
+        [game],
+        game.roster,
+        {
+          teamName: myTeamName,
+          teamLogo: myTeamLogo,
+          appLogo: logoBasqest,
+          category: activeCategory,
+          filterLabel: `Informe en Vivo — ${QUARTER_LABELS[game.currentQuarter]}`,
+          gameLabel: `vs ${game.opponentName}`,
+          quarterFilter: 'ALL',
+          playerFilter: 'ALL',
+        },
+      );
     } catch (e) {
       console.error(e);
     }
