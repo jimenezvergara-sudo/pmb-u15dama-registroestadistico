@@ -185,24 +185,72 @@ export async function generatePdfReport(
   ];
   cards.forEach((c, i) => {
     const cx = M + i * (cardW + 4);
-    // Card bg
     doc.setFillColor(...WHITE);
     doc.roundedRect(cx, y, cardW, 26, 4, 4, 'F');
-    // Top accent line
     doc.setFillColor(...c.color);
     doc.roundedRect(cx + 8, y, cardW - 16, 2, 1, 1, 'F');
-    // Label
     doc.setFontSize(6.5);
     doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
     doc.text(c.label, cx + cardW / 2, y + 10, { align: 'center' });
-    // Value
     doc.setFontSize(20);
     doc.setTextColor(...NEAR_BLACK);
     doc.setFont('helvetica', 'bold');
     doc.text(c.value, cx + cardW / 2, y + 22, { align: 'center' });
   });
   y += 32;
+
+  // ── Productivity cards ──
+  sectionTitle('Productividad del Equipo');
+
+  const allShotsGlobal = filteredGames.flatMap(g => g.shots);
+  const totalShotsCount = allShotsGlobal.length;
+  const madeCount = allShotsGlobal.filter(s => s.made).length;
+  const pctPossession = totalShotsCount > 0 ? Math.round((madeCount / totalShotsCount) * 100) : 0;
+  const dblAtt = allShotsGlobal.filter(s => s.points === 2).length;
+  const dblMade = allShotsGlobal.filter(s => s.points === 2 && s.made).length;
+  const pctDbl = dblAtt > 0 ? Math.round((dblMade / dblAtt) * 100) : 0;
+  const tplAtt = allShotsGlobal.filter(s => s.points === 3).length;
+  const tplMade = allShotsGlobal.filter(s => s.points === 3 && s.made).length;
+  const pctTpl = tplAtt > 0 ? Math.round((tplMade / tplAtt) * 100) : 0;
+  const ftAtt2 = allShotsGlobal.filter(s => s.points === 1).length;
+  const ftMade2 = allShotsGlobal.filter(s => s.points === 1 && s.made).length;
+  const pctFt = ftAtt2 > 0 ? Math.round((ftMade2 / ftAtt2) * 100) : 0;
+  const fga2 = allShotsGlobal.filter(s => s.points >= 2).length;
+  const eFgVal = fga2 > 0 ? Math.round(((dblMade + 0.5 * tplMade) / fga2) * 100) : 0;
+  const ptsTot = allShotsGlobal.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
+  const tsDen = 2 * (fga2 + 0.44 * ftAtt2);
+  const tsVal = tsDen > 0 ? Math.round((ptsTot / tsDen) * 100) : 0;
+
+  const prodCards = [
+    { label: 'EF. POSESIÓN', value: `${pctPossession}%`, color: GOLD },
+    { label: 'eFG%', value: `${eFgVal}%`, color: CYAN },
+    { label: 'TS%', value: `${tsVal}%`, color: PURPLE_LIGHT },
+    { label: 'EF. DOBLES', value: `${pctDbl}%`, color: GOLD },
+    { label: 'EF. TL', value: `${pctFt}%`, color: CYAN },
+    { label: 'EF. TRIPLES', value: `${pctTpl}%`, color: PURPLE_LIGHT },
+  ];
+
+  const pCardW = (W - M * 2 - 10) / 3;
+  prodCards.forEach((c, i) => {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const cx = M + col * (pCardW + 5);
+    const cy = y + row * 22;
+    doc.setFillColor(...WHITE);
+    doc.roundedRect(cx, cy, pCardW, 19, 3, 3, 'F');
+    doc.setFillColor(...c.color);
+    doc.roundedRect(cx + 6, cy, pCardW - 12, 1.5, 0.7, 0.7, 'F');
+    doc.setFontSize(6);
+    doc.setTextColor(...MUTED);
+    doc.setFont('helvetica', 'bold');
+    doc.text(c.label, cx + pCardW / 2, cy + 8, { align: 'center' });
+    doc.setFontSize(14);
+    doc.setTextColor(...NEAR_BLACK);
+    doc.setFont('helvetica', 'bold');
+    doc.text(c.value, cx + pCardW / 2, cy + 16, { align: 'center' });
+  });
+  y += Math.ceil(prodCards.length / 3) * 22 + 6;
 
   // ── Season leaders ──
   const allShots = filteredGames.flatMap(g => g.shots);
