@@ -578,7 +578,7 @@ export async function generatePdfReport(
 
     const chartX = M;
     const chartW = W - M * 2;
-    const chartH = 58;
+    const chartH = 80;
     const maxVal = Math.max(...qData.map(d => Math.max(d.pts, d.opp)), 1);
     const barGroupW = chartW / qData.length;
     const barW = barGroupW * 0.28;
