@@ -259,29 +259,45 @@ export async function generatePdfReport(
   filteredGames.forEach(g => g.roster.forEach(p => rosterMap.set(p.id, p)));
   const roster = Array.from(rosterMap.values());
 
+  const totalShotsAll = allShots.length;
   const playerStats = roster.map(p => {
     const shots = allShots.filter(s => s.playerId === p.id);
     const pts = shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
+    const triplesMade = shots.filter(s => s.points === 3 && s.made).length;
+    const triplesAtt = shots.filter(s => s.points === 3).length;
+    const doblesMade = shots.filter(s => s.points === 2 && s.made).length;
+    const doblesAtt = shots.filter(s => s.points === 2).length;
+    const ftMade = shots.filter(s => s.points === 1 && s.made).length;
+    const ftAtt = shots.filter(s => s.points === 1).length;
+    const pFga = doblesAtt + triplesAtt;
+    const pEfg = pFga > 0 ? Math.round(((doblesMade + 0.5 * triplesMade) / pFga) * 100) : 0;
+    const pTsDen = 2 * (pFga + 0.44 * ftAtt);
+    const pTs = pTsDen > 0 ? Math.round((pts / pTsDen) * 100) : 0;
+    const pActions = allActions.filter(a => a.playerId === p.id);
+    const oReb = pActions.filter(a => a.type === 'offensive_rebound').length;
+    const dReb = pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length;
     return {
-      ...p, pts,
-      triplesMade: shots.filter(s => s.points === 3 && s.made).length,
-      triplesAtt: shots.filter(s => s.points === 3).length,
-      doblesMade: shots.filter(s => s.points === 2 && s.made).length,
-      doblesAtt: shots.filter(s => s.points === 2).length,
-      ftMade: shots.filter(s => s.points === 1 && s.made).length,
-      ftAtt: shots.filter(s => s.points === 1).length,
-      reb: allActions.filter(a => a.playerId === p.id && (a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound')).length,
-      ast: allActions.filter(a => a.playerId === p.id && a.type === 'assist').length,
-      stl: allActions.filter(a => a.playerId === p.id && a.type === 'steal').length,
+      ...p, pts, triplesMade, triplesAtt, doblesMade, doblesAtt, ftMade, ftAtt,
+      eFg: pEfg, ts: pTs, totalShots: shots.length,
+      oReb, dReb, reb: oReb + dReb,
+      ast: pActions.filter(a => a.type === 'assist').length,
+      stl: pActions.filter(a => a.type === 'steal').length,
     };
   });
+
+  // Volume threshold for % leaders (20% of total shots)
+  const minVol = Math.max(1, Math.round(totalShotsAll * 0.2));
 
   const topScorer = [...playerStats].sort((a, b) => b.pts - a.pts)[0];
   const topThrees = [...playerStats].filter(p => p.triplesMade > 0).sort((a, b) => b.triplesMade - a.triplesMade)[0];
   const topDoubles = [...playerStats].filter(p => p.doblesMade > 0).sort((a, b) => b.doblesMade - a.doblesMade)[0];
+  const topOReb = [...playerStats].filter(p => p.oReb > 0).sort((a, b) => b.oReb - a.oReb)[0];
+  const topDReb = [...playerStats].filter(p => p.dReb > 0).sort((a, b) => b.dReb - a.dReb)[0];
   const topReb = [...playerStats].filter(p => p.reb > 0).sort((a, b) => b.reb - a.reb)[0];
   const topAst = [...playerStats].filter(p => p.ast > 0).sort((a, b) => b.ast - a.ast)[0];
   const topStl = [...playerStats].filter(p => p.stl > 0).sort((a, b) => b.stl - a.stl)[0];
+  const topEfg = [...playerStats].filter(p => p.totalShots >= minVol && (p.doblesAtt + p.triplesAtt) > 0).sort((a, b) => b.eFg - a.eFg)[0];
+  const topTs = [...playerStats].filter(p => p.totalShots >= minVol && (p.doblesAtt + p.triplesAtt) > 0).sort((a, b) => b.ts - a.ts)[0];
 
   sectionTitle('Líderes de Temporada');
 
@@ -289,9 +305,13 @@ export async function generatePdfReport(
     { label: 'PUNTOS', player: topScorer, value: topScorer?.pts, accent: GOLD },
     { label: 'TRIPLES', player: topThrees, value: topThrees?.triplesMade, accent: CYAN },
     { label: 'DOBLES', player: topDoubles, value: topDoubles?.doblesMade, accent: PURPLE_LIGHT },
-    { label: 'REBOTES', player: topReb, value: topReb?.reb, accent: SUCCESS },
+    { label: 'REB. OFENSIVOS', player: topOReb, value: topOReb?.oReb, accent: SUCCESS },
+    { label: 'REB. DEFENSIVOS', player: topDReb, value: topDReb?.dReb, accent: SUCCESS },
+    { label: 'REB. TOTALES', player: topReb, value: topReb?.reb, accent: SUCCESS },
     { label: 'ASISTENCIAS', player: topAst, value: topAst?.ast, accent: CYAN },
     { label: 'ROBOS', player: topStl, value: topStl?.stl, accent: GOLD },
+    { label: 'eFG%', player: topEfg, value: topEfg ? `${topEfg.eFg}%` : undefined, accent: PURPLE_LIGHT },
+    { label: 'TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: CYAN },
   ];
 
   const lColW = (W - M * 2 - 8) / 3;
