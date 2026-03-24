@@ -222,7 +222,7 @@ export async function generatePdfReport(
       doblesAtt: shots.filter(s => s.points === 2).length,
       ftMade: shots.filter(s => s.points === 1 && s.made).length,
       ftAtt: shots.filter(s => s.points === 1).length,
-      reb: allActions.filter(a => a.playerId === p.id && a.type === 'rebound').length,
+      reb: allActions.filter(a => a.playerId === p.id && (a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound')).length,
       ast: allActions.filter(a => a.playerId === p.id && a.type === 'assist').length,
       stl: allActions.filter(a => a.playerId === p.id && a.type === 'steal').length,
     };
