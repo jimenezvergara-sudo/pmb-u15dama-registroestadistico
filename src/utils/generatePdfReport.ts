@@ -83,7 +83,7 @@ export async function generatePdfReport(
     doc.setTextColor(...WHITE);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text('BASQEST+', M, 16);
+    doc.text('BASQUEST+', M, 16);
 
     // Tagline with cyan accent
     doc.setFontSize(8);
