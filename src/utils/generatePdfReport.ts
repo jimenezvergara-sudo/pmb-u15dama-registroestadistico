@@ -429,7 +429,7 @@ export async function generatePdfReport(
 
   autoTable(doc, {
     startY: y,
-    head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'REB', 'AST', 'STL', 'PF']],
+    head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'PF']],
     body: tableBody,
     margin: { left: M, right: M },
     styles: { fontSize: 7, cellPadding: 1.8, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2 },
