@@ -726,8 +726,8 @@ export async function generatePdfReport(
     y += 18;
 
     // Court
-    const courtW = 130;
-    const courtH = 121;
+    const courtW = 87;
+    const courtH = 81;
     const courtX = (W - courtW) / 2;
     const courtY = y;
 
