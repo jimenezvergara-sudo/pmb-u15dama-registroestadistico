@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { QuarterId, QUARTER_LABELS } from '@/types/basketball';
+import { QuarterId, QUARTER_LABELS, ActionType } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
 import QuickActionFAB from '@/components/QuickActionFAB';
 import SubstitutionDialog from '@/components/SubstitutionDialog';
 import StartingLineup from '@/components/StartingLineup';
+import LiveGameReport from '@/components/LiveGameReport';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Undo2 } from 'lucide-react';
+import { Undo2, BarChart3 } from 'lucide-react';
 import logoBasqest from '@/assets/logo-basqest.png';
 import {
   AlertDialog,
@@ -35,6 +36,7 @@ const LiveGame: React.FC = () => {
   const [courtRotation, setCourtRotation] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [pendingQuarter, setPendingQuarter] = useState<QuarterId | null>(null);
+  const [showReport, setShowReport] = useState(false);
 
   // Periodically flush court time every 10s
   useEffect(() => {
@@ -122,14 +124,17 @@ const LiveGame: React.FC = () => {
     toast('Último tiro deshecho', { duration: 1000 });
   };
 
-  const handleQuickAction = (action: 'rebound' | 'assist' | 'steal' | 'turnover' | 'foul') => {
+  const handleQuickAction = (action: ActionType) => {
     if (!selectedPlayer) {
       toast('Selecciona una jugadora primero', { duration: 1500 });
       return;
     }
     recordAction(selectedPlayer, action);
     const player = activeGame.roster.find(p => p.id === selectedPlayer);
-    const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida', foul: 'Falta' };
+    const labels: Record<string, string> = {
+      rebound: 'Rebote', offensive_rebound: 'Rebote Ofensivo', defensive_rebound: 'Rebote Defensivo',
+      assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida', foul: 'Falta',
+    };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
     setSelectedPlayer(null);
 
@@ -226,6 +231,13 @@ const LiveGame: React.FC = () => {
               OT
             </button>
           </div>
+          <button
+            onClick={() => setShowReport(true)}
+            className="px-2.5 py-1 rounded text-xs font-bold tap-feedback bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1"
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            📊 Informe
+          </button>
         </div>
       </div>
 
@@ -380,6 +392,10 @@ const LiveGame: React.FC = () => {
           </AlertDialog>
         </div>
       </div>
+      {/* Live Game Report */}
+      {showReport && activeGame && (
+        <LiveGameReport game={activeGame} onClose={() => setShowReport(false)} />
+      )}
     </div>
   );
 };

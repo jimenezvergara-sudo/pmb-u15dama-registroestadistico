@@ -27,6 +27,8 @@ const QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const ACTION_LABELS: Record<string, string> = {
   rebound: '🏀 Rebote',
+  offensive_rebound: '🏀 Reb. Ofensivo',
+  defensive_rebound: '🏀 Reb. Defensivo',
   assist: '🤝 Asistencia',
   steal: '🖐️ Robo',
   turnover: '❌ Pérdida',

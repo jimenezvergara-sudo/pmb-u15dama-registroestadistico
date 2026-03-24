@@ -222,7 +222,7 @@ export async function generatePdfReport(
       doblesAtt: shots.filter(s => s.points === 2).length,
       ftMade: shots.filter(s => s.points === 1 && s.made).length,
       ftAtt: shots.filter(s => s.points === 1).length,
-      reb: allActions.filter(a => a.playerId === p.id && a.type === 'rebound').length,
+      reb: allActions.filter(a => a.playerId === p.id && (a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound')).length,
       ast: allActions.filter(a => a.playerId === p.id && a.type === 'assist').length,
       stl: allActions.filter(a => a.playerId === p.id && a.type === 'steal').length,
     };
@@ -363,7 +363,7 @@ export async function generatePdfReport(
       twoM, twoA, twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threeM, threeA, threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
       ftM, ftA, ftPct: ftA > 0 ? Math.round((ftM / ftA) * 100) : 0,
-      reb: pActions.filter(a => a.type === 'rebound').length,
+      reb: pActions.filter(a => a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound').length,
       ast: pActions.filter(a => a.type === 'assist').length,
       stl: pActions.filter(a => a.type === 'steal').length,
       pf: pActions.filter(a => a.type === 'foul').length,
