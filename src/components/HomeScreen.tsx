@@ -267,12 +267,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       {/* Productividad del Equipo */}
       <div className="px-4 mt-4 relative z-10">
         <h2 className="text-base font-extrabold text-foreground mb-3">Productividad del Equipo</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {productivityCards.map(stat => (
-            <Card key={stat.label} className="bg-card border border-primary/30 shadow-md">
-              <CardContent className="p-2 text-center">
-                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider leading-tight">{stat.label}</p>
-                <p className="text-lg font-black text-primary leading-tight mt-0.5">{stat.value}</p>
+            <Card key={stat.label} className="bg-card border-2 border-amber-400/70 shadow-xl">
+              <CardContent className="p-3 text-center">
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
+                <p className="text-2xl font-black text-foreground leading-tight mt-1">{stat.value}</p>
               </CardContent>
             </Card>
           ))}
