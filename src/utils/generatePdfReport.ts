@@ -83,7 +83,7 @@ export async function generatePdfReport(
     doc.setTextColor(...WHITE);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text('BASQEST+', M, 16);
+    doc.text('BASQUEST+', M, 16);
 
     // Tagline with cyan accent
     doc.setFontSize(8);
@@ -133,7 +133,7 @@ export async function generatePdfReport(
     doc.setFontSize(7);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...CYAN);
-    doc.text('BASQEST+', M, H - 4);
+    doc.text('BASQUEST+', M, H - 4);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(180, 175, 200);
     doc.text(`${options.category} · ${new Date().toLocaleDateString()}`, M + 22, H - 4);
@@ -296,7 +296,7 @@ export async function generatePdfReport(
       const won = teamPts > oppPts;
       const legLabel = g.leg ? ` (${g.leg === 'ida' ? 'Ida' : 'Vuelta'})` : '';
       const homeLabel = g.isHome === true ? ' (L)' : g.isHome === false ? ' (V)' : '';
-      const teamCol = `${options.teamName || 'BASQEST+'}${homeLabel}`;
+      const teamCol = `${options.teamName || 'BASQUEST+'}${homeLabel}`;
       const oppCol = `${g.opponentName}${g.isHome === true ? ' (V)' : g.isHome === false ? ' (L)' : ''}${legLabel}`;
       return [new Date(g.date).toLocaleDateString(), teamCol, oppCol, `${teamPts} - ${oppPts}`, won ? 'V' : 'D'];
     });
@@ -786,6 +786,6 @@ export async function generatePdfReport(
   }
 
   // Save
-  const fileName = `BASQEST_Report_${options.teamName || 'Stats'}_${new Date().toISOString().slice(0, 10)}.pdf`;
+  const fileName = `BASQUEST_Report_${options.teamName || 'Stats'}_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(fileName);
 }

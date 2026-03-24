@@ -61,7 +61,7 @@ const PublicStats: React.FC = () => {
         <Link to="/">
           <Button variant="outline" className="gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Ir a BASQEST+
+            Ir a BASQUEST+
           </Button>
         </Link>
       </div>
@@ -123,7 +123,7 @@ const PublicStats: React.FC = () => {
           {teamLogo ? (
             <img src={teamLogo} alt={teamName} className="w-12 h-12 rounded-full object-cover border-2 border-primary-foreground/30" />
           ) : (
-            <img src={logoBasqest} alt="BASQEST+" className="w-10 h-10" />
+            <img src={logoBasqest} alt="BASQUEST+" className="w-10 h-10" />
           )}
         </div>
         <h1 className="text-xl font-black text-primary-foreground tracking-tight">
@@ -222,7 +222,7 @@ const PublicStats: React.FC = () => {
         <Link to="/">
           <Button variant="default" size="sm" className="gap-2">
             <img src={logoBasqest} alt="" className="w-4 h-4" />
-            Probar BASQEST+ Gratis
+            Probar BASQUEST+ Gratis
           </Button>
         </Link>
       </div>

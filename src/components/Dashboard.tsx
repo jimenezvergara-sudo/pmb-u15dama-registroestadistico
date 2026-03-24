@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
   if (games.length === 0) {
     return (
       <div className="p-4 flex flex-col items-center justify-center h-full gap-4">
-        <img src={logoBasqest} alt="BASQEST+" className="w-24 h-24 opacity-30" />
+        <img src={logoBasqest} alt="BASQUEST+" className="w-24 h-24 opacity-30" />
         <p className="text-muted-foreground text-center">No hay partidos registrados aún</p>
       </div>
     );
@@ -194,7 +194,7 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src={logoBasqest} alt="BASQEST+" className="w-10 h-10" />
+          <img src={logoBasqest} alt="BASQUEST+" className="w-10 h-10" />
           <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
         </div>
         <div className="flex items-center gap-2">
@@ -333,7 +333,7 @@ const Dashboard: React.FC = () => {
       {/* Score summary */}
       <div className="bg-primary rounded-xl p-4 flex items-center justify-between">
         <div className="text-center flex-1">
-          <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">BASQEST+</p>
+          <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">BASQUEST+</p>
           <p className="text-4xl font-black text-primary-foreground">{isAggregate ? ppg : totalPoints}</p>
           {isAggregate && <p className="text-[9px] text-primary-foreground/50 font-bold">PPG</p>}
         </div>
@@ -391,7 +391,7 @@ const Dashboard: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(250, 15%, 86%)" />
               <XAxis dataKey="quarter" tick={{ fontSize: 11, fontWeight: 700 }} />
               <YAxis tick={{ fontSize: 10 }} width={25} />
-              <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }} formatter={(val: number, name: string) => [`${val} pts`, name === 'points' ? 'BASQEST+' : 'Rival']} />
+              <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }} formatter={(val: number, name: string) => [`${val} pts`, name === 'points' ? 'BASQUEST+' : 'Rival']} />
               <Area type="monotone" dataKey="points" stroke="hsl(268, 76%, 52%)" fill="url(#primaryGrad)" strokeWidth={2.5} />
               <Area type="monotone" dataKey="rival" stroke="hsl(0, 75%, 55%)" fill="url(#rivalGrad)" strokeWidth={2} strokeDasharray="4 3" />
             </AreaChart>

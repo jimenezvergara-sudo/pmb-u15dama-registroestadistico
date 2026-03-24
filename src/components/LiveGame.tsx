@@ -176,7 +176,7 @@ const LiveGame: React.FC = () => {
             {myTeamLogo ? (
               <img src={myTeamLogo} alt={myTeamName || 'Local'} className="w-7 h-7 rounded-full object-cover mb-0.5 ring-1 ring-primary-foreground/30" />
             ) : (
-              <img src={logoBasqest} alt="BASQEST+" className="w-6 h-6 mb-0.5" />
+              <img src={logoBasqest} alt="BASQUEST+" className="w-6 h-6 mb-0.5" />
             )}
             <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">{myTeamName || 'Local'}</p>
             <p className="text-4xl font-black text-primary-foreground leading-none">{teamScore}</p>
