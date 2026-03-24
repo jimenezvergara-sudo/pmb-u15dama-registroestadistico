@@ -519,8 +519,14 @@ export async function generatePdfReport(
     twoM: a.twoM + r.twoM, twoA: a.twoA + r.twoA,
     threeM: a.threeM + r.threeM, threeA: a.threeA + r.threeA,
     ftM: a.ftM + r.ftM, ftA: a.ftA + r.ftA,
-    reb: a.reb + r.reb, oReb: a.oReb + r.oReb, dReb: a.dReb + r.dReb, ast: a.ast + r.ast, stl: a.stl + r.stl, pf: a.pf + r.pf,
-  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, oReb: 0, dReb: 0, ast: 0, stl: 0, pf: 0 });
+    reb: a.reb + r.reb, oReb: a.oReb + r.oReb, dReb: a.dReb + r.dReb,
+    ast: a.ast + r.ast, stl: a.stl + r.stl, tov: a.tov + r.tov, pf: a.pf + r.pf,
+  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, oReb: 0, dReb: 0, ast: 0, stl: 0, tov: 0, pf: 0 });
+
+  const ttFga = tt.twoA + tt.threeA;
+  const ttEfg = ttFga > 0 ? Math.round(((tt.twoM + 0.5 * tt.threeM) / ttFga) * 100) : 0;
+  const ttTsDen = 2 * (ttFga + 0.44 * tt.ftA);
+  const ttTs = ttTsDen > 0 ? Math.round((tt.pts / ttTsDen) * 100) : 0;
 
   // Totals bar
   doc.setFillColor(...PURPLE_DARK);
@@ -528,14 +534,13 @@ export async function generatePdfReport(
   const totItems = [
     { l: 'PTS', v: `${tt.pts}`, c: GOLD },
     { l: 'TC', v: `${tt.fga > 0 ? Math.round((tt.fgm / tt.fga) * 100) : 0}%`, c: WHITE },
-    { l: '2PT', v: `${tt.twoA > 0 ? Math.round((tt.twoM / tt.twoA) * 100) : 0}%`, c: WHITE },
     { l: '3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
     { l: 'TL', v: `${tt.ftA > 0 ? Math.round((tt.ftM / tt.ftA) * 100) : 0}%`, c: WHITE },
-    { l: 'RO', v: `${tt.oReb}`, c: WHITE },
-    { l: 'RD', v: `${tt.dReb}`, c: WHITE },
     { l: 'REB', v: `${tt.reb}`, c: WHITE },
     { l: 'AST', v: `${tt.ast}`, c: WHITE },
-    { l: 'STL', v: `${tt.stl}`, c: WHITE },
+    { l: 'TOV', v: `${tt.tov}`, c: WHITE },
+    { l: 'eFG%', v: `${ttEfg}%`, c: CYAN },
+    { l: 'TS%', v: `${ttTs}%`, c: GOLD },
   ];
   const totW = (W - M * 2) / totItems.length;
   totItems.forEach((t, i) => {
