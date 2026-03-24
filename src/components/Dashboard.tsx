@@ -122,7 +122,9 @@ const Dashboard: React.FC = () => {
     const ftM = playerShots.filter(s => s.points === 1 && s.made).length;
 
     const playerActions = allActions.filter(a => a.playerId === player.id);
-    const reb = playerActions.filter(a => a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound').length;
+    const oReb = playerActions.filter(a => a.type === 'offensive_rebound').length;
+    const dReb = playerActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length;
+    const reb = oReb + dReb;
     const ast = playerActions.filter(a => a.type === 'assist').length;
     const stl = playerActions.filter(a => a.type === 'steal').length;
     const pf = playerActions.filter(a => a.type === 'foul').length;
@@ -156,7 +158,7 @@ const Dashboard: React.FC = () => {
 
     return {
       player, pts, fga, fgm, twoA, twoM, threeA, threeM, ftA, ftM,
-      reb, ast, stl, pf, courtTimePct,
+      reb, oReb, dReb, ast, stl, pf, courtTimePct,
       fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
       twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
@@ -221,6 +223,8 @@ const Dashboard: React.FC = () => {
               ftA: r.ftA,
               ftPct: r.ftPct,
               reb: r.reb,
+              oReb: r.oReb,
+              dReb: r.dReb,
               ast: r.ast,
               stl: r.stl,
               pf: r.pf,
@@ -459,6 +463,8 @@ const Dashboard: React.FC = () => {
                 <th className="text-center py-2 px-0.5 font-bold">3PT</th>
                 <th className="text-center py-2 px-0.5 font-bold">TL</th>
                 <th className="text-center py-2 px-0.5 font-bold">PTS</th>
+                <th className="text-center py-2 px-0.5 font-bold">RO</th>
+                <th className="text-center py-2 px-0.5 font-bold">RD</th>
                 <th className="text-center py-2 px-0.5 font-bold">REB</th>
                 <th className="text-center py-2 px-0.5 font-bold">AST</th>
                 <th className="text-center py-2 px-0.5 font-bold">STL</th>
@@ -492,7 +498,9 @@ const Dashboard: React.FC = () => {
                     <div className={`text-[9px] ${row.ftPct >= 75 ? 'text-success font-bold' : row.ftA > 0 && row.ftPct < 50 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>{row.ftPct}%</div>
                   </td>
                   <td className="text-center py-2 px-0.5 font-extrabold">{row.pts}</td>
-                  <td className="text-center py-2 px-0.5 font-semibold">{row.reb}</td>
+                  <td className="text-center py-2 px-0.5 font-semibold">{row.oReb}</td>
+                  <td className="text-center py-2 px-0.5 font-semibold">{row.dReb}</td>
+                  <td className="text-center py-2 px-0.5 font-bold">{row.reb}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">{row.ast}</td>
                   <td className="text-center py-2 px-0.5 font-semibold">{row.stl}</td>
                   <td className={`text-center py-2 px-0.5 font-semibold ${row.pf >= 5 ? 'text-destructive font-bold' : row.pf === 4 ? 'text-amber-500 font-bold' : ''}`}>{row.pf}</td>

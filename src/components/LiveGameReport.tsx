@@ -51,14 +51,16 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
     const shots = allShots.filter(s => s.playerId === p.id);
     const pts = shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
     const pActions = allActions.filter(a => a.playerId === p.id);
-    const reb = pActions.filter(a => isRebound(a.type)).length;
+    const oReb = pActions.filter(a => a.type === 'offensive_rebound').length;
+    const dReb = pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length;
+    const reb = oReb + dReb;
     const ast = pActions.filter(a => a.type === 'assist').length;
     const stl = pActions.filter(a => a.type === 'steal').length;
     const tov = pActions.filter(a => a.type === 'turnover').length;
     const fouls = pActions.filter(a => a.type === 'foul').length;
     const fg = shots.filter(s => s.points >= 2);
     const fgm = fg.filter(s => s.made).length;
-    return { ...p, pts, reb, ast, stl, tov, fouls, fgm, fga: fg.length };
+    return { ...p, pts, reb, oReb, dReb, ast, stl, tov, fouls, fgm, fga: fg.length };
   }).sort((a, b) => b.pts - a.pts);
 
   const handleShareWhatsApp = () => {
@@ -174,6 +176,8 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
                 <th className="text-left py-1 font-bold text-muted-foreground">JUG</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">PTS</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">TC</th>
+                <th className="text-center py-1 font-bold text-muted-foreground">RO</th>
+                <th className="text-center py-1 font-bold text-muted-foreground">RD</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">REB</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">AST</th>
                 <th className="text-center py-1 font-bold text-muted-foreground">STL</th>
@@ -186,7 +190,9 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
                   <td className="py-1 font-bold truncate max-w-[80px]">#{p.number} {p.name.split(' ')[0]}</td>
                   <td className="text-center font-black">{p.pts}</td>
                   <td className="text-center">{p.fgm}/{p.fga}</td>
-                  <td className="text-center">{p.reb}</td>
+                  <td className="text-center">{p.oReb}</td>
+                  <td className="text-center">{p.dReb}</td>
+                  <td className="text-center font-bold">{p.reb}</td>
                   <td className="text-center">{p.ast}</td>
                   <td className="text-center">{p.stl}</td>
                   <td className="text-center">{p.fouls}</td>

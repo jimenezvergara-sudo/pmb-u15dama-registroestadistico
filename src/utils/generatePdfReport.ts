@@ -21,7 +21,7 @@ interface BoxScoreRow {
   twoM: number; twoA: number; twoPct: number;
   threeM: number; threeA: number; threePct: number;
   ftM: number; ftA: number; ftPct: number;
-  reb: number; ast: number; stl: number; pf: number;
+  reb: number; oReb: number; dReb: number; ast: number; stl: number; pf: number;
 }
 
 // ── Brand Palette (from CSS tokens) ──
@@ -411,6 +411,8 @@ export async function generatePdfReport(
       twoM, twoA, twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threeM, threeA, threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
       ftM, ftA, ftPct: ftA > 0 ? Math.round((ftM / ftA) * 100) : 0,
+      oReb: pActions.filter(a => a.type === 'offensive_rebound').length,
+      dReb: pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length,
       reb: pActions.filter(a => a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound').length,
       ast: pActions.filter(a => a.type === 'assist').length,
       stl: pActions.filter(a => a.type === 'steal').length,
@@ -424,12 +426,12 @@ export async function generatePdfReport(
     `${r.twoM}/${r.twoA}`, `${r.twoPct}%`,
     `${r.threeM}/${r.threeA}`, `${r.threePct}%`,
     `${r.ftM}/${r.ftA}`, `${r.ftPct}%`,
-    `${r.pts}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.pf}`,
+    `${r.pts}`, `${r.oReb}`, `${r.dReb}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.pf}`,
   ]);
 
   autoTable(doc, {
     startY: y,
-    head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'REB', 'AST', 'STL', 'PF']],
+    head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'PF']],
     body: tableBody,
     margin: { left: M, right: M },
     styles: { fontSize: 7, cellPadding: 1.8, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2 },
@@ -470,8 +472,8 @@ export async function generatePdfReport(
     twoM: a.twoM + r.twoM, twoA: a.twoA + r.twoA,
     threeM: a.threeM + r.threeM, threeA: a.threeA + r.threeA,
     ftM: a.ftM + r.ftM, ftA: a.ftA + r.ftA,
-    reb: a.reb + r.reb, ast: a.ast + r.ast, stl: a.stl + r.stl, pf: a.pf + r.pf,
-  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, ast: 0, stl: 0, pf: 0 });
+    reb: a.reb + r.reb, oReb: a.oReb + r.oReb, dReb: a.dReb + r.dReb, ast: a.ast + r.ast, stl: a.stl + r.stl, pf: a.pf + r.pf,
+  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, oReb: 0, dReb: 0, ast: 0, stl: 0, pf: 0 });
 
   // Totals bar
   doc.setFillColor(...PURPLE_DARK);
@@ -482,6 +484,8 @@ export async function generatePdfReport(
     { l: '2PT', v: `${tt.twoA > 0 ? Math.round((tt.twoM / tt.twoA) * 100) : 0}%`, c: WHITE },
     { l: '3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
     { l: 'TL', v: `${tt.ftA > 0 ? Math.round((tt.ftM / tt.ftA) * 100) : 0}%`, c: WHITE },
+    { l: 'RO', v: `${tt.oReb}`, c: WHITE },
+    { l: 'RD', v: `${tt.dReb}`, c: WHITE },
     { l: 'REB', v: `${tt.reb}`, c: WHITE },
     { l: 'AST', v: `${tt.ast}`, c: WHITE },
     { l: 'STL', v: `${tt.stl}`, c: WHITE },
