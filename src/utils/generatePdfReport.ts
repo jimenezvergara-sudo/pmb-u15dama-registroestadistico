@@ -21,7 +21,8 @@ interface BoxScoreRow {
   twoM: number; twoA: number; twoPct: number;
   threeM: number; threeA: number; threePct: number;
   ftM: number; ftA: number; ftPct: number;
-  reb: number; oReb: number; dReb: number; ast: number; stl: number; pf: number;
+  reb: number; oReb: number; dReb: number; ast: number; stl: number; tov: number; pf: number;
+  eFg: number; ts: number;
 }
 
 // ── Brand Palette (from CSS tokens) ──
