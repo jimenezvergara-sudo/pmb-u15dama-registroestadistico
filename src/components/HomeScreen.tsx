@@ -5,7 +5,8 @@ import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { usePageView } from '@/hooks/useAnalytics';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Target, CircleDot, Percent, Grab, Handshake, ShieldCheck, Shield, LogOut } from 'lucide-react';
+import { Trophy, Target, CircleDot, Percent, Grab, Handshake, ShieldCheck, Shield, LogOut, Info } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import logoBasqest from '@/assets/logo-basqest-new.png';
 
 interface HomeScreenProps {
@@ -15,6 +16,7 @@ interface HomeScreenProps {
 const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   const { games, players, activeCategory, myTeamName, myTeamLogo } = useApp();
   const { signOut, profile, user } = useAuth();
+  const [infoDialog, setInfoDialog] = React.useState<{ title: string; description: string } | null>(null);
 
   usePageView({ page: 'home', userId: user?.id });
 
@@ -217,8 +219,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     { label: 'EF. POSESIÓN', value: `${pctPosesion}%` },
     { label: 'EF. DOBLES', value: `${pctDobles}%` },
     { label: 'EF. TL', value: `${pctTL}%` },
-    { label: 'eFG%', value: `${eFG}%` },
-    { label: 'TS%', value: `${tsPercent}%` },
+    {
+      label: 'eFG%', value: `${eFG}%`,
+      info: {
+        title: 'eFG% — Effective Field Goal Percentage',
+        description: 'El eFG% (Effective Field Goal Percentage) ajusta el porcentaje de tiros de campo para reflejar que los triples valen más que los dobles.\n\nFórmula:\n(Dobles anotados + 0.5 × Triples anotados) ÷ Total de tiros de campo intentados × 100\n\nEjemplo: Si una jugadora anota 4 dobles y 2 triples en 12 intentos de campo:\neFG% = (4 + 0.5 × 2) ÷ 12 × 100 = 41.7%',
+      },
+    },
+    {
+      label: 'TS%', value: `${tsPercent}%`,
+      info: {
+        title: 'TS% — True Shooting Percentage',
+        description: 'El True Shooting Percentage (TS%) es la métrica avanzada para medir la eficiencia anotadora, al incluir triples, tiros de campo de dos puntos y tiros libres en una sola fórmula.\n\nFórmula:\nPuntos convertidos ÷ (2 × (Tiros de campo intentados + 0.44 × Tiros libres intentados)) × 100\n\nEjemplo: Si una jugadora anota 20 puntos con 12 tiros de campo y 6 tiros libres intentados:\nTS% = 20 ÷ (2 × (12 + 0.44 × 6)) × 100 = 69.4%',
+      },
+    },
   ];
 
   return (
@@ -270,7 +284,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {productivityCards.map(stat => (
             <Card key={stat.label} className="bg-card border-2 border-amber-400/70 shadow-xl">
-              <CardContent className="p-3 text-center">
+              <CardContent className="p-3 text-center relative">
+                {stat.info && (
+                  <button
+                    onClick={() => setInfoDialog(stat.info!)}
+                    className="absolute top-1.5 right-1.5 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
                 <p className="text-2xl font-black text-foreground leading-tight mt-1">{stat.value}</p>
               </CardContent>
@@ -342,6 +364,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
           {totalGames} {totalGames === 1 ? 'partido jugado' : 'partidos jugados'}
         </p>
       </div>
+      {/* Info Dialog */}
+      <Dialog open={!!infoDialog} onOpenChange={(open) => !open && setInfoDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold">{infoDialog?.title}</DialogTitle>
+            <DialogDescription className="whitespace-pre-line text-sm mt-2">
+              {infoDialog?.description}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
