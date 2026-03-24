@@ -91,35 +91,47 @@ Deno.serve(async (req) => {
         });
       }
 
-      // 2. Create admin user
-      const { data: newUser, error: userError } =
-        await adminClient.auth.admin.createUser({
-          email: admin_email,
-          password: admin_password,
-          email_confirm: true,
-          user_metadata: { full_name: admin_name },
-        });
+      // 2. Create or find admin user
+      let adminUserId: string;
 
-      if (userError) {
-        // Rollback org
-        await adminClient.from("organizations").delete().eq("id", org.id);
-        return new Response(JSON.stringify({ error: userError.message }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      // Check if user already exists
+      const { data: existingUser } = await adminClient.auth.admin.listUsers();
+      const found = existingUser?.users?.find(
+        (u: any) => u.email?.toLowerCase() === admin_email.toLowerCase()
+      );
+
+      if (found) {
+        adminUserId = found.id;
+      } else {
+        const { data: newUser, error: userError } =
+          await adminClient.auth.admin.createUser({
+            email: admin_email,
+            password: admin_password,
+            email_confirm: true,
+            user_metadata: { full_name: admin_name },
+          });
+
+        if (userError) {
+          await adminClient.from("organizations").delete().eq("id", org.id);
+          return new Response(JSON.stringify({ error: userError.message }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        adminUserId = newUser.user.id;
       }
 
       // 3. Update profile to use this org's club_id
       await adminClient
         .from("profiles")
         .update({ club_id: org.id })
-        .eq("user_id", newUser.user.id);
+        .eq("user_id", adminUserId);
 
       // 4. Set role to club_admin_elite
       await adminClient
         .from("user_roles")
         .update({ role: "club_admin_elite" })
-        .eq("user_id", newUser.user.id);
+        .eq("user_id", adminUserId);
 
       return new Response(
         JSON.stringify({ success: true, organization: org, user_id: newUser.user.id }),
