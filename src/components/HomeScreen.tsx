@@ -16,6 +16,7 @@ interface HomeScreenProps {
 const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   const { games, players, activeCategory, myTeamName, myTeamLogo } = useApp();
   const { signOut, profile, user } = useAuth();
+  const [infoDialog, setInfoDialog] = React.useState<{ title: string; description: string } | null>(null);
 
   usePageView({ page: 'home', userId: user?.id });
 
