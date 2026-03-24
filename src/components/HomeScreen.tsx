@@ -284,7 +284,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {productivityCards.map(stat => (
             <Card key={stat.label} className="bg-card border-2 border-amber-400/70 shadow-xl">
-              <CardContent className="p-3 text-center">
+              <CardContent className="p-3 text-center relative">
+                {stat.info && (
+                  <button
+                    onClick={() => setInfoDialog(stat.info!)}
+                    className="absolute top-1.5 right-1.5 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
                 <p className="text-2xl font-black text-foreground leading-tight mt-1">{stat.value}</p>
               </CardContent>
