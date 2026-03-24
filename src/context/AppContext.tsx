@@ -548,7 +548,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={{
       ...state,
-      addPlayer, removePlayer, removeGame, updateGame, addTournament,
+      addPlayer, removePlayer, removeGame, updateGame, addTournament, removeTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
