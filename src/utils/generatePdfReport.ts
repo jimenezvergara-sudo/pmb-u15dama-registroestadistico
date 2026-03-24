@@ -435,18 +435,24 @@ export async function generatePdfReport(
     const ftA = pShots.filter(s => s.points === 1).length;
     const ftM = pShots.filter(s => s.points === 1 && s.made).length;
     const pActions = allActions.filter(a => a.playerId === player.id);
+    const oReb = pActions.filter(a => a.type === 'offensive_rebound').length;
+    const dReb = pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length;
+    const pFga = twoA + threeA;
+    const pEfg = pFga > 0 ? Math.round(((twoM + 0.5 * threeM) / pFga) * 100) : 0;
+    const pTsDen = 2 * (pFga + 0.44 * ftA);
+    const pTs = pTsDen > 0 ? Math.round((pts / pTsDen) * 100) : 0;
     return {
       name: player.name, number: player.number, pts, fgm, fga,
       fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
       twoM, twoA, twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threeM, threeA, threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
       ftM, ftA, ftPct: ftA > 0 ? Math.round((ftM / ftA) * 100) : 0,
-      oReb: pActions.filter(a => a.type === 'offensive_rebound').length,
-      dReb: pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length,
-      reb: pActions.filter(a => a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound').length,
+      oReb, dReb, reb: oReb + dReb,
       ast: pActions.filter(a => a.type === 'assist').length,
       stl: pActions.filter(a => a.type === 'steal').length,
+      tov: pActions.filter(a => a.type === 'turnover').length,
       pf: pActions.filter(a => a.type === 'foul').length,
+      eFg: pEfg, ts: pTs,
     };
   }).sort((a, b) => b.pts - a.pts);
 
