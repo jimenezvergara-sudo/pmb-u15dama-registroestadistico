@@ -122,14 +122,17 @@ const LiveGame: React.FC = () => {
     toast('Último tiro deshecho', { duration: 1000 });
   };
 
-  const handleQuickAction = (action: 'rebound' | 'assist' | 'steal' | 'turnover' | 'foul') => {
+  const handleQuickAction = (action: ActionType) => {
     if (!selectedPlayer) {
       toast('Selecciona una jugadora primero', { duration: 1500 });
       return;
     }
     recordAction(selectedPlayer, action);
     const player = activeGame.roster.find(p => p.id === selectedPlayer);
-    const labels = { rebound: 'Rebote', assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida', foul: 'Falta' };
+    const labels: Record<string, string> = {
+      rebound: 'Rebote', offensive_rebound: 'Rebote Ofensivo', defensive_rebound: 'Rebote Defensivo',
+      assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida', foul: 'Falta',
+    };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
     setSelectedPlayer(null);
 
