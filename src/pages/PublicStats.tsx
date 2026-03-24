@@ -61,7 +61,7 @@ const PublicStats: React.FC = () => {
         <Link to="/">
           <Button variant="outline" className="gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Ir a BASQEST+
+            Ir a BASQUEST+
           </Button>
         </Link>
       </div>
