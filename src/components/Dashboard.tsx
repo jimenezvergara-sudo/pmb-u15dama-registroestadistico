@@ -333,7 +333,7 @@ const Dashboard: React.FC = () => {
       {/* Score summary */}
       <div className="bg-primary rounded-xl p-4 flex items-center justify-between">
         <div className="text-center flex-1">
-          <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">BASQEST+</p>
+          <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">BASQUEST+</p>
           <p className="text-4xl font-black text-primary-foreground">{isAggregate ? ppg : totalPoints}</p>
           {isAggregate && <p className="text-[9px] text-primary-foreground/50 font-bold">PPG</p>}
         </div>
