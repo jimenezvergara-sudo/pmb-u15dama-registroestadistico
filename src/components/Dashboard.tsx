@@ -158,7 +158,7 @@ const Dashboard: React.FC = () => {
 
     return {
       player, pts, fga, fgm, twoA, twoM, threeA, threeM, ftA, ftM,
-      reb, ast, stl, pf, courtTimePct,
+      reb, oReb, dReb, ast, stl, pf, courtTimePct,
       fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
       twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
