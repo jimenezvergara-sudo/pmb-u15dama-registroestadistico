@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Trophy, BarChart3 } from 'lucide-react';
+import { Plus, Trophy, BarChart3, Trash2 } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import TournamentStandings from '@/components/TournamentStandings';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
+import { toast } from 'sonner';
 
 const TournamentManager: React.FC = () => {
-  const { tournaments, addTournament } = useApp();
+  const { tournaments, addTournament, removeTournament } = useApp();
   const [name, setName] = useState('');
   const [selectedTournament, setSelectedTournament] = useState<{ id: string; name: string } | null>(null);
 
@@ -68,6 +69,19 @@ const TournamentManager: React.FC = () => {
               className="shrink-0"
             >
               <BarChart3 className="w-4 h-4 mr-1" /> Tabla
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="shrink-0 h-9 w-9 text-destructive hover:bg-destructive/10"
+              onClick={() => {
+                if (confirm(`¿Eliminar el torneo "${t.name}"?`)) {
+                  removeTournament(t.id);
+                  toast.success('Torneo eliminado');
+                }
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
         ))}

@@ -22,6 +22,7 @@ interface AppContextValue extends Omit<AppState, 'loading'> {
   removeGame: (id: string) => void;
   updateGame: (game: Game) => void;
   addTournament: (t: Omit<Tournament, 'id'>) => void;
+  removeTournament: (id: string) => void;
   addTeam: (t: Omit<Team, 'id'>) => void;
   removeTeam: (id: string) => void;
   startGame: (opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg, isHome?: boolean) => void;
@@ -322,6 +323,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => ({ ...s, tournaments: [...s.tournaments, { id: row.id, name: row.name, date: row.date }] }));
   }, [userId, clubId]);
 
+  const removeTournament = useCallback(async (id: string) => {
+    await supabase.from('club_tournaments' as any).delete().eq('id', id);
+    setState(s => ({ ...s, tournaments: s.tournaments.filter(t => t.id !== id) }));
+  }, []);
+
   const addTeam = useCallback(async (t: Omit<Team, 'id'>) => {
     if (!userId || !clubId) return;
     const { data, error } = await supabase.from('club_rival_teams' as any).insert({
@@ -542,7 +548,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={{
       ...state,
-      addPlayer, removePlayer, removeGame, updateGame, addTournament,
+      addPlayer, removePlayer, removeGame, updateGame, addTournament, removeTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
