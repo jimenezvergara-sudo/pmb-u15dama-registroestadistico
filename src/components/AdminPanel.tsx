@@ -10,7 +10,6 @@ import { Constants } from '@/integrations/supabase/types';
 import type { Enums } from '@/integrations/supabase/types';
 import AdManager from '@/components/AdManager';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import OrganizationManager from '@/components/OrganizationManager';
 
 interface AdminUser {
   user_id: string;
@@ -197,13 +196,6 @@ const AdminPanel: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Organization Management — super_admin only */}
-      {isSuperAdmin && (
-        <div className="px-4 mt-6">
-          <OrganizationManager />
-        </div>
-      )}
 
       {/* Ad Management */}
       <div className="px-4 mt-6">

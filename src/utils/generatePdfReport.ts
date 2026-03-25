@@ -21,8 +21,7 @@ interface BoxScoreRow {
   twoM: number; twoA: number; twoPct: number;
   threeM: number; threeA: number; threePct: number;
   ftM: number; ftA: number; ftPct: number;
-  reb: number; oReb: number; dReb: number; ast: number; stl: number; tov: number; pf: number;
-  eFg: number; ts: number;
+  reb: number; oReb: number; dReb: number; ast: number; stl: number; pf: number;
 }
 
 // ── Brand Palette (from CSS tokens) ──
@@ -260,45 +259,29 @@ export async function generatePdfReport(
   filteredGames.forEach(g => g.roster.forEach(p => rosterMap.set(p.id, p)));
   const roster = Array.from(rosterMap.values());
 
-  const totalShotsAll = allShots.length;
   const playerStats = roster.map(p => {
     const shots = allShots.filter(s => s.playerId === p.id);
     const pts = shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
-    const triplesMade = shots.filter(s => s.points === 3 && s.made).length;
-    const triplesAtt = shots.filter(s => s.points === 3).length;
-    const doblesMade = shots.filter(s => s.points === 2 && s.made).length;
-    const doblesAtt = shots.filter(s => s.points === 2).length;
-    const ftMade = shots.filter(s => s.points === 1 && s.made).length;
-    const ftAtt = shots.filter(s => s.points === 1).length;
-    const pFga = doblesAtt + triplesAtt;
-    const pEfg = pFga > 0 ? Math.round(((doblesMade + 0.5 * triplesMade) / pFga) * 100) : 0;
-    const pTsDen = 2 * (pFga + 0.44 * ftAtt);
-    const pTs = pTsDen > 0 ? Math.round((pts / pTsDen) * 100) : 0;
-    const pActions = allActions.filter(a => a.playerId === p.id);
-    const oReb = pActions.filter(a => a.type === 'offensive_rebound').length;
-    const dReb = pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length;
     return {
-      ...p, pts, triplesMade, triplesAtt, doblesMade, doblesAtt, ftMade, ftAtt,
-      eFg: pEfg, ts: pTs, totalShots: shots.length,
-      oReb, dReb, reb: oReb + dReb,
-      ast: pActions.filter(a => a.type === 'assist').length,
-      stl: pActions.filter(a => a.type === 'steal').length,
+      ...p, pts,
+      triplesMade: shots.filter(s => s.points === 3 && s.made).length,
+      triplesAtt: shots.filter(s => s.points === 3).length,
+      doblesMade: shots.filter(s => s.points === 2 && s.made).length,
+      doblesAtt: shots.filter(s => s.points === 2).length,
+      ftMade: shots.filter(s => s.points === 1 && s.made).length,
+      ftAtt: shots.filter(s => s.points === 1).length,
+      reb: allActions.filter(a => a.playerId === p.id && (a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound')).length,
+      ast: allActions.filter(a => a.playerId === p.id && a.type === 'assist').length,
+      stl: allActions.filter(a => a.playerId === p.id && a.type === 'steal').length,
     };
   });
-
-  // Volume threshold for % leaders (20% of total shots)
-  const minVol = Math.max(1, Math.round(totalShotsAll * 0.2));
 
   const topScorer = [...playerStats].sort((a, b) => b.pts - a.pts)[0];
   const topThrees = [...playerStats].filter(p => p.triplesMade > 0).sort((a, b) => b.triplesMade - a.triplesMade)[0];
   const topDoubles = [...playerStats].filter(p => p.doblesMade > 0).sort((a, b) => b.doblesMade - a.doblesMade)[0];
-  const topOReb = [...playerStats].filter(p => p.oReb > 0).sort((a, b) => b.oReb - a.oReb)[0];
-  const topDReb = [...playerStats].filter(p => p.dReb > 0).sort((a, b) => b.dReb - a.dReb)[0];
   const topReb = [...playerStats].filter(p => p.reb > 0).sort((a, b) => b.reb - a.reb)[0];
   const topAst = [...playerStats].filter(p => p.ast > 0).sort((a, b) => b.ast - a.ast)[0];
   const topStl = [...playerStats].filter(p => p.stl > 0).sort((a, b) => b.stl - a.stl)[0];
-  const topEfg = [...playerStats].filter(p => p.totalShots >= minVol && (p.doblesAtt + p.triplesAtt) > 0).sort((a, b) => b.eFg - a.eFg)[0];
-  const topTs = [...playerStats].filter(p => p.totalShots >= minVol && (p.doblesAtt + p.triplesAtt) > 0).sort((a, b) => b.ts - a.ts)[0];
 
   sectionTitle('Líderes de Temporada');
 
@@ -306,13 +289,9 @@ export async function generatePdfReport(
     { label: 'PUNTOS', player: topScorer, value: topScorer?.pts, accent: GOLD },
     { label: 'TRIPLES', player: topThrees, value: topThrees?.triplesMade, accent: CYAN },
     { label: 'DOBLES', player: topDoubles, value: topDoubles?.doblesMade, accent: PURPLE_LIGHT },
-    { label: 'REB. OFENSIVOS', player: topOReb, value: topOReb?.oReb, accent: SUCCESS },
-    { label: 'REB. DEFENSIVOS', player: topDReb, value: topDReb?.dReb, accent: SUCCESS },
-    { label: 'REB. TOTALES', player: topReb, value: topReb?.reb, accent: SUCCESS },
+    { label: 'REBOTES', player: topReb, value: topReb?.reb, accent: SUCCESS },
     { label: 'ASISTENCIAS', player: topAst, value: topAst?.ast, accent: CYAN },
     { label: 'ROBOS', player: topStl, value: topStl?.stl, accent: GOLD },
-    { label: 'eFG%', player: topEfg, value: topEfg ? `${topEfg.eFg}%` : undefined, accent: PURPLE_LIGHT },
-    { label: 'TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: CYAN },
   ];
 
   const lColW = (W - M * 2 - 8) / 3;
@@ -354,15 +333,6 @@ export async function generatePdfReport(
     }
   });
   y += Math.ceil(leaderItems.length / 3) * 22 + 6;
-
-  // Check if we need a new page for results
-  if (y > H - 60 && filteredGames.length > 0) {
-    drawFooter(pageNum);
-    doc.addPage();
-    drawPageBg();
-    pageNum++;
-    drawHeader();
-  }
 
   // ── Results table ──
   if (filteredGames.length > 0) {
@@ -435,78 +405,61 @@ export async function generatePdfReport(
     const ftA = pShots.filter(s => s.points === 1).length;
     const ftM = pShots.filter(s => s.points === 1 && s.made).length;
     const pActions = allActions.filter(a => a.playerId === player.id);
-    const oReb = pActions.filter(a => a.type === 'offensive_rebound').length;
-    const dReb = pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length;
-    const pFga = twoA + threeA;
-    const pEfg = pFga > 0 ? Math.round(((twoM + 0.5 * threeM) / pFga) * 100) : 0;
-    const pTsDen = 2 * (pFga + 0.44 * ftA);
-    const pTs = pTsDen > 0 ? Math.round((pts / pTsDen) * 100) : 0;
     return {
       name: player.name, number: player.number, pts, fgm, fga,
       fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
       twoM, twoA, twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threeM, threeA, threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
       ftM, ftA, ftPct: ftA > 0 ? Math.round((ftM / ftA) * 100) : 0,
-      oReb, dReb, reb: oReb + dReb,
+      oReb: pActions.filter(a => a.type === 'offensive_rebound').length,
+      dReb: pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length,
+      reb: pActions.filter(a => a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound').length,
       ast: pActions.filter(a => a.type === 'assist').length,
       stl: pActions.filter(a => a.type === 'steal').length,
-      tov: pActions.filter(a => a.type === 'turnover').length,
       pf: pActions.filter(a => a.type === 'foul').length,
-      eFg: pEfg, ts: pTs,
     };
   }).sort((a, b) => b.pts - a.pts);
 
   const tableBody = boxRows.map(r => [
     `#${r.number} ${r.name}`,
-    `${r.pts}`,
     `${r.fgm}/${r.fga}`, `${r.fgPct}%`,
     `${r.twoM}/${r.twoA}`, `${r.twoPct}%`,
     `${r.threeM}/${r.threeA}`, `${r.threePct}%`,
     `${r.ftM}/${r.ftA}`, `${r.ftPct}%`,
-    `${r.oReb}`, `${r.dReb}`, `${r.reb}`,
-    `${r.ast}`, `${r.stl}`, `${r.tov}`, `${r.pf}`,
-    `${r.eFg}%`, `${r.ts}%`,
+    `${r.pts}`, `${r.oReb}`, `${r.dReb}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.pf}`,
   ]);
 
   autoTable(doc, {
     startY: y,
-    head: [['Jugadora', 'PTS', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG%', 'TS%']],
+    head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'PF']],
     body: tableBody,
     margin: { left: M, right: M },
-    styles: { fontSize: 6, cellPadding: 1.5, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2, overflow: 'ellipsize' },
-    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 6 },
+    styles: { fontSize: 7, cellPadding: 1.8, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2 },
+    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 7 },
     bodyStyles: { fillColor: WHITE },
     alternateRowStyles: { fillColor: TABLE_ALT },
     columnStyles: {
-      0: { cellWidth: 26, fontStyle: 'bold' },
-      1: { fontStyle: 'bold', halign: 'center', fillColor: [245, 240, 255] },
-      2: { halign: 'center' }, 3: { halign: 'center' }, 4: { halign: 'center' }, 5: { halign: 'center' },
-      6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' }, 9: { halign: 'center' },
+      0: { cellWidth: 30, fontStyle: 'bold' },
+      9: { fontStyle: 'bold', halign: 'center', fillColor: [245, 240, 255] },
+      1: { halign: 'center' }, 2: { halign: 'center' }, 3: { halign: 'center' }, 4: { halign: 'center' },
+      5: { halign: 'center' }, 6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
       10: { halign: 'center' }, 11: { halign: 'center' }, 12: { halign: 'center' }, 13: { halign: 'center' },
-      14: { halign: 'center' }, 15: { halign: 'center' }, 16: { halign: 'center' },
-      17: { halign: 'center', fontStyle: 'bold' }, 18: { halign: 'center', fontStyle: 'bold' },
     },
     theme: 'grid',
     didParseCell: (data) => {
       if (data.section === 'body') {
         const ci = data.column.index;
         const val = parseInt(data.cell.raw as string);
-        // % columns: 3(TC%), 5(2PT%), 7(3PT%), 9(TL%)
-        if ([3, 5, 7, 9].includes(ci) && !isNaN(val)) {
-          if (ci === 7 && val >= 40) data.cell.styles.textColor = [...SUCCESS];
-          else if (ci === 7 && val < 25 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
-          else if ([3, 5].includes(ci) && val >= 50) data.cell.styles.textColor = [...SUCCESS];
-          else if ([3, 5].includes(ci) && val < 30 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
-          else if (ci === 9 && val >= 75) data.cell.styles.textColor = [...SUCCESS];
-          else if (ci === 9 && val < 50 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+        if ([2, 4, 6, 8].includes(ci) && !isNaN(val)) {
+          if (ci === 6 && val >= 40) data.cell.styles.textColor = [...SUCCESS];
+          else if (ci === 6 && val < 25 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+          else if ([2, 4].includes(ci) && val >= 50) data.cell.styles.textColor = [...SUCCESS];
+          else if ([2, 4].includes(ci) && val < 30 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+          else if (ci === 8 && val >= 75) data.cell.styles.textColor = [...SUCCESS];
+          else if (ci === 8 && val < 50 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
         }
-        // PTS column
-        if (ci === 1) data.cell.styles.textColor = [...PURPLE];
-        // eFG% and TS%
-        if ([17, 18].includes(ci) && !isNaN(val)) {
-          if (val >= 55) data.cell.styles.textColor = [...SUCCESS];
-          else if (val < 40 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
-        }
+        // Highlight PTS column
+        if (ci === 9) data.cell.styles.textColor = [...PURPLE];
       }
     },
   });
@@ -519,14 +472,8 @@ export async function generatePdfReport(
     twoM: a.twoM + r.twoM, twoA: a.twoA + r.twoA,
     threeM: a.threeM + r.threeM, threeA: a.threeA + r.threeA,
     ftM: a.ftM + r.ftM, ftA: a.ftA + r.ftA,
-    reb: a.reb + r.reb, oReb: a.oReb + r.oReb, dReb: a.dReb + r.dReb,
-    ast: a.ast + r.ast, stl: a.stl + r.stl, tov: a.tov + r.tov, pf: a.pf + r.pf,
-  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, oReb: 0, dReb: 0, ast: 0, stl: 0, tov: 0, pf: 0 });
-
-  const ttFga = tt.twoA + tt.threeA;
-  const ttEfg = ttFga > 0 ? Math.round(((tt.twoM + 0.5 * tt.threeM) / ttFga) * 100) : 0;
-  const ttTsDen = 2 * (ttFga + 0.44 * tt.ftA);
-  const ttTs = ttTsDen > 0 ? Math.round((tt.pts / ttTsDen) * 100) : 0;
+    reb: a.reb + r.reb, oReb: a.oReb + r.oReb, dReb: a.dReb + r.dReb, ast: a.ast + r.ast, stl: a.stl + r.stl, pf: a.pf + r.pf,
+  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, oReb: 0, dReb: 0, ast: 0, stl: 0, pf: 0 });
 
   // Totals bar
   doc.setFillColor(...PURPLE_DARK);
@@ -534,13 +481,14 @@ export async function generatePdfReport(
   const totItems = [
     { l: 'PTS', v: `${tt.pts}`, c: GOLD },
     { l: 'TC', v: `${tt.fga > 0 ? Math.round((tt.fgm / tt.fga) * 100) : 0}%`, c: WHITE },
+    { l: '2PT', v: `${tt.twoA > 0 ? Math.round((tt.twoM / tt.twoA) * 100) : 0}%`, c: WHITE },
     { l: '3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
     { l: 'TL', v: `${tt.ftA > 0 ? Math.round((tt.ftM / tt.ftA) * 100) : 0}%`, c: WHITE },
+    { l: 'RO', v: `${tt.oReb}`, c: WHITE },
+    { l: 'RD', v: `${tt.dReb}`, c: WHITE },
     { l: 'REB', v: `${tt.reb}`, c: WHITE },
     { l: 'AST', v: `${tt.ast}`, c: WHITE },
-    { l: 'TOV', v: `${tt.tov}`, c: WHITE },
-    { l: 'eFG%', v: `${ttEfg}%`, c: CYAN },
-    { l: 'TS%', v: `${ttTs}%`, c: GOLD },
+    { l: 'STL', v: `${tt.stl}`, c: WHITE },
   ];
   const totW = (W - M * 2) / totItems.length;
   totItems.forEach((t, i) => {
@@ -578,7 +526,7 @@ export async function generatePdfReport(
 
     const chartX = M;
     const chartW = W - M * 2;
-    const chartH = 80;
+    const chartH = 58;
     const maxVal = Math.max(...qData.map(d => Math.max(d.pts, d.opp)), 1);
     const barGroupW = chartW / qData.length;
     const barW = barGroupW * 0.28;
@@ -726,8 +674,8 @@ export async function generatePdfReport(
     y += 18;
 
     // Court
-    const courtW = 87;
-    const courtH = 81;
+    const courtW = 130;
+    const courtH = 121;
     const courtX = (W - courtW) / 2;
     const courtY = y;
 

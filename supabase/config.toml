@@ -2,6 +2,3 @@ project_id = "mtwzcummwlmfvlduweer"
 
 [functions.analyze-stats]
 verify_jwt = false
-
-[functions.manage-organization]
-verify_jwt = false
