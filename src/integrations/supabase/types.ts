@@ -197,6 +197,36 @@ export type Database = {
         }
         Relationships: []
       }
+      organizations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          logo_url: string | null
+          max_staff: number
+          name: string
+          plan: Database["public"]["Enums"]["org_plan"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          max_staff?: number
+          name: string
+          plan?: Database["public"]["Enums"]["org_plan"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          max_staff?: number
+          name?: string
+          plan?: Database["public"]["Enums"]["org_plan"]
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string
@@ -438,6 +468,7 @@ export type Database = {
         | "club_admin_elite"
         | "club_admin_pro"
         | "club_staff"
+      org_plan: "free" | "pro" | "elite"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -575,6 +606,7 @@ export const Constants = {
         "club_admin_pro",
         "club_staff",
       ],
+      org_plan: ["free", "pro", "elite"],
     },
   },
 } as const
