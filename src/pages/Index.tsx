@@ -9,6 +9,7 @@ import TournamentManager from '@/components/TournamentManager';
 import TeamManager from '@/components/TeamManager';
 import HomeScreen from '@/components/HomeScreen';
 import AdminPanel from '@/components/AdminPanel';
+import PostLoginLanding from '@/components/PostLoginLanding';
 import { CATEGORIES, Category } from '@/types/basketball';
 import logoBasqest from '@/assets/logo-basqest.png';
 
