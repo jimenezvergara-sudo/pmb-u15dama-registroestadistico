@@ -37,6 +37,7 @@ const AppContent: React.FC = () => {
   const { activeGame, activeCategory, setActiveCategory, loading } = useApp();
   const [tab, setTab] = useState<TabId>('home');
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [activeModule, setActiveModule] = useState<'landing' | 'stats' | 'ceo'>('landing');
 
   React.useEffect(() => {
     if (activeGame) setTab('live');
@@ -46,6 +47,32 @@ const AppContent: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  // Show landing screen first
+  if (activeModule === 'landing') {
+    return (
+      <PostLoginLanding
+        onSelectStats={() => setActiveModule('stats')}
+        onSelectCeo={() => setActiveModule('ceo')}
+      />
+    );
+  }
+
+  // CEO module placeholder (future ERP)
+  if (activeModule === 'ceo') {
+    return (
+      <div className="min-h-screen bg-[#0d0a1a] flex flex-col items-center justify-center px-6">
+        <h1 className="text-2xl font-black text-white mb-2">CEO Sports</h1>
+        <p className="text-sm text-white/50 mb-8">Módulo en construcción</p>
+        <button
+          onClick={() => setActiveModule('landing')}
+          className="text-sm font-bold text-[#FFC300] bg-[#FFC300]/10 px-5 py-2.5 rounded-xl hover:bg-[#FFC300]/20 transition-colors"
+        >
+          ← Volver al inicio
+        </button>
       </div>
     );
   }
