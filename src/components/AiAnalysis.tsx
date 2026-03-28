@@ -60,13 +60,243 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
 
   const handleDownload = () => {
     if (!analysis) return;
-    const blob = new Blob([analysis], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `analisis-ia-${gameLabel.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    const PURPLE: [number, number, number] = [122, 38, 225];
+    const PURPLE_DARK: [number, number, number] = [60, 15, 120];
+    const CYAN: [number, number, number] = [50, 217, 255];
+    const GOLD: [number, number, number] = [255, 195, 0];
+    const WHITE: [number, number, number] = [255, 255, 255];
+    const NEAR_BLACK: [number, number, number] = [25, 15, 45];
+    const BODY_BG: [number, number, number] = [245, 243, 250];
+    const MUTED: [number, number, number] = [140, 130, 160];
+
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
+    const M = 16;
+    const contentW = W - M * 2;
+    let y = 0;
+    let pageNum = 1;
+
+    const drawPageBg = () => {
+      doc.setFillColor(...BODY_BG);
+      doc.rect(0, 0, W, H, 'F');
+    };
+
+    const drawHeader = () => {
+      doc.setFillColor(...PURPLE_DARK);
+      doc.rect(0, 0, W, 38, 'F');
+      doc.setFillColor(...PURPLE);
+      doc.rect(0, 0, W, 32, 'F');
+      doc.setFillColor(...GOLD);
+      doc.rect(0, 32, W, 1.5, 'F');
+
+      // Decorative
+      doc.setFillColor(255, 255, 255);
+      // @ts-ignore
+      doc.setGState(new doc.GState({ opacity: 0.06 }));
+      doc.circle(W - 25, 8, 30, 'F');
+      // @ts-ignore
+      doc.setGState(new doc.GState({ opacity: 1 }));
+
+      doc.setTextColor(...WHITE);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('BASQUEST+', M, 14);
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...CYAN);
+      doc.text('Inteligencia Deportiva', M, 20);
+
+      // Analysis badge
+      doc.setFillColor(...GOLD);
+      doc.roundedRect(M, 23, 42, 6, 3, 3, 'F');
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...NEAR_BLACK);
+      doc.text('⚡ ANALISIS IA', M + 21, 27, { align: 'center' });
+
+      y = 42;
+    };
+
+    const drawFooter = () => {
+      doc.setFillColor(...PURPLE_DARK);
+      doc.rect(0, H - 10, W, 10, 'F');
+      doc.setFillColor(...GOLD);
+      doc.rect(0, H - 10, W, 0.6, 'F');
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...CYAN);
+      doc.text('BASQUEST+', M, H - 3.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(180, 175, 200);
+      doc.text(`${new Date().toLocaleDateString()} · ${gameLabel}`, M + 22, H - 3.5);
+      doc.text(`Pág ${pageNum}`, W - M, H - 3.5, { align: 'right' });
+    };
+
+    const ensureSpace = (needed: number) => {
+      if (y + needed > H - 14) {
+        drawFooter();
+        doc.addPage();
+        drawPageBg();
+        pageNum++;
+        drawHeader();
+      }
+    };
+
+    // ── First page ──
+    drawPageBg();
+    drawHeader();
+
+    // Context card
+    doc.setFillColor(...WHITE);
+    doc.roundedRect(M, y, contentW, 16, 4, 4, 'F');
+    doc.setFillColor(...PURPLE);
+    doc.roundedRect(M, y, 3, 16, 1.5, 1.5, 'F');
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...NEAR_BLACK);
+    doc.text(`📊 ${gameLabel}`, M + 7, y + 6.5);
+    doc.setFontSize(7);
+    doc.setTextColor(...MUTED);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${numGames} partido(s) · Equipo ${totalPoints} pts · Rival ${totalOpponent} pts`, M + 7, y + 12.5);
+    y += 22;
+
+    // ── Render analysis ──
+    const lines = analysis.split('\n');
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      if (trimmed === '') {
+        y += 3;
+        return;
+      }
+
+      // Heading ##
+      if (trimmed.startsWith('## ')) {
+        ensureSpace(14);
+        y += 4;
+        // Section divider
+        doc.setFillColor(...PURPLE);
+        doc.roundedRect(M, y, 3, 7, 1.5, 1.5, 'F');
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...NEAR_BLACK);
+        doc.text(trimmed.slice(3), M + 6, y + 5.5);
+        y += 11;
+        return;
+      }
+
+      // Bold line **...**
+      if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
+        ensureSpace(8);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...PURPLE);
+        const wrapped = doc.splitTextToSize(trimmed.slice(2, -2), contentW - 4);
+        doc.text(wrapped, M + 2, y + 4);
+        y += wrapped.length * 4.5 + 3;
+        return;
+      }
+
+      // Bullet point
+      if (trimmed.startsWith('- ')) {
+        ensureSpace(8);
+        const text = trimmed.slice(2);
+        // Parse inline bold
+        const parts = text.split(/(\*\*[^*]+\*\*)/g);
+        let xPos = M + 7;
+
+        // Bullet dot
+        doc.setFillColor(...GOLD);
+        doc.circle(M + 4, y + 3, 1, 'F');
+
+        // Wrap the full text first for spacing
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        const plainText = text.replace(/\*\*/g, '');
+        const wrapped = doc.splitTextToSize(plainText, contentW - 10);
+
+        if (wrapped.length === 1) {
+          // Single line - render with inline bold
+          parts.forEach(part => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              doc.setFont('helvetica', 'bold');
+              doc.setTextColor(...NEAR_BLACK);
+              doc.text(part.slice(2, -2), xPos, y + 4);
+              xPos += doc.getTextWidth(part.slice(2, -2));
+            } else {
+              doc.setFont('helvetica', 'normal');
+              doc.setTextColor(...MUTED);
+              doc.text(part, xPos, y + 4);
+              xPos += doc.getTextWidth(part);
+            }
+          });
+          y += 6;
+        } else {
+          // Multi-line - render plain
+          doc.setTextColor(...MUTED);
+          doc.text(wrapped, M + 7, y + 4);
+          y += wrapped.length * 4 + 2;
+        }
+        return;
+      }
+
+      // Numbered list
+      if (/^\d+\./.test(trimmed)) {
+        ensureSpace(8);
+        const num = trimmed.match(/^(\d+)\./)?.[1] || '';
+        const text = trimmed.replace(/^\d+\.\s*/, '');
+        doc.setFontSize(8);
+
+        // Number badge
+        doc.setFillColor(...PURPLE);
+        doc.circle(M + 4, y + 3, 2.5, 'F');
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...WHITE);
+        doc.text(num, M + 4, y + 4, { align: 'center' });
+
+        // Text
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...MUTED);
+        const wrapped = doc.splitTextToSize(text.replace(/\*\*/g, ''), contentW - 12);
+        doc.text(wrapped, M + 9, y + 4);
+        y += wrapped.length * 4 + 3;
+        return;
+      }
+
+      // Normal paragraph
+      ensureSpace(8);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...NEAR_BLACK);
+      const plainText = trimmed.replace(/\*\*/g, '');
+      const wrapped = doc.splitTextToSize(plainText, contentW - 4);
+      doc.text(wrapped, M + 2, y + 4);
+      y += wrapped.length * 4 + 2;
+    });
+
+    // Signature
+    ensureSpace(20);
+    y += 6;
+    doc.setFillColor(...WHITE);
+    doc.roundedRect(M, y, contentW, 14, 4, 4, 'F');
+    doc.setFillColor(...GOLD);
+    doc.roundedRect(M + 4, y, contentW - 8, 1.5, 0.7, 0.7, 'F');
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...MUTED);
+    doc.text('⚡ Generado por BASQUEST+ — Inteligencia Deportiva con IA', W / 2, y + 9, { align: 'center' });
+
+    drawFooter();
+
+    const fileName = `BASQUEST_Analisis_IA_${gameLabel.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    doc.save(fileName);
+    toast.success('PDF descargado');
   };
 
   const handleAnalyze = async () => {
