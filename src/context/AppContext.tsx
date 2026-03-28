@@ -35,6 +35,10 @@ interface AppContextValue extends Omit<AppState, 'loading'> {
   undoLastOpponentScore: () => void;
   setActiveCategory: (c: Category) => void;
   recordAction: (playerId: string, type: ActionType) => void;
+  deleteShot: (shotId: string) => void;
+  deleteAction: (actionId: string) => void;
+  deleteOpponentScore: (scoreId: string) => void;
+  toggleShotResult: (shotId: string) => void;
   setOnCourtPlayers: (playerIds: string[]) => void;
   recordSubstitution: (playerIn: string, playerOut: string) => void;
   snapshotCourtTime: () => void;
@@ -486,6 +490,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, []);
 
+  const deleteShot = useCallback((shotId: string) => {
+    setState(s => {
+      if (!s.activeGame) return s;
+      return { ...s, activeGame: { ...s.activeGame, shots: s.activeGame.shots.filter(sh => sh.id !== shotId) } };
+    });
+  }, []);
+
+  const deleteAction = useCallback((actionId: string) => {
+    setState(s => {
+      if (!s.activeGame) return s;
+      return { ...s, activeGame: { ...s.activeGame, actions: (s.activeGame.actions || []).filter(a => a.id !== actionId) } };
+    });
+  }, []);
+
+  const deleteOpponentScore = useCallback((scoreId: string) => {
+    setState(s => {
+      if (!s.activeGame) return s;
+      return { ...s, activeGame: { ...s.activeGame, opponentScores: (s.activeGame.opponentScores || []).filter(o => o.id !== scoreId) } };
+    });
+  }, []);
+
+  const toggleShotResult = useCallback((shotId: string) => {
+    setState(s => {
+      if (!s.activeGame) return s;
+      return {
+        ...s,
+        activeGame: {
+          ...s.activeGame,
+          shots: s.activeGame.shots.map(sh => sh.id === shotId ? { ...sh, made: !sh.made } : sh),
+        },
+      };
+    });
+  }, []);
+
   const setOnCourtPlayers = useCallback((playerIds: string[]) => {
     setState(s => {
       if (!s.activeGame) return s;
@@ -552,6 +590,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
+      deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
       setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer, setMyTeamName, setMyTeamLogo,
     }}>
       {children}

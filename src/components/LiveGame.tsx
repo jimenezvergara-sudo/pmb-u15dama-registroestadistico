@@ -6,6 +6,7 @@ import QuickActionFAB from '@/components/QuickActionFAB';
 import SubstitutionDialog from '@/components/SubstitutionDialog';
 import StartingLineup from '@/components/StartingLineup';
 import LiveGameReport from '@/components/LiveGameReport';
+import LiveActionLog from '@/components/LiveActionLog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2, BarChart3 } from 'lucide-react';
@@ -30,6 +31,7 @@ const LiveGame: React.FC = () => {
     recordOpponentScore, undoLastOpponentScore, recordAction,
     setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer,
     myTeamName, myTeamLogo,
+    deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
   } = useApp();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -392,6 +394,14 @@ const LiveGame: React.FC = () => {
           </AlertDialog>
         </div>
       </div>
+      {/* Live Action Log */}
+      <LiveActionLog
+        game={activeGame}
+        onDeleteShot={deleteShot}
+        onDeleteAction={deleteAction}
+        onDeleteOpponentScore={deleteOpponentScore}
+        onToggleShotResult={toggleShotResult}
+      />
       {/* Live Game Report */}
       {showReport && activeGame && (
         <LiveGameReport game={activeGame} onClose={() => setShowReport(false)} />
