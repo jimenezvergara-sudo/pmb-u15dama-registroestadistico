@@ -394,6 +394,14 @@ const LiveGame: React.FC = () => {
           </AlertDialog>
         </div>
       </div>
+      {/* Live Action Log */}
+      <LiveActionLog
+        game={activeGame}
+        onDeleteShot={deleteShot}
+        onDeleteAction={deleteAction}
+        onDeleteOpponentScore={deleteOpponentScore}
+        onToggleShotResult={toggleShotResult}
+      />
       {/* Live Game Report */}
       {showReport && activeGame && (
         <LiveGameReport game={activeGame} onClose={() => setShowReport(false)} />
