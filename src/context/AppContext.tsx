@@ -35,6 +35,10 @@ interface AppContextValue extends Omit<AppState, 'loading'> {
   undoLastOpponentScore: () => void;
   setActiveCategory: (c: Category) => void;
   recordAction: (playerId: string, type: ActionType) => void;
+  deleteShot: (shotId: string) => void;
+  deleteAction: (actionId: string) => void;
+  deleteOpponentScore: (scoreId: string) => void;
+  toggleShotResult: (shotId: string) => void;
   setOnCourtPlayers: (playerIds: string[]) => void;
   recordSubstitution: (playerIn: string, playerOut: string) => void;
   snapshotCourtTime: () => void;
