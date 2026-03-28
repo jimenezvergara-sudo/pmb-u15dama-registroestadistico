@@ -21,20 +21,21 @@ interface BoxScoreRow {
   twoM: number; twoA: number; twoPct: number;
   threeM: number; threeA: number; threePct: number;
   ftM: number; ftA: number; ftPct: number;
-  reb: number; oReb: number; dReb: number; ast: number; stl: number; pf: number;
+  reb: number; oReb: number; dReb: number; ast: number; stl: number; tov: number; pf: number;
+  eFG: number; ts: number;
 }
 
 // ── Brand Palette (from CSS tokens) ──
-const PURPLE: [number, number, number] = [122, 38, 225];      // primary 268 76% 52%
-const PURPLE_LIGHT: [number, number, number] = [165, 100, 240]; // lighter purple
-const PURPLE_DARK: [number, number, number] = [60, 15, 120];    // deep purple
-const CYAN: [number, number, number] = [50, 217, 255];         // secondary 190 100% 60%
-const GOLD: [number, number, number] = [255, 195, 0];          // accent 45 100% 50%
-const SUCCESS: [number, number, number] = [16, 185, 129];      // success 160 84% 39%
-const DESTRUCTIVE: [number, number, number] = [217, 72, 72];   // destructive
+const PURPLE: [number, number, number] = [122, 38, 225];
+const PURPLE_LIGHT: [number, number, number] = [165, 100, 240];
+const PURPLE_DARK: [number, number, number] = [60, 15, 120];
+const CYAN: [number, number, number] = [50, 217, 255];
+const GOLD: [number, number, number] = [255, 195, 0];
+const SUCCESS: [number, number, number] = [16, 185, 129];
+const DESTRUCTIVE: [number, number, number] = [217, 72, 72];
 const WHITE: [number, number, number] = [255, 255, 255];
 const NEAR_BLACK: [number, number, number] = [25, 15, 45];
-const BODY_BG: [number, number, number] = [245, 243, 250];     // soft lavender bg
+const BODY_BG: [number, number, number] = [245, 243, 250];
 const CARD_BG: [number, number, number] = [237, 234, 245];
 const MUTED: [number, number, number] = [140, 130, 160];
 const TABLE_ALT: [number, number, number] = [248, 245, 255];
@@ -47,9 +48,9 @@ export async function generatePdfReport(
   options: ReportOptions
 ) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
-  const W = doc.internal.pageSize.getWidth();   // ~215.9
-  const H = doc.internal.pageSize.getHeight();  // ~279.4
-  const M = 14; // margin
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const M = 14;
   let y = 0;
 
   // ═══════════════ HELPERS ═══════════════
@@ -60,60 +61,49 @@ export async function generatePdfReport(
   };
 
   const drawHeader = () => {
-    // Gradient-like header band with two layers
     doc.setFillColor(...PURPLE_DARK);
     doc.rect(0, 0, W, 42, 'F');
     doc.setFillColor(...PURPLE);
     doc.rect(0, 0, W, 36, 'F');
 
-    // Decorative accent stripe
     doc.setFillColor(...GOLD);
     doc.rect(0, 36, W, 1.5, 'F');
 
-    // Decorative circles (brand flair)
     doc.setFillColor(255, 255, 255);
-    // @ts-ignore - GState is available at runtime
+    // @ts-ignore
     doc.setGState(new doc.GState({ opacity: 0.06 }));
     doc.circle(W - 30, 10, 35, 'F');
     doc.circle(W - 60, 25, 20, 'F');
     // @ts-ignore
     doc.setGState(new doc.GState({ opacity: 1 }));
 
-    // App name
     doc.setTextColor(...WHITE);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
     doc.text('BASQUEST+', M, 16);
 
-    // Tagline with cyan accent
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...CYAN);
     doc.text('Inteligencia Deportiva', M, 23);
 
-    // Team name in gold capsule
     if (options.teamName) {
       const teamText = options.teamName.toUpperCase();
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       const tw = doc.getTextWidth(teamText);
       const capsuleW = tw + 10;
-      const capsuleX = M;
-      const capsuleY = 27;
       doc.setFillColor(...GOLD);
-      doc.roundedRect(capsuleX, capsuleY, capsuleW, 7, 3.5, 3.5, 'F');
+      doc.roundedRect(M, 27, capsuleW, 7, 3.5, 3.5, 'F');
       doc.setTextColor(...NEAR_BLACK);
-      doc.text(teamText, capsuleX + 5, capsuleY + 5.2);
+      doc.text(teamText, M + 5, 32.2);
     }
 
-    // App logo
     if (options.appLogo) {
       try { doc.addImage(options.appLogo, 'PNG', W - M - 20, 4, 20, 20); } catch { /* skip */ }
     }
-    // Team logo
     if (options.teamLogo) {
       try {
-        // Circular clip effect: draw white circle bg then image
         doc.setFillColor(...WHITE);
         doc.circle(W - M - 10, 31, 7, 'F');
         doc.addImage(options.teamLogo, 'PNG', W - M - 16, 25, 12, 12);
@@ -124,7 +114,6 @@ export async function generatePdfReport(
   };
 
   const drawFooter = (pageNum: number) => {
-    // Footer bar
     doc.setFillColor(...PURPLE_DARK);
     doc.rect(0, H - 12, W, 12, 'F');
     doc.setFillColor(...GOLD);
@@ -161,7 +150,7 @@ export async function generatePdfReport(
   doc.setFontSize(7);
   doc.setTextColor(...MUTED);
   doc.setFont('helvetica', 'normal');
-  doc.text(`📋  ${options.filterLabel}  ·  ${options.gameLabel}`, M + 4, y + 5);
+  doc.text(`${options.filterLabel}  ·  ${options.gameLabel}`, M + 4, y + 5);
   y += 12;
 
   // ── Team summary cards ──
@@ -179,9 +168,9 @@ export async function generatePdfReport(
 
   const cardW = (W - M * 2 - 8) / 3;
   const cards = [
-    { label: 'RÉCORD', value: `${wins}-${losses}`, color: GOLD },
-    { label: 'PTS/PARTIDO', value: ppg, color: CYAN },
-    { label: 'PTS/CONTRA', value: oppPpg, color: PURPLE_LIGHT },
+    { label: 'RECORD', value: `${wins}-${losses}`, color: GOLD, icon: '🏆' },
+    { label: 'PTS/PARTIDO', value: ppg, color: CYAN, icon: '🏀' },
+    { label: 'PTS/CONTRA', value: oppPpg, color: PURPLE_LIGHT, icon: '🛡' },
   ];
   cards.forEach((c, i) => {
     const cx = M + i * (cardW + 4);
@@ -189,21 +178,25 @@ export async function generatePdfReport(
     doc.roundedRect(cx, y, cardW, 26, 4, 4, 'F');
     doc.setFillColor(...c.color);
     doc.roundedRect(cx + 8, y, cardW - 16, 2, 1, 1, 'F');
-    doc.setFontSize(6.5);
+    // Icon
+    doc.setFontSize(12);
+    doc.text(c.icon, cx + cardW / 2, y + 9, { align: 'center' });
+    doc.setFontSize(6);
     doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
-    doc.text(c.label, cx + cardW / 2, y + 10, { align: 'center' });
-    doc.setFontSize(20);
+    doc.text(c.label, cx + cardW / 2, y + 14, { align: 'center' });
+    doc.setFontSize(18);
     doc.setTextColor(...NEAR_BLACK);
     doc.setFont('helvetica', 'bold');
-    doc.text(c.value, cx + cardW / 2, y + 22, { align: 'center' });
+    doc.text(c.value, cx + cardW / 2, y + 23, { align: 'center' });
   });
   y += 32;
 
   // ── Productivity cards ──
-  sectionTitle('Productividad del Equipo');
+  sectionTitle('Productividad del Equipo', '📊');
 
   const allShotsGlobal = filteredGames.flatMap(g => g.shots);
+  const allActionsGlobal = filteredGames.flatMap(g => g.actions || []);
   const totalShotsCount = allShotsGlobal.length;
   const madeCount = allShotsGlobal.filter(s => s.made).length;
   const pctPossession = totalShotsCount > 0 ? Math.round((madeCount / totalShotsCount) * 100) : 0;
@@ -222,13 +215,22 @@ export async function generatePdfReport(
   const tsDen = 2 * (fga2 + 0.44 * ftAtt2);
   const tsVal = tsDen > 0 ? Math.round((ptsTot / tsDen) * 100) : 0;
 
+  // Team-level action totals
+  const totalRebGlobal = allActionsGlobal.filter(a => a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound').length;
+  const totalAstGlobal = allActionsGlobal.filter(a => a.type === 'assist').length;
+  const totalStlGlobal = allActionsGlobal.filter(a => a.type === 'steal').length;
+  const totalTovGlobal = allActionsGlobal.filter(a => a.type === 'turnover').length;
+
   const prodCards = [
-    { label: 'EF. POSESIÓN', value: `${pctPossession}%`, color: GOLD },
-    { label: 'eFG%', value: `${eFgVal}%`, color: CYAN },
-    { label: 'TS%', value: `${tsVal}%`, color: PURPLE_LIGHT },
-    { label: 'EF. DOBLES', value: `${pctDbl}%`, color: GOLD },
-    { label: 'EF. TL', value: `${pctFt}%`, color: CYAN },
-    { label: 'EF. TRIPLES', value: `${pctTpl}%`, color: PURPLE_LIGHT },
+    { label: 'EF. POSESION', value: `${pctPossession}%`, color: GOLD, icon: '🎯' },
+    { label: 'eFG%', value: `${eFgVal}%`, color: CYAN, icon: '📈' },
+    { label: 'TS%', value: `${tsVal}%`, color: PURPLE_LIGHT, icon: '⚡' },
+    { label: 'EF. DOBLES', value: `${pctDbl}%`, color: GOLD, icon: '✌' },
+    { label: 'EF. TL', value: `${pctFt}%`, color: CYAN, icon: '🏹' },
+    { label: 'EF. TRIPLES', value: `${pctTpl}%`, color: PURPLE_LIGHT, icon: '🔥' },
+    { label: 'REBOTES', value: `${totalRebGlobal}`, color: SUCCESS, icon: '💪' },
+    { label: 'ASISTENCIAS', value: `${totalAstGlobal}`, color: CYAN, icon: '🤝' },
+    { label: 'ROBOS / PB', value: `${totalStlGlobal} / ${totalTovGlobal}`, color: GOLD, icon: '🛡' },
   ];
 
   const pCardW = (W - M * 2 - 10) / 3;
@@ -241,10 +243,13 @@ export async function generatePdfReport(
     doc.roundedRect(cx, cy, pCardW, 19, 3, 3, 'F');
     doc.setFillColor(...c.color);
     doc.roundedRect(cx + 6, cy, pCardW - 12, 1.5, 0.7, 0.7, 'F');
+    // Icon
+    doc.setFontSize(9);
+    doc.text(c.icon, cx + 5, cy + 8);
     doc.setFontSize(6);
     doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
-    doc.text(c.label, cx + pCardW / 2, cy + 8, { align: 'center' });
+    doc.text(c.label, cx + pCardW / 2 + 3, cy + 8, { align: 'center' });
     doc.setFontSize(14);
     doc.setTextColor(...NEAR_BLACK);
     doc.setFont('helvetica', 'bold');
@@ -259,20 +264,36 @@ export async function generatePdfReport(
   filteredGames.forEach(g => g.roster.forEach(p => rosterMap.set(p.id, p)));
   const roster = Array.from(rosterMap.values());
 
+  // Volume threshold for efficiency leaders (20% of max attempts)
+  const maxFga = Math.max(...roster.map(p => allShots.filter(s => s.playerId === p.id && s.points >= 2).length), 1);
+  const volThreshold = Math.max(Math.round(maxFga * 0.2), 1);
+
   const playerStats = roster.map(p => {
     const shots = allShots.filter(s => s.playerId === p.id);
     const pts = shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
+    const pActions = allActions.filter(a => a.playerId === p.id);
+    const oReb = pActions.filter(a => a.type === 'offensive_rebound').length;
+    const dReb = pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length;
+    const fgaP = shots.filter(s => s.points >= 2).length;
+    const twoM = shots.filter(s => s.points === 2 && s.made).length;
+    const threeM = shots.filter(s => s.points === 3 && s.made).length;
+    const ftA = shots.filter(s => s.points === 1).length;
+    const ftM = shots.filter(s => s.points === 1 && s.made).length;
+    const eFGp = fgaP > 0 ? Math.round(((twoM + 0.5 * threeM) / fgaP) * 100) : 0;
+    const tsDenP = 2 * (fgaP + 0.44 * ftA);
+    const tsP = tsDenP > 0 ? Math.round((pts / tsDenP) * 100) : 0;
     return {
-      ...p, pts,
-      triplesMade: shots.filter(s => s.points === 3 && s.made).length,
+      ...p, pts, oReb, dReb,
+      reb: oReb + dReb,
+      triplesMade: threeM,
       triplesAtt: shots.filter(s => s.points === 3).length,
-      doblesMade: shots.filter(s => s.points === 2 && s.made).length,
+      doblesMade: twoM,
       doblesAtt: shots.filter(s => s.points === 2).length,
-      ftMade: shots.filter(s => s.points === 1 && s.made).length,
-      ftAtt: shots.filter(s => s.points === 1).length,
-      reb: allActions.filter(a => a.playerId === p.id && (a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound')).length,
-      ast: allActions.filter(a => a.playerId === p.id && a.type === 'assist').length,
-      stl: allActions.filter(a => a.playerId === p.id && a.type === 'steal').length,
+      ftMade: ftM, ftAtt: ftA, fgaP,
+      ast: pActions.filter(a => a.type === 'assist').length,
+      stl: pActions.filter(a => a.type === 'steal').length,
+      tov: pActions.filter(a => a.type === 'turnover').length,
+      eFG: eFGp, ts: tsP,
     };
   });
 
@@ -280,18 +301,26 @@ export async function generatePdfReport(
   const topThrees = [...playerStats].filter(p => p.triplesMade > 0).sort((a, b) => b.triplesMade - a.triplesMade)[0];
   const topDoubles = [...playerStats].filter(p => p.doblesMade > 0).sort((a, b) => b.doblesMade - a.doblesMade)[0];
   const topReb = [...playerStats].filter(p => p.reb > 0).sort((a, b) => b.reb - a.reb)[0];
+  const topOReb = [...playerStats].filter(p => p.oReb > 0).sort((a, b) => b.oReb - a.oReb)[0];
+  const topDReb = [...playerStats].filter(p => p.dReb > 0).sort((a, b) => b.dReb - a.dReb)[0];
   const topAst = [...playerStats].filter(p => p.ast > 0).sort((a, b) => b.ast - a.ast)[0];
   const topStl = [...playerStats].filter(p => p.stl > 0).sort((a, b) => b.stl - a.stl)[0];
+  const topEfg = [...playerStats].filter(p => p.fgaP >= volThreshold).sort((a, b) => b.eFG - a.eFG)[0];
+  const topTs = [...playerStats].filter(p => p.fgaP >= volThreshold).sort((a, b) => b.ts - a.ts)[0];
 
-  sectionTitle('Líderes de Temporada');
+  sectionTitle('Lideres de Temporada', '👑');
 
   const leaderItems = [
-    { label: 'PUNTOS', player: topScorer, value: topScorer?.pts, accent: GOLD },
-    { label: 'TRIPLES', player: topThrees, value: topThrees?.triplesMade, accent: CYAN },
-    { label: 'DOBLES', player: topDoubles, value: topDoubles?.doblesMade, accent: PURPLE_LIGHT },
-    { label: 'REBOTES', player: topReb, value: topReb?.reb, accent: SUCCESS },
-    { label: 'ASISTENCIAS', player: topAst, value: topAst?.ast, accent: CYAN },
-    { label: 'ROBOS', player: topStl, value: topStl?.stl, accent: GOLD },
+    { label: '🏀 PUNTOS', player: topScorer, value: topScorer?.pts, accent: GOLD },
+    { label: '🔥 TRIPLES', player: topThrees, value: topThrees?.triplesMade, accent: CYAN },
+    { label: '✌ DOBLES', player: topDoubles, value: topDoubles?.doblesMade, accent: PURPLE_LIGHT },
+    { label: '💪 REBOTES', player: topReb, value: topReb?.reb, accent: SUCCESS },
+    { label: '⬆ REB.OFENSIVO', player: topOReb, value: topOReb?.oReb, accent: GOLD },
+    { label: '⬇ REB.DEFENSIVO', player: topDReb, value: topDReb?.dReb, accent: CYAN },
+    { label: '🤝 ASISTENCIAS', player: topAst, value: topAst?.ast, accent: CYAN },
+    { label: '🛡 ROBOS', player: topStl, value: topStl?.stl, accent: GOLD },
+    { label: '📈 eFG%', player: topEfg, value: topEfg ? `${topEfg.eFG}%` : undefined, accent: PURPLE_LIGHT },
+    { label: '⚡ TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: SUCCESS },
   ];
 
   const lColW = (W - M * 2 - 8) / 3;
@@ -301,27 +330,27 @@ export async function generatePdfReport(
     const lx = M + col * (lColW + 4);
     const ly = y + row * 22;
 
-    // Card
+    // Check page overflow
+    if (ly + 19 > H - 16) return;
+
     doc.setFillColor(...WHITE);
     doc.roundedRect(lx, ly, lColW, 19, 3, 3, 'F');
-    // Left accent bar
     doc.setFillColor(...item.accent);
     doc.roundedRect(lx, ly + 3, 2.5, 13, 1.2, 1.2, 'F');
 
-    doc.setFontSize(6.5);
+    doc.setFontSize(6);
     doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
     doc.text(item.label, lx + 6, ly + 6);
 
     if (item.player) {
-      doc.setFontSize(8.5);
+      doc.setFontSize(8);
       doc.setTextColor(...NEAR_BLACK);
       doc.setFont('helvetica', 'bold');
       doc.text(`#${item.player.number} ${item.player.name}`, lx + 6, ly + 12.5);
-      // Value badge
-      doc.setFillColor(...item.accent);
       const valStr = `${item.value}`;
       const valW = Math.max(doc.getTextWidth(valStr) + 5, 10);
+      doc.setFillColor(...item.accent);
       doc.roundedRect(lx + lColW - valW - 3, ly + 8, valW, 8, 3, 3, 'F');
       doc.setFontSize(10);
       doc.setTextColor(...(item.accent === GOLD ? NEAR_BLACK : WHITE));
@@ -334,9 +363,17 @@ export async function generatePdfReport(
   });
   y += Math.ceil(leaderItems.length / 3) * 22 + 6;
 
+  drawFooter(pageNum);
+
+  // ═══════════════ PAGE 2: Results + Box Score ═══════════════
+  doc.addPage();
+  drawPageBg();
+  pageNum++;
+  drawHeader();
+
   // ── Results table ──
   if (filteredGames.length > 0) {
-    sectionTitle('Resultados');
+    sectionTitle('Resultados', '📋');
 
     const gameRows = filteredGames.map(g => {
       const teamPts = g.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
@@ -366,18 +403,11 @@ export async function generatePdfReport(
       },
       theme: 'grid',
     });
-    y = (doc as any).lastAutoTable.finalY + 6;
+    y = (doc as any).lastAutoTable.finalY + 8;
   }
 
-  drawFooter(pageNum);
-
-  // ═══════════════ PAGE 2: Box Score ═══════════════
-  doc.addPage();
-  drawPageBg();
-  pageNum++;
-  drawHeader();
-
-  sectionTitle('Box Score');
+  // ── Box Score ──
+  sectionTitle('Box Score', '📊');
 
   if (options.quarterFilter !== 'ALL') {
     doc.setFontSize(8);
@@ -389,6 +419,12 @@ export async function generatePdfReport(
   const filteredShots = allShots.filter(s => {
     if (options.quarterFilter !== 'ALL' && s.quarterId !== options.quarterFilter) return false;
     if (options.playerFilter !== 'ALL' && s.playerId !== options.playerFilter) return false;
+    return true;
+  });
+
+  const filteredActions = allActions.filter(a => {
+    if (options.quarterFilter !== 'ALL' && a.quarterId !== options.quarterFilter) return false;
+    if (options.playerFilter !== 'ALL' && a.playerId !== options.playerFilter) return false;
     return true;
   });
 
@@ -404,19 +440,25 @@ export async function generatePdfReport(
     const threeM = pShots.filter(s => s.points === 3 && s.made).length;
     const ftA = pShots.filter(s => s.points === 1).length;
     const ftM = pShots.filter(s => s.points === 1 && s.made).length;
-    const pActions = allActions.filter(a => a.playerId === player.id);
+    const pActions = filteredActions.filter(a => a.playerId === player.id);
+    const oReb = pActions.filter(a => a.type === 'offensive_rebound').length;
+    const dReb = pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length;
+    const eFG = fga > 0 ? Math.round(((twoM + 0.5 * threeM) / fga) * 100) : 0;
+    const tsDenom = 2 * (fga + 0.44 * ftA);
+    const ts = tsDenom > 0 ? Math.round((pts / tsDenom) * 100) : 0;
     return {
       name: player.name, number: player.number, pts, fgm, fga,
       fgPct: fga > 0 ? Math.round((fgm / fga) * 100) : 0,
       twoM, twoA, twoPct: twoA > 0 ? Math.round((twoM / twoA) * 100) : 0,
       threeM, threeA, threePct: threeA > 0 ? Math.round((threeM / threeA) * 100) : 0,
       ftM, ftA, ftPct: ftA > 0 ? Math.round((ftM / ftA) * 100) : 0,
-      oReb: pActions.filter(a => a.type === 'offensive_rebound').length,
-      dReb: pActions.filter(a => a.type === 'defensive_rebound' || a.type === 'rebound').length,
-      reb: pActions.filter(a => a.type === 'rebound' || a.type === 'offensive_rebound' || a.type === 'defensive_rebound').length,
+      oReb, dReb,
+      reb: oReb + dReb,
       ast: pActions.filter(a => a.type === 'assist').length,
       stl: pActions.filter(a => a.type === 'steal').length,
+      tov: pActions.filter(a => a.type === 'turnover').length,
       pf: pActions.filter(a => a.type === 'foul').length,
+      eFG, ts,
     };
   }).sort((a, b) => b.pts - a.pts);
 
@@ -426,24 +468,27 @@ export async function generatePdfReport(
     `${r.twoM}/${r.twoA}`, `${r.twoPct}%`,
     `${r.threeM}/${r.threeA}`, `${r.threePct}%`,
     `${r.ftM}/${r.ftA}`, `${r.ftPct}%`,
-    `${r.pts}`, `${r.oReb}`, `${r.dReb}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.pf}`,
+    `${r.pts}`, `${r.oReb}`, `${r.dReb}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.tov}`, `${r.pf}`,
+    `${r.eFG}%`, `${r.ts}%`,
   ]);
 
   autoTable(doc, {
     startY: y,
-    head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'PF']],
+    head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG%', 'TS%']],
     body: tableBody,
     margin: { left: M, right: M },
-    styles: { fontSize: 7, cellPadding: 1.8, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2 },
-    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 7 },
+    styles: { fontSize: 6.5, cellPadding: 1.5, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2 },
+    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 6.5 },
     bodyStyles: { fillColor: WHITE },
     alternateRowStyles: { fillColor: TABLE_ALT },
     columnStyles: {
-      0: { cellWidth: 30, fontStyle: 'bold' },
+      0: { cellWidth: 28, fontStyle: 'bold' },
       9: { fontStyle: 'bold', halign: 'center', fillColor: [245, 240, 255] },
       1: { halign: 'center' }, 2: { halign: 'center' }, 3: { halign: 'center' }, 4: { halign: 'center' },
       5: { halign: 'center' }, 6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
       10: { halign: 'center' }, 11: { halign: 'center' }, 12: { halign: 'center' }, 13: { halign: 'center' },
+      14: { halign: 'center' }, 15: { halign: 'center' }, 16: { halign: 'center' },
+      17: { halign: 'center' }, 18: { halign: 'center' },
     },
     theme: 'grid',
     didParseCell: (data) => {
@@ -458,7 +503,14 @@ export async function generatePdfReport(
           else if (ci === 8 && val >= 75) data.cell.styles.textColor = [...SUCCESS];
           else if (ci === 8 && val < 50 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
         }
-        // Highlight PTS column
+        // eFG% and TS% color coding
+        if ([17, 18].includes(ci) && !isNaN(val)) {
+          if (val >= 55) data.cell.styles.textColor = [...SUCCESS];
+          else if (val < 40 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+        }
+        // TOV highlight (red if high)
+        if (ci === 15 && val >= 4) data.cell.styles.textColor = [...DESTRUCTIVE];
+        // PTS column
         if (ci === 9) data.cell.styles.textColor = [...PURPLE];
       }
     },
@@ -472,35 +524,37 @@ export async function generatePdfReport(
     twoM: a.twoM + r.twoM, twoA: a.twoA + r.twoA,
     threeM: a.threeM + r.threeM, threeA: a.threeA + r.threeA,
     ftM: a.ftM + r.ftM, ftA: a.ftA + r.ftA,
-    reb: a.reb + r.reb, oReb: a.oReb + r.oReb, dReb: a.dReb + r.dReb, ast: a.ast + r.ast, stl: a.stl + r.stl, pf: a.pf + r.pf,
-  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, oReb: 0, dReb: 0, ast: 0, stl: 0, pf: 0 });
+    reb: a.reb + r.reb, oReb: a.oReb + r.oReb, dReb: a.dReb + r.dReb,
+    ast: a.ast + r.ast, stl: a.stl + r.stl, tov: a.tov + r.tov, pf: a.pf + r.pf,
+  }), { pts: 0, fgm: 0, fga: 0, twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0, reb: 0, oReb: 0, dReb: 0, ast: 0, stl: 0, tov: 0, pf: 0 });
 
   // Totals bar
-  doc.setFillColor(...PURPLE_DARK);
-  doc.roundedRect(M, y, W - M * 2, 18, 4, 4, 'F');
-  const totItems = [
-    { l: 'PTS', v: `${tt.pts}`, c: GOLD },
-    { l: 'TC', v: `${tt.fga > 0 ? Math.round((tt.fgm / tt.fga) * 100) : 0}%`, c: WHITE },
-    { l: '2PT', v: `${tt.twoA > 0 ? Math.round((tt.twoM / tt.twoA) * 100) : 0}%`, c: WHITE },
-    { l: '3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
-    { l: 'TL', v: `${tt.ftA > 0 ? Math.round((tt.ftM / tt.ftA) * 100) : 0}%`, c: WHITE },
-    { l: 'RO', v: `${tt.oReb}`, c: WHITE },
-    { l: 'RD', v: `${tt.dReb}`, c: WHITE },
-    { l: 'REB', v: `${tt.reb}`, c: WHITE },
-    { l: 'AST', v: `${tt.ast}`, c: WHITE },
-    { l: 'STL', v: `${tt.stl}`, c: WHITE },
-  ];
-  const totW = (W - M * 2) / totItems.length;
-  totItems.forEach((t, i) => {
-    const tx = M + i * totW;
-    doc.setFontSize(5.5);
-    doc.setTextColor(180, 170, 210);
-    doc.setFont('helvetica', 'bold');
-    doc.text(t.l, tx + totW / 2, y + 6, { align: 'center' });
-    doc.setFontSize(11);
-    doc.setTextColor(...t.c);
-    doc.text(t.v, tx + totW / 2, y + 14, { align: 'center' });
-  });
+  if (y + 18 < H - 16) {
+    doc.setFillColor(...PURPLE_DARK);
+    doc.roundedRect(M, y, W - M * 2, 18, 4, 4, 'F');
+    const totItems = [
+      { l: '🏀 PTS', v: `${tt.pts}`, c: GOLD },
+      { l: 'TC', v: `${tt.fga > 0 ? Math.round((tt.fgm / tt.fga) * 100) : 0}%`, c: WHITE },
+      { l: '2PT', v: `${tt.twoA > 0 ? Math.round((tt.twoM / tt.twoA) * 100) : 0}%`, c: WHITE },
+      { l: '🔥 3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
+      { l: 'TL', v: `${tt.ftA > 0 ? Math.round((tt.ftM / tt.ftA) * 100) : 0}%`, c: WHITE },
+      { l: '💪 REB', v: `${tt.reb}`, c: WHITE },
+      { l: '🤝 AST', v: `${tt.ast}`, c: WHITE },
+      { l: '🛡 STL', v: `${tt.stl}`, c: WHITE },
+      { l: 'TOV', v: `${tt.tov}`, c: DESTRUCTIVE },
+    ];
+    const totW = (W - M * 2) / totItems.length;
+    totItems.forEach((t, i) => {
+      const tx = M + i * totW;
+      doc.setFontSize(5);
+      doc.setTextColor(180, 170, 210);
+      doc.setFont('helvetica', 'bold');
+      doc.text(t.l, tx + totW / 2, y + 6, { align: 'center' });
+      doc.setFontSize(11);
+      doc.setTextColor(...t.c);
+      doc.text(t.v, tx + totW / 2, y + 14, { align: 'center' });
+    });
+  }
 
   drawFooter(pageNum);
 
@@ -515,7 +569,7 @@ export async function generatePdfReport(
 
   // ── Points per Quarter bar chart ──
   if (activeQuarters.length > 1) {
-    sectionTitle('Puntos por Cuarto');
+    sectionTitle('Puntos por Cuarto', '📊');
 
     const qData = activeQuarters.map(q => {
       const qShots = allShots.filter(s => s.quarterId === q);
@@ -532,15 +586,12 @@ export async function generatePdfReport(
     const barW = barGroupW * 0.28;
     const gap = 4;
 
-    // Chart background card
     doc.setFillColor(...WHITE);
     doc.roundedRect(chartX, y, chartW, chartH + 22, 5, 5, 'F');
-    // Subtle inner shadow
     doc.setDrawColor(...TABLE_BORDER);
     doc.setLineWidth(0.3);
     doc.roundedRect(chartX, y, chartW, chartH + 22, 5, 5, 'S');
 
-    // Grid lines
     for (let i = 0; i <= 4; i++) {
       const gy = y + 8 + (chartH * (1 - i / 4));
       doc.setDrawColor(235, 232, 245);
@@ -551,12 +602,10 @@ export async function generatePdfReport(
       doc.text(`${Math.round(maxVal * i / 4)}`, chartX + 4, gy + 1.5);
     }
 
-    // Bars with gradient effect
     qData.forEach((d, i) => {
       const groupX = chartX + 18 + i * barGroupW;
       const barBaseY = y + 8 + chartH;
 
-      // Team bar (purple with lighter top)
       const teamH = Math.max((d.pts / maxVal) * chartH, 0.5);
       doc.setFillColor(...PURPLE);
       doc.roundedRect(groupX, barBaseY - teamH, barW, teamH, 1.5, 1.5, 'F');
@@ -576,7 +625,6 @@ export async function generatePdfReport(
         doc.text(`${d.pts}`, groupX + barW / 2, barBaseY - teamH - 2, { align: 'center' });
       }
 
-      // Opponent bar (coral/red)
       const oppH = Math.max((d.opp / maxVal) * chartH, 0.5);
       doc.setFillColor(...DESTRUCTIVE);
       doc.roundedRect(groupX + barW + gap, barBaseY - oppH, barW, oppH, 1.5, 1.5, 'F');
@@ -587,14 +635,12 @@ export async function generatePdfReport(
         doc.text(`${d.opp}`, groupX + barW + gap + barW / 2, barBaseY - oppH - 2, { align: 'center' });
       }
 
-      // Quarter label
       doc.setFontSize(9);
       doc.setTextColor(...NEAR_BLACK);
       doc.setFont('helvetica', 'bold');
       doc.text(d.label, groupX + barW + gap / 2, barBaseY + 7, { align: 'center' });
     });
 
-    // Legend
     const legendY = y + chartH + 14;
     doc.setFillColor(...PURPLE);
     doc.roundedRect(chartX + chartW - 60, legendY, 5, 5, 1.5, 1.5, 'F');
@@ -647,17 +693,16 @@ export async function generatePdfReport(
       drawHeader();
     }
 
-    sectionTitle('Shot Chart');
+    sectionTitle('Shot Chart', '🎯');
 
-    // Stats badges
     const totalAtt = shotsForChart.length;
     const totalMade = shotsForChart.filter(s => s.made).length;
     const totalPct = totalAtt > 0 ? Math.round((totalMade / totalAtt) * 100) : 0;
 
     const statBadges = [
-      { l: 'Intentos', v: `${totalAtt}`, c: PURPLE },
-      { l: 'Aciertos', v: `${totalMade}`, c: SUCCESS },
-      { l: 'Eficiencia', v: `${totalPct}%`, c: GOLD },
+      { l: '🏀 Intentos', v: `${totalAtt}`, c: PURPLE },
+      { l: '✅ Aciertos', v: `${totalMade}`, c: SUCCESS },
+      { l: '📊 Eficiencia', v: `${totalPct}%`, c: GOLD },
     ];
     statBadges.forEach((b, i) => {
       const bx = M + i * 35;
@@ -679,23 +724,19 @@ export async function generatePdfReport(
     const courtX = (W - courtW) / 2;
     const courtY = y;
 
-    // Court outer card
     doc.setFillColor(...WHITE);
     doc.roundedRect(courtX - 5, courtY - 5, courtW + 10, courtH + 10, 5, 5, 'F');
 
-    // Court surface
-    doc.setFillColor(225, 200, 165); // hardwood tone
+    doc.setFillColor(225, 200, 165);
     doc.rect(courtX, courtY, courtW, courtH, 'F');
 
-    // Court markings
     doc.setDrawColor(190, 165, 130);
     doc.setLineWidth(0.6);
-    doc.rect(courtX, courtY, courtW, courtH); // outline
+    doc.rect(courtX, courtY, courtW, courtH);
 
     const sx = (v: number) => courtX + (v / 300) * courtW;
     const sy = (v: number) => courtY + (v / 280) * courtH;
 
-    // Paint
     doc.setFillColor(215, 185, 150);
     const paintX = sx(100);
     const paintY = sy(200);
@@ -704,14 +745,11 @@ export async function generatePdfReport(
     doc.rect(paintX, paintY, paintW, paintH, 'F');
     doc.rect(paintX, paintY, paintW, paintH);
 
-    // FT circle
     doc.circle(sx(150), sy(200), (40 / 300) * courtW);
 
-    // 3PT lines
     doc.line(sx(40), sy(280), sx(40), sy(170));
     doc.line(sx(260), sy(280), sx(260), sy(170));
 
-    // 3PT arc
     for (let angle = 0; angle <= 180; angle += 8) {
       const rad = (angle * Math.PI) / 180;
       const rad2 = ((angle + 8) * Math.PI) / 180;
@@ -720,13 +758,11 @@ export async function generatePdfReport(
       doc.line(sx(x1), sy(y1), sx(x2), sy(y2));
     }
 
-    // Basket
     doc.setFillColor(...GOLD);
     doc.circle(sx(150), sy(270), 2, 'F');
     doc.setDrawColor(...GOLD);
     doc.circle(sx(150), sy(270), 3.5);
 
-    // Plot shots
     shotsForChart.forEach(s => {
       const px = courtX + (s.x / 100) * courtW;
       const py = courtY + (s.y / 100) * courtH;
@@ -738,7 +774,6 @@ export async function generatePdfReport(
         doc.circle(px, py, 2.2, 'F');
         // @ts-ignore
         doc.setGState(new doc.GState({ opacity: 1 }));
-        // White inner dot
         doc.setFillColor(...WHITE);
         doc.circle(px, py, 0.7, 'F');
       } else {
@@ -752,7 +787,6 @@ export async function generatePdfReport(
 
     y = courtY + courtH + 10;
 
-    // Legend
     doc.setFillColor(...SUCCESS);
     doc.circle(M + 4, y + 1.5, 2.2, 'F');
     doc.setFillColor(...WHITE);
@@ -770,15 +804,14 @@ export async function generatePdfReport(
 
     y += 8;
 
-    // Shot type breakdown
     const twoS = shotsForChart.filter(s => s.points === 2);
     const threeS = shotsForChart.filter(s => s.points === 3);
     const ftS = shotsForChart.filter(s => s.points === 1);
 
     const breakdown = [
-      ['2PT', `${twoS.filter(s => s.made).length}/${twoS.length}`, `${twoS.length > 0 ? Math.round((twoS.filter(s => s.made).length / twoS.length) * 100) : 0}%`],
-      ['3PT', `${threeS.filter(s => s.made).length}/${threeS.length}`, `${threeS.length > 0 ? Math.round((threeS.filter(s => s.made).length / threeS.length) * 100) : 0}%`],
-      ['TL', `${ftS.filter(s => s.made).length}/${ftS.length}`, `${ftS.length > 0 ? Math.round((ftS.filter(s => s.made).length / ftS.length) * 100) : 0}%`],
+      ['✌ 2PT', `${twoS.filter(s => s.made).length}/${twoS.length}`, `${twoS.length > 0 ? Math.round((twoS.filter(s => s.made).length / twoS.length) * 100) : 0}%`],
+      ['🔥 3PT', `${threeS.filter(s => s.made).length}/${threeS.length}`, `${threeS.length > 0 ? Math.round((threeS.filter(s => s.made).length / threeS.length) * 100) : 0}%`],
+      ['🏹 TL', `${ftS.filter(s => s.made).length}/${ftS.length}`, `${ftS.length > 0 ? Math.round((ftS.filter(s => s.made).length / ftS.length) * 100) : 0}%`],
     ];
 
     autoTable(doc, {
@@ -817,30 +850,25 @@ export async function generatePdfReport(
       const bannerW = W - M * 2;
       const bannerH = Math.min(30, (img.naturalHeight / img.naturalWidth) * bannerW);
 
-      // Check if there's room on the current page (above footer)
-      const spaceNeeded = bannerH + 14; // banner + label + margin
-      const availableSpace = H - 16 - y; // 16 = footer height + margin
+      const spaceNeeded = bannerH + 14;
+      const availableSpace = H - 16 - y;
 
       if (availableSpace < spaceNeeded) {
-        // Add a new page for the banner
         doc.addPage();
         drawPageBg();
         pageNum++;
         drawHeader();
-        // y is set by drawHeader to 46
         y = 46;
       }
 
-      // Premium label
       doc.setFillColor(...GOLD);
       doc.roundedRect(M, y, 28, 5, 1, 1, 'F');
       doc.setFontSize(6);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...NEAR_BLACK);
-      doc.text('⭐ PREMIUM', M + 14, y + 3.5, { align: 'center' });
+      doc.text('PREMIUM', M + 14, y + 3.5, { align: 'center' });
       y += 7;
 
-      // Banner image
       doc.addImage(dataUrl, 'JPEG', M, y, bannerW, bannerH);
       doc.setDrawColor(...GOLD);
       doc.setLineWidth(0.5);
@@ -852,7 +880,6 @@ export async function generatePdfReport(
     }
   }
 
-  // Save
   const fileName = `BASQUEST_Report_${options.teamName || 'Stats'}_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(fileName);
 }
