@@ -244,7 +244,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col flex-1 bg-background overflow-y-auto">
       {/* Header marquee - App branding */}
       <div className="bg-primary px-5 pt-6 pb-10 rounded-b-3xl relative overflow-hidden">
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-primary-foreground/5" />
