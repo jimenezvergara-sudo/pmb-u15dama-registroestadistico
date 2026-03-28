@@ -490,6 +490,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, []);
 
+  const deleteShot = useCallback((shotId: string) => {
+    setState(s => {
+      if (!s.activeGame) return s;
+      return { ...s, activeGame: { ...s.activeGame, shots: s.activeGame.shots.filter(sh => sh.id !== shotId) } };
+    });
+  }, []);
+
+  const deleteAction = useCallback((actionId: string) => {
+    setState(s => {
+      if (!s.activeGame) return s;
+      return { ...s, activeGame: { ...s.activeGame, actions: (s.activeGame.actions || []).filter(a => a.id !== actionId) } };
+    });
+  }, []);
+
+  const deleteOpponentScore = useCallback((scoreId: string) => {
+    setState(s => {
+      if (!s.activeGame) return s;
+      return { ...s, activeGame: { ...s.activeGame, opponentScores: (s.activeGame.opponentScores || []).filter(o => o.id !== scoreId) } };
+    });
+  }, []);
+
+  const toggleShotResult = useCallback((shotId: string) => {
+    setState(s => {
+      if (!s.activeGame) return s;
+      return {
+        ...s,
+        activeGame: {
+          ...s.activeGame,
+          shots: s.activeGame.shots.map(sh => sh.id === shotId ? { ...sh, made: !sh.made } : sh),
+        },
+      };
+    });
+  }, []);
+
   const setOnCourtPlayers = useCallback((playerIds: string[]) => {
     setState(s => {
       if (!s.activeGame) return s;
