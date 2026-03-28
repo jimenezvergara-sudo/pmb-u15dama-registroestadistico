@@ -825,6 +825,7 @@ export async function generatePdfReport(
       alternateRowStyles: { fillColor: TABLE_ALT },
       theme: 'grid',
     });
+    y = (doc as any).lastAutoTable.finalY + 8;
   }
 
   drawFooter(pageNum);
