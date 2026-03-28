@@ -6,6 +6,7 @@ import QuickActionFAB from '@/components/QuickActionFAB';
 import SubstitutionDialog from '@/components/SubstitutionDialog';
 import StartingLineup from '@/components/StartingLineup';
 import LiveGameReport from '@/components/LiveGameReport';
+import LiveActionLog from '@/components/LiveActionLog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2, BarChart3 } from 'lucide-react';
