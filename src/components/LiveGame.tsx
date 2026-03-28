@@ -31,6 +31,7 @@ const LiveGame: React.FC = () => {
     recordOpponentScore, undoLastOpponentScore, recordAction,
     setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer,
     myTeamName, myTeamLogo,
+    deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
   } = useApp();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
