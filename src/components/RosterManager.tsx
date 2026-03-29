@@ -151,7 +151,7 @@ const RosterManager: React.FC = () => {
 
             <span className="text-2xl font-extrabold text-primary">{p.number}</span>
             <span className="text-[10px] font-semibold text-foreground truncate w-full text-center leading-tight">
-              {p.name.split(' ')[0]}
+              {p.name}
             </span>
           </div>
         ))}
