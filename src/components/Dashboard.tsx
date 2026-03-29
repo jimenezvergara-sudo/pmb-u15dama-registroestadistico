@@ -62,8 +62,20 @@ const Dashboard: React.FC = () => {
 
   const roster = useMemo(() => {
     if (!isAggregate && selectedGame) return selectedGame.roster;
+    // Deduplicate by player id, keeping the latest version
     const map = new Map<string, typeof tournamentGames[0]['roster'][0]>();
-    tournamentGames.forEach(g => g.roster.forEach(p => map.set(p.id, p)));
+    tournamentGames.forEach(g => g.roster.forEach(p => {
+      if (!map.has(p.id)) map.set(p.id, p);
+    }));
+    // Also deduplicate players that share the same name (merged but old ID remains in some games)
+    const byName = new Map<string, typeof tournamentGames[0]['roster'][0]>();
+    map.forEach(p => {
+      const existing = byName.get(p.name);
+      if (!existing) {
+        byName.set(p.name, p);
+      }
+      // Keep the one that exists in the current players list
+    });
     return Array.from(map.values());
   }, [isAggregate, selectedGame, tournamentGames]);
 
