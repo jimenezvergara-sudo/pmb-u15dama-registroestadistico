@@ -584,6 +584,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => ({ ...s, myTeamLogo: logo }));
   }, [userId]);
 
+  const mergePlayers = useCallback(async (keepId: string, removeId: string, keepNumber: number) => {
+    // Update all games: remap removeId → keepId in shots, actions, substitutions, roster, onCourtPlayerIds, courtTimeMs
+    const updatedGames = state.games.map(g => {
+      const remapId = (id: string) => id === removeId ? keepId : id;
+      const newRoster = g.roster.map(p => p.id === removeId ? { ...p, id: keepId, number: keepNumber } : p)
+        .filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i); // deduplicate
+      const newShots = g.shots.map(s => ({ ...s, playerId: remapId(s.playerId) }));
+      const newActions = (g.actions || []).map(a => ({ ...a, playerId: remapId(a.playerId) }));
+      const newSubs = (g.substitutions || []).map(s => ({ ...s, playerIn: remapId(s.playerIn), playerOut: remapId(s.playerOut) }));
+      const newOnCourt = g.onCourtPlayerIds.map(remapId).filter((id, i, arr) => arr.indexOf(id) === i);
+      const newCourtTime = { ...g.courtTimeMs };
+      if (newCourtTime[removeId]) {
+        newCourtTime[keepId] = (newCourtTime[keepId] || 0) + newCourtTime[removeId];
+        delete newCourtTime[removeId];
+      }
+      return { ...g, roster: newRoster, shots: newShots, actions: newActions, substitutions: newSubs, onCourtPlayerIds: newOnCourt, courtTimeMs: newCourtTime };
+    });
+
+    // Persist each updated game to cloud
+    for (const g of updatedGames) {
+      await supabase.from('club_games' as any).update({
+        roster: g.roster as any,
+        shots: g.shots as any,
+        actions: g.actions as any,
+        substitutions: g.substitutions as any,
+        on_court_player_ids: g.onCourtPlayerIds as any,
+        court_time_ms: g.courtTimeMs as any,
+      }).eq('id', g.id);
+    }
+
+    // Delete the removed player from cloud
+    await supabase.from('club_players' as any).delete().eq('id', removeId);
+
+    setState(s => ({
+      ...s,
+      games: updatedGames,
+      players: s.players.filter(p => p.id !== removeId).map(p => p.id === keepId ? { ...p, number: keepNumber } : p),
+    }));
+  }, [state.games]);
+
   return (
     <AppContext.Provider value={{
       ...state,
@@ -593,6 +633,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
       deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
       setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer, setMyTeamName, setMyTeamLogo,
+      mergePlayers,
     }}>
       {children}
     </AppContext.Provider>
