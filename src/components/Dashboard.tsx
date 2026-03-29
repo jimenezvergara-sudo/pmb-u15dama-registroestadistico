@@ -528,6 +528,40 @@ const Dashboard: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Glossary legend */}
+        <Collapsible>
+          <CollapsibleTrigger className="flex items-center gap-1.5 mt-2 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span className="underline underline-offset-2">¿Qué significa cada sigla?</span>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 text-[10px] text-muted-foreground bg-muted/30 rounded-lg p-3">
+              {[
+                ['PTS', 'Puntos anotados'],
+                ['TC', 'Tiros de Campo (2PT + 3PT)'],
+                ['2PT', 'Tiros de 2 puntos (Dobles)'],
+                ['3PT', 'Tiros de 3 puntos (Triples)'],
+                ['TL', 'Tiros Libres'],
+                ['RO', 'Rebotes Ofensivos'],
+                ['RD', 'Rebotes Defensivos'],
+                ['REB', 'Rebotes Totales (RO + RD)'],
+                ['AST', 'Asistencias'],
+                ['STL', 'Robos de balón'],
+                ['TOV', 'Pérdidas de balón'],
+                ['PF', 'Faltas Personales'],
+                ['eFG%', 'Eficiencia de tiro ponderada'],
+                ['TS%', 'Eficiencia real de anotación'],
+                ['MIN%', '% de tiempo en cancha'],
+              ].map(([sigla, def]) => (
+                <div key={sigla} className="flex gap-1.5">
+                  <span className="font-bold text-primary shrink-0">{sigla}</span>
+                  <span>{def}</span>
+                </div>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       {/* Banner publicitario después del Box Score */}
