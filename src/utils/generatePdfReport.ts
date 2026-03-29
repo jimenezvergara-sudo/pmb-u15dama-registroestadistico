@@ -693,16 +693,16 @@ export async function generatePdfReport(
       drawHeader();
     }
 
-    sectionTitle('Shot Chart', '🎯');
+    sectionTitle('Shot Chart');
 
     const totalAtt = shotsForChart.length;
     const totalMade = shotsForChart.filter(s => s.made).length;
     const totalPct = totalAtt > 0 ? Math.round((totalMade / totalAtt) * 100) : 0;
 
     const statBadges = [
-      { l: '🏀 Intentos', v: `${totalAtt}`, c: PURPLE },
-      { l: '✅ Aciertos', v: `${totalMade}`, c: SUCCESS },
-      { l: '📊 Eficiencia', v: `${totalPct}%`, c: GOLD },
+      { l: 'Intentos', v: `${totalAtt}`, c: PURPLE },
+      { l: 'Aciertos', v: `${totalMade}`, c: SUCCESS },
+      { l: 'Eficiencia', v: `${totalPct}%`, c: GOLD },
     ];
     statBadges.forEach((b, i) => {
       const bx = M + i * 35;
