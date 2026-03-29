@@ -135,7 +135,7 @@ const RosterManager: React.FC = () => {
             Añade jugadoras para empezar
           </p>
         )}
-        {players.map((p: Player) => {
+        {[...players].sort((a, b) => a.number - b.number).map((p: Player) => {
           const isKeep = mergeKeep === p.id;
           const isRemove = mergeRemove === p.id;
           return (
