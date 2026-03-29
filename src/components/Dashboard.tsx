@@ -458,7 +458,7 @@ const Dashboard: React.FC = () => {
           <table className="text-xs w-full min-w-[520px]">
             <thead>
               <tr className="text-muted-foreground border-b border-border">
-                <th className="text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[70px]">Jug.</th>
+                <th className="text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[80px]">Jug.</th>
                 <th className="text-center py-2 px-0.5 font-bold">TC</th>
                 <th className="text-center py-2 px-0.5 font-bold">2PT</th>
                 <th className="text-center py-2 px-0.5 font-bold">3PT</th>
