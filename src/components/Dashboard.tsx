@@ -478,9 +478,9 @@ const Dashboard: React.FC = () => {
             <tbody>
               {boxScore.map(row => (
                 <tr key={row.player.id} className="border-b border-border/50">
-                  <td className="py-2 pr-1 font-semibold sticky left-0 bg-card z-10">
-                    <span className="font-extrabold text-primary mr-0.5">#{row.player.number}</span>
-                    <span className="truncate max-w-[45px] inline-block align-bottom">{row.player.name.split(' ')[0]}</span>
+                  <td className="py-1.5 pr-1 font-semibold sticky left-0 bg-card z-10 min-w-[80px]">
+                    <span className="font-extrabold text-primary">#{row.player.number}</span>
+                    <span className="block text-[10px] leading-tight max-w-[70px] break-words">{row.player.name}</span>
                   </td>
                   <td className="text-center py-2 px-0.5">
                     <div className="text-[10px]">{row.fgm}/{row.fga}</div>
