@@ -222,15 +222,15 @@ export async function generatePdfReport(
   const totalTovGlobal = allActionsGlobal.filter(a => a.type === 'turnover').length;
 
   const prodCards = [
-    { label: 'EF. POSESION', value: `${pctPossession}%`, color: GOLD, icon: '🎯' },
-    { label: 'eFG%', value: `${eFgVal}%`, color: CYAN, icon: '📈' },
-    { label: 'TS%', value: `${tsVal}%`, color: PURPLE_LIGHT, icon: '⚡' },
-    { label: 'EF. DOBLES', value: `${pctDbl}%`, color: GOLD, icon: '✌' },
-    { label: 'EF. TL', value: `${pctFt}%`, color: CYAN, icon: '🏹' },
-    { label: 'EF. TRIPLES', value: `${pctTpl}%`, color: PURPLE_LIGHT, icon: '🔥' },
-    { label: 'REBOTES', value: `${totalRebGlobal}`, color: SUCCESS, icon: '💪' },
-    { label: 'ASISTENCIAS', value: `${totalAstGlobal}`, color: CYAN, icon: '🤝' },
-    { label: 'ROBOS / PB', value: `${totalStlGlobal} / ${totalTovGlobal}`, color: GOLD, icon: '🛡' },
+    { label: 'EF. POSESION', value: `${pctPossession}%`, color: GOLD },
+    { label: 'eFG%', value: `${eFgVal}%`, color: CYAN },
+    { label: 'TS%', value: `${tsVal}%`, color: PURPLE_LIGHT },
+    { label: 'EF. DOBLES', value: `${pctDbl}%`, color: GOLD },
+    { label: 'EF. TL', value: `${pctFt}%`, color: CYAN },
+    { label: 'EF. TRIPLES', value: `${pctTpl}%`, color: PURPLE_LIGHT },
+    { label: 'REBOTES', value: `${totalRebGlobal}`, color: SUCCESS },
+    { label: 'ASISTENCIAS', value: `${totalAstGlobal}`, color: CYAN },
+    { label: 'ROBOS / PB', value: `${totalStlGlobal} / ${totalTovGlobal}`, color: GOLD },
   ];
 
   const pCardW = (W - M * 2 - 10) / 3;
