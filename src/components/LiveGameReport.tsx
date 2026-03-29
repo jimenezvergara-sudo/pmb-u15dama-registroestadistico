@@ -259,6 +259,28 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
             </div>
           </div>
 
+          {/* Glossary */}
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span className="underline underline-offset-2">¿Qué significa cada sigla?</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[9px] text-muted-foreground bg-muted/30 rounded-lg p-2">
+                {[
+                  ['PTS', 'Puntos'], ['TC', 'Tiros de Campo'], ['2PT', 'Dobles'], ['3PT', 'Triples'],
+                  ['TL', 'Tiros Libres'], ['REB', 'Rebotes Totales'], ['AST', 'Asistencias'], ['STL', 'Robos'],
+                  ['TOV', 'Pérdidas'], ['PF', 'Faltas'], ['eFG%', 'Eficiencia ponderada'], ['TS%', 'Eficiencia real'],
+                ].map(([s, d]) => (
+                  <div key={s} className="flex gap-1">
+                    <span className="font-bold text-primary shrink-0">{s}</span>
+                    <span>{d}</span>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
           {/* Actions */}
           <div className="flex gap-2 pt-1">
             <Button onClick={handleDownloadPdf} variant="outline" size="sm" className="flex-1 gap-1.5">
