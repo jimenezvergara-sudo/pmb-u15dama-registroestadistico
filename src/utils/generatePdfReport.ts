@@ -129,13 +129,13 @@ export async function generatePdfReport(
     doc.text(`Página ${pageNum}`, W - M, H - 4, { align: 'right' });
   };
 
-  const sectionTitle = (title: string, icon?: string) => {
+  const sectionTitle = (title: string) => {
     doc.setFillColor(...PURPLE);
     doc.roundedRect(M, y, 3, 7, 1.5, 1.5, 'F');
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...NEAR_BLACK);
-    doc.text(`${icon ? icon + ' ' : ''}${title}`, M + 6, y + 5.5);
+    doc.text(title, M + 6, y + 5.5);
     y += 10;
   };
 
@@ -168,9 +168,9 @@ export async function generatePdfReport(
 
   const cardW = (W - M * 2 - 8) / 3;
   const cards = [
-    { label: 'RECORD', value: `${wins}-${losses}`, color: GOLD, icon: '🏆' },
-    { label: 'PTS/PARTIDO', value: ppg, color: CYAN, icon: '🏀' },
-    { label: 'PTS/CONTRA', value: oppPpg, color: PURPLE_LIGHT, icon: '🛡' },
+    { label: 'RECORD', value: `${wins}-${losses}`, color: GOLD },
+    { label: 'PTS/PARTIDO', value: ppg, color: CYAN },
+    { label: 'PTS/CONTRA', value: oppPpg, color: PURPLE_LIGHT },
   ];
   cards.forEach((c, i) => {
     const cx = M + i * (cardW + 4);
@@ -178,9 +178,9 @@ export async function generatePdfReport(
     doc.roundedRect(cx, y, cardW, 26, 4, 4, 'F');
     doc.setFillColor(...c.color);
     doc.roundedRect(cx + 8, y, cardW - 16, 2, 1, 1, 'F');
-    // Icon
-    doc.setFontSize(12);
-    doc.text(c.icon, cx + cardW / 2, y + 9, { align: 'center' });
+    // Colored dot instead of emoji
+    doc.setFillColor(...c.color);
+    doc.circle(cx + cardW / 2, y + 7, 2.5, 'F');
     doc.setFontSize(6);
     doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
@@ -193,7 +193,7 @@ export async function generatePdfReport(
   y += 32;
 
   // ── Productivity cards ──
-  sectionTitle('Productividad del Equipo', '📊');
+  sectionTitle('Productividad del Equipo');
 
   const allShotsGlobal = filteredGames.flatMap(g => g.shots);
   const allActionsGlobal = filteredGames.flatMap(g => g.actions || []);
@@ -222,15 +222,15 @@ export async function generatePdfReport(
   const totalTovGlobal = allActionsGlobal.filter(a => a.type === 'turnover').length;
 
   const prodCards = [
-    { label: 'EF. POSESION', value: `${pctPossession}%`, color: GOLD, icon: '🎯' },
-    { label: 'eFG%', value: `${eFgVal}%`, color: CYAN, icon: '📈' },
-    { label: 'TS%', value: `${tsVal}%`, color: PURPLE_LIGHT, icon: '⚡' },
-    { label: 'EF. DOBLES', value: `${pctDbl}%`, color: GOLD, icon: '✌' },
-    { label: 'EF. TL', value: `${pctFt}%`, color: CYAN, icon: '🏹' },
-    { label: 'EF. TRIPLES', value: `${pctTpl}%`, color: PURPLE_LIGHT, icon: '🔥' },
-    { label: 'REBOTES', value: `${totalRebGlobal}`, color: SUCCESS, icon: '💪' },
-    { label: 'ASISTENCIAS', value: `${totalAstGlobal}`, color: CYAN, icon: '🤝' },
-    { label: 'ROBOS / PB', value: `${totalStlGlobal} / ${totalTovGlobal}`, color: GOLD, icon: '🛡' },
+    { label: 'EF. POSESION', value: `${pctPossession}%`, color: GOLD },
+    { label: 'eFG%', value: `${eFgVal}%`, color: CYAN },
+    { label: 'TS%', value: `${tsVal}%`, color: PURPLE_LIGHT },
+    { label: 'EF. DOBLES', value: `${pctDbl}%`, color: GOLD },
+    { label: 'EF. TL', value: `${pctFt}%`, color: CYAN },
+    { label: 'EF. TRIPLES', value: `${pctTpl}%`, color: PURPLE_LIGHT },
+    { label: 'REBOTES', value: `${totalRebGlobal}`, color: SUCCESS },
+    { label: 'ASISTENCIAS', value: `${totalAstGlobal}`, color: CYAN },
+    { label: 'ROBOS / PB', value: `${totalStlGlobal} / ${totalTovGlobal}`, color: GOLD },
   ];
 
   const pCardW = (W - M * 2 - 10) / 3;
@@ -243,9 +243,9 @@ export async function generatePdfReport(
     doc.roundedRect(cx, cy, pCardW, 19, 3, 3, 'F');
     doc.setFillColor(...c.color);
     doc.roundedRect(cx + 6, cy, pCardW - 12, 1.5, 0.7, 0.7, 'F');
-    // Icon
-    doc.setFontSize(9);
-    doc.text(c.icon, cx + 5, cy + 8);
+    // Colored dot instead of emoji
+    doc.setFillColor(...c.color);
+    doc.circle(cx + 5, cy + 6, 1.8, 'F');
     doc.setFontSize(6);
     doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
@@ -308,19 +308,19 @@ export async function generatePdfReport(
   const topEfg = [...playerStats].filter(p => p.fgaP >= volThreshold).sort((a, b) => b.eFG - a.eFG)[0];
   const topTs = [...playerStats].filter(p => p.fgaP >= volThreshold).sort((a, b) => b.ts - a.ts)[0];
 
-  sectionTitle('Lideres de Temporada', '👑');
+  sectionTitle('Lideres de Temporada');
 
   const leaderItems = [
-    { label: '🏀 PUNTOS', player: topScorer, value: topScorer?.pts, accent: GOLD },
-    { label: '🔥 TRIPLES', player: topThrees, value: topThrees?.triplesMade, accent: CYAN },
-    { label: '✌ DOBLES', player: topDoubles, value: topDoubles?.doblesMade, accent: PURPLE_LIGHT },
-    { label: '💪 REBOTES', player: topReb, value: topReb?.reb, accent: SUCCESS },
-    { label: '⬆ REB.OFENSIVO', player: topOReb, value: topOReb?.oReb, accent: GOLD },
-    { label: '⬇ REB.DEFENSIVO', player: topDReb, value: topDReb?.dReb, accent: CYAN },
-    { label: '🤝 ASISTENCIAS', player: topAst, value: topAst?.ast, accent: CYAN },
-    { label: '🛡 ROBOS', player: topStl, value: topStl?.stl, accent: GOLD },
-    { label: '📈 eFG%', player: topEfg, value: topEfg ? `${topEfg.eFG}%` : undefined, accent: PURPLE_LIGHT },
-    { label: '⚡ TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: SUCCESS },
+    { label: 'PUNTOS', player: topScorer, value: topScorer?.pts, accent: GOLD },
+    { label: 'TRIPLES', player: topThrees, value: topThrees?.triplesMade, accent: CYAN },
+    { label: 'DOBLES', player: topDoubles, value: topDoubles?.doblesMade, accent: PURPLE_LIGHT },
+    { label: 'REBOTES', player: topReb, value: topReb?.reb, accent: SUCCESS },
+    { label: 'REB.OFENSIVO', player: topOReb, value: topOReb?.oReb, accent: GOLD },
+    { label: 'REB.DEFENSIVO', player: topDReb, value: topDReb?.dReb, accent: CYAN },
+    { label: 'ASISTENCIAS', player: topAst, value: topAst?.ast, accent: CYAN },
+    { label: 'ROBOS', player: topStl, value: topStl?.stl, accent: GOLD },
+    { label: 'eFG%', player: topEfg, value: topEfg ? `${topEfg.eFG}%` : undefined, accent: PURPLE_LIGHT },
+    { label: 'TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: SUCCESS },
   ];
 
   const lColW = (W - M * 2 - 8) / 3;
@@ -373,7 +373,7 @@ export async function generatePdfReport(
 
   // ── Results table ──
   if (filteredGames.length > 0) {
-    sectionTitle('Resultados', '📋');
+    sectionTitle('Resultados');
 
     const gameRows = filteredGames.map(g => {
       const teamPts = g.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
@@ -407,7 +407,7 @@ export async function generatePdfReport(
   }
 
   // ── Box Score ──
-  sectionTitle('Box Score', '📊');
+  sectionTitle('Box Score');
 
   if (options.quarterFilter !== 'ALL') {
     doc.setFontSize(8);
@@ -533,14 +533,14 @@ export async function generatePdfReport(
     doc.setFillColor(...PURPLE_DARK);
     doc.roundedRect(M, y, W - M * 2, 18, 4, 4, 'F');
     const totItems = [
-      { l: '🏀 PTS', v: `${tt.pts}`, c: GOLD },
+      { l: 'PTS', v: `${tt.pts}`, c: GOLD },
       { l: 'TC', v: `${tt.fga > 0 ? Math.round((tt.fgm / tt.fga) * 100) : 0}%`, c: WHITE },
       { l: '2PT', v: `${tt.twoA > 0 ? Math.round((tt.twoM / tt.twoA) * 100) : 0}%`, c: WHITE },
-      { l: '🔥 3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
+      { l: '3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
       { l: 'TL', v: `${tt.ftA > 0 ? Math.round((tt.ftM / tt.ftA) * 100) : 0}%`, c: WHITE },
-      { l: '💪 REB', v: `${tt.reb}`, c: WHITE },
-      { l: '🤝 AST', v: `${tt.ast}`, c: WHITE },
-      { l: '🛡 STL', v: `${tt.stl}`, c: WHITE },
+      { l: 'REB', v: `${tt.reb}`, c: WHITE },
+      { l: 'AST', v: `${tt.ast}`, c: WHITE },
+      { l: 'STL', v: `${tt.stl}`, c: WHITE },
       { l: 'TOV', v: `${tt.tov}`, c: DESTRUCTIVE },
     ];
     const totW = (W - M * 2) / totItems.length;
@@ -569,7 +569,7 @@ export async function generatePdfReport(
 
   // ── Points per Quarter bar chart ──
   if (activeQuarters.length > 1) {
-    sectionTitle('Puntos por Cuarto', '📊');
+    sectionTitle('Puntos por Cuarto');
 
     const qData = activeQuarters.map(q => {
       const qShots = allShots.filter(s => s.quarterId === q);
@@ -693,16 +693,16 @@ export async function generatePdfReport(
       drawHeader();
     }
 
-    sectionTitle('Shot Chart', '🎯');
+    sectionTitle('Shot Chart');
 
     const totalAtt = shotsForChart.length;
     const totalMade = shotsForChart.filter(s => s.made).length;
     const totalPct = totalAtt > 0 ? Math.round((totalMade / totalAtt) * 100) : 0;
 
     const statBadges = [
-      { l: '🏀 Intentos', v: `${totalAtt}`, c: PURPLE },
-      { l: '✅ Aciertos', v: `${totalMade}`, c: SUCCESS },
-      { l: '📊 Eficiencia', v: `${totalPct}%`, c: GOLD },
+      { l: 'Intentos', v: `${totalAtt}`, c: PURPLE },
+      { l: 'Aciertos', v: `${totalMade}`, c: SUCCESS },
+      { l: 'Eficiencia', v: `${totalPct}%`, c: GOLD },
     ];
     statBadges.forEach((b, i) => {
       const bx = M + i * 35;
