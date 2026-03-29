@@ -407,7 +407,7 @@ export async function generatePdfReport(
   }
 
   // ── Box Score ──
-  sectionTitle('Box Score', '📊');
+  sectionTitle('Box Score');
 
   if (options.quarterFilter !== 'ALL') {
     doc.setFontSize(8);
