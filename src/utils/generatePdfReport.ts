@@ -569,7 +569,7 @@ export async function generatePdfReport(
 
   // ── Points per Quarter bar chart ──
   if (activeQuarters.length > 1) {
-    sectionTitle('Puntos por Cuarto', '📊');
+    sectionTitle('Puntos por Cuarto');
 
     const qData = activeQuarters.map(q => {
       const qShots = allShots.filter(s => s.quarterId === q);
