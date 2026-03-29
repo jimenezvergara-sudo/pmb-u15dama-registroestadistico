@@ -168,9 +168,9 @@ export async function generatePdfReport(
 
   const cardW = (W - M * 2 - 8) / 3;
   const cards = [
-    { label: 'RECORD', value: `${wins}-${losses}`, color: GOLD, icon: '🏆' },
-    { label: 'PTS/PARTIDO', value: ppg, color: CYAN, icon: '🏀' },
-    { label: 'PTS/CONTRA', value: oppPpg, color: PURPLE_LIGHT, icon: '🛡' },
+    { label: 'RECORD', value: `${wins}-${losses}`, color: GOLD },
+    { label: 'PTS/PARTIDO', value: ppg, color: CYAN },
+    { label: 'PTS/CONTRA', value: oppPpg, color: PURPLE_LIGHT },
   ];
   cards.forEach((c, i) => {
     const cx = M + i * (cardW + 4);
@@ -178,9 +178,9 @@ export async function generatePdfReport(
     doc.roundedRect(cx, y, cardW, 26, 4, 4, 'F');
     doc.setFillColor(...c.color);
     doc.roundedRect(cx + 8, y, cardW - 16, 2, 1, 1, 'F');
-    // Icon
-    doc.setFontSize(12);
-    doc.text(c.icon, cx + cardW / 2, y + 9, { align: 'center' });
+    // Colored dot instead of emoji
+    doc.setFillColor(...c.color);
+    doc.circle(cx + cardW / 2, y + 7, 2.5, 'F');
     doc.setFontSize(6);
     doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
