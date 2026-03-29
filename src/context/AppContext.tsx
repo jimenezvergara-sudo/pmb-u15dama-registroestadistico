@@ -45,7 +45,7 @@ interface AppContextValue extends Omit<AppState, 'loading'> {
   startGameTimer: () => void;
   setMyTeamName: (name: string) => void;
   setMyTeamLogo: (logo: string) => void;
-  mergePlayers: (keepId: string, removeId: string, keepNumber: number) => Promise<void>;
+  mergePlayers: (keepId: string, removeId: string, keepNumber: number, keepName: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
