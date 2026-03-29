@@ -2,6 +2,7 @@ import React from 'react';
 import { Game, QUARTER_LABELS } from '@/types/basketball';
 import { useApp } from '@/context/AppContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Share2, FileText, TrendingUp, TrendingDown, Minus } from 'lucide-react';
