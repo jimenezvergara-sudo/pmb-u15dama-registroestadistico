@@ -32,9 +32,13 @@ const NewGame: React.FC = () => {
     ? teams.find(t => t.id === selectedTeamId)?.clubName || ''
     : customOpponent.trim();
 
+  const getPlayerNumber = (p: Player) => rosterNumbers[p.id] ?? p.number;
+
   const handleStart = () => {
     if (!opponentName || selectedPlayers.size === 0) return;
-    const roster = players.filter(p => selectedPlayers.has(p.id));
+    const roster = players
+      .filter(p => selectedPlayers.has(p.id))
+      .map(p => ({ ...p, number: getPlayerNumber(p) }));
     startGame(
       opponentName,
       roster,
