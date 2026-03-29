@@ -140,20 +140,62 @@ const NewGame: React.FC = () => {
           </p>
         )}
         <div className="grid grid-cols-3 gap-2">
-          {players.map((p: Player) => (
-            <button
-              key={p.id}
-              onClick={() => togglePlayer(p.id)}
-              className={`flex flex-col items-center py-3 px-2 rounded-lg tap-feedback min-h-[60px] transition-colors ${
-                selectedPlayers.has(p.id)
-                  ? 'bg-primary text-primary-foreground ring-2 ring-primary'
-                  : 'bg-card text-card-foreground'
-              }`}
-            >
-              <span className="text-xl font-extrabold">{p.number}</span>
-              <span className="text-xs font-medium truncate w-full text-center">{p.name.split(' ')[0]}</span>
-            </button>
-          ))}
+          {players.map((p: Player) => {
+            const displayNum = getPlayerNumber(p);
+            const isEditing = editingNumberId === p.id;
+            const isSelected = selectedPlayers.has(p.id);
+            return (
+              <div key={p.id} className="relative">
+                <button
+                  onClick={() => togglePlayer(p.id)}
+                  className={`w-full flex flex-col items-center py-3 px-2 rounded-lg tap-feedback min-h-[60px] transition-colors ${
+                    isSelected
+                      ? 'bg-primary text-primary-foreground ring-2 ring-primary'
+                      : 'bg-card text-card-foreground'
+                  }`}
+                >
+                  <span className="text-xl font-extrabold">{displayNum}</span>
+                  <span className="text-xs font-medium truncate w-full text-center">{p.name.split(' ')[0]}</span>
+                </button>
+                {isSelected && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingNumberId(p.id);
+                      setTempNumber(String(displayNum));
+                    }}
+                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-accent text-accent-foreground flex items-center justify-center"
+                  >
+                    <Pencil className="w-3 h-3" />
+                  </button>
+                )}
+                {isEditing && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/90 rounded-lg border-2 border-primary p-1">
+                    <Input
+                      type="number"
+                      value={tempNumber}
+                      onChange={e => setTempNumber(e.target.value)}
+                      className="w-12 h-8 text-center text-sm p-0"
+                      autoFocus
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          const num = parseInt(tempNumber);
+                          if (!isNaN(num)) setRosterNumbers(prev => ({ ...prev, [p.id]: num }));
+                          setEditingNumberId(null);
+                        }
+                        if (e.key === 'Escape') setEditingNumberId(null);
+                      }}
+                      onBlur={() => {
+                        const num = parseInt(tempNumber);
+                        if (!isNaN(num)) setRosterNumbers(prev => ({ ...prev, [p.id]: num }));
+                        setEditingNumberId(null);
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
