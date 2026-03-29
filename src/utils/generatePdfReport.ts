@@ -129,13 +129,13 @@ export async function generatePdfReport(
     doc.text(`Página ${pageNum}`, W - M, H - 4, { align: 'right' });
   };
 
-  const sectionTitle = (title: string, icon?: string) => {
+  const sectionTitle = (title: string) => {
     doc.setFillColor(...PURPLE);
     doc.roundedRect(M, y, 3, 7, 1.5, 1.5, 'F');
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...NEAR_BLACK);
-    doc.text(`${icon ? icon + ' ' : ''}${title}`, M + 6, y + 5.5);
+    doc.text(title, M + 6, y + 5.5);
     y += 10;
   };
 
