@@ -129,9 +129,9 @@ const RosterManager: React.FC = () => {
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-3 gap-2">
         {players.length === 0 && (
-          <p className="text-muted-foreground text-sm text-center py-8">
+          <p className="text-muted-foreground text-sm text-center py-8 col-span-3">
             Añade jugadoras para empezar
           </p>
         )}
@@ -142,7 +142,7 @@ const RosterManager: React.FC = () => {
             <div
               key={p.id}
               onClick={() => mergeMode ? handleMergeTap(p.id) : undefined}
-              className={`flex items-center rounded-lg px-3 py-3 gap-3 transition-colors ${
+              className={`relative flex flex-col items-center justify-center rounded-lg p-2 aspect-square transition-colors ${
                 mergeMode ? 'cursor-pointer' : ''
               } ${
                 isKeep ? 'bg-primary/20 ring-2 ring-primary' :
@@ -150,21 +150,18 @@ const RosterManager: React.FC = () => {
                 'bg-card'
               }`}
             >
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                isKeep ? 'bg-primary/30' : isRemove ? 'bg-destructive/30' : 'bg-primary/10'
-              }`}>
-                <span className={`font-extrabold text-sm ${
-                  isKeep ? 'text-primary' : isRemove ? 'text-destructive' : 'text-primary'
-                }`}>{p.number}</span>
-              </div>
-              <span className="flex-1 font-semibold text-foreground">
-                {p.name}
-                {isKeep && <span className="text-xs text-primary ml-1">(mantener)</span>}
-                {isRemove && <span className="text-xs text-destructive ml-1">(eliminar)</span>}
-              </span>
+              <span className={`text-2xl font-extrabold ${
+                isKeep ? 'text-primary' : isRemove ? 'text-destructive' : 'text-primary'
+              }`}>{p.number}</span>
+              <span className="text-[10px] font-semibold text-foreground truncate w-full text-center leading-tight">{p.name.split(' ')[0]}</span>
+              {isKeep && <span className="text-[8px] text-primary font-bold">mantener</span>}
+              {isRemove && <span className="text-[8px] text-destructive font-bold">eliminar</span>}
               {!mergeMode && (
-                <button onClick={() => removePlayer(p.id)} className="text-muted-foreground hover:text-destructive tap-feedback p-2">
-                  <Trash2 className="w-4 h-4" />
+                <button
+                  onClick={(e) => { e.stopPropagation(); removePlayer(p.id); }}
+                  className="absolute top-1 right-1 text-muted-foreground hover:text-destructive tap-feedback p-0.5"
+                >
+                  <Trash2 className="w-3 h-3" />
                 </button>
               )}
             </div>
