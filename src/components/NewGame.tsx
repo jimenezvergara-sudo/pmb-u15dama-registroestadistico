@@ -16,6 +16,9 @@ const NewGame: React.FC = () => {
   const [tournamentId, setTournamentId] = useState<string>('');
   const [leg, setLeg] = useState<GameLeg | ''>('');
   const [isHome, setIsHome] = useState<boolean | undefined>(undefined);
+  const [rosterNumbers, setRosterNumbers] = useState<Record<string, number>>({});
+  const [editingNumberId, setEditingNumberId] = useState<string | null>(null);
+  const [tempNumber, setTempNumber] = useState('');
 
   const togglePlayer = (id: string) => {
     setSelectedPlayers(prev => {
