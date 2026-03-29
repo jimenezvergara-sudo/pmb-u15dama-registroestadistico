@@ -533,14 +533,14 @@ export async function generatePdfReport(
     doc.setFillColor(...PURPLE_DARK);
     doc.roundedRect(M, y, W - M * 2, 18, 4, 4, 'F');
     const totItems = [
-      { l: '🏀 PTS', v: `${tt.pts}`, c: GOLD },
+      { l: 'PTS', v: `${tt.pts}`, c: GOLD },
       { l: 'TC', v: `${tt.fga > 0 ? Math.round((tt.fgm / tt.fga) * 100) : 0}%`, c: WHITE },
       { l: '2PT', v: `${tt.twoA > 0 ? Math.round((tt.twoM / tt.twoA) * 100) : 0}%`, c: WHITE },
-      { l: '🔥 3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
+      { l: '3PT', v: `${tt.threeA > 0 ? Math.round((tt.threeM / tt.threeA) * 100) : 0}%`, c: CYAN },
       { l: 'TL', v: `${tt.ftA > 0 ? Math.round((tt.ftM / tt.ftA) * 100) : 0}%`, c: WHITE },
-      { l: '💪 REB', v: `${tt.reb}`, c: WHITE },
-      { l: '🤝 AST', v: `${tt.ast}`, c: WHITE },
-      { l: '🛡 STL', v: `${tt.stl}`, c: WHITE },
+      { l: 'REB', v: `${tt.reb}`, c: WHITE },
+      { l: 'AST', v: `${tt.ast}`, c: WHITE },
+      { l: 'STL', v: `${tt.stl}`, c: WHITE },
       { l: 'TOV', v: `${tt.tov}`, c: DESTRUCTIVE },
     ];
     const totW = (W - M * 2) / totItems.length;
