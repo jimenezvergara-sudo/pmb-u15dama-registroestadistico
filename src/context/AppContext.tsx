@@ -45,7 +45,7 @@ interface AppContextValue extends Omit<AppState, 'loading'> {
   startGameTimer: () => void;
   setMyTeamName: (name: string) => void;
   setMyTeamLogo: (logo: string) => void;
-  mergePlayers: (keepId: string, removeId: string, keepNumber: number) => Promise<void>;
+  mergePlayers: (keepId: string, removeId: string, keepNumber: number, keepName: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -584,11 +584,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => ({ ...s, myTeamLogo: logo }));
   }, [userId]);
 
-  const mergePlayers = useCallback(async (keepId: string, removeId: string, keepNumber: number) => {
+  const mergePlayers = useCallback(async (keepId: string, removeId: string, keepNumber: number, keepName: string) => {
     // Update all games: remap removeId → keepId in shots, actions, substitutions, roster, onCourtPlayerIds, courtTimeMs
     const updatedGames = state.games.map(g => {
       const remapId = (id: string) => id === removeId ? keepId : id;
-      const newRoster = g.roster.map(p => p.id === removeId ? { ...p, id: keepId, number: keepNumber } : p)
+      const newRoster = g.roster.map(p => p.id === removeId ? { ...p, id: keepId, number: keepNumber, name: keepName } : p.id === keepId ? { ...p, number: keepNumber, name: keepName } : p)
         .filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i); // deduplicate
       const newShots = g.shots.map(s => ({ ...s, playerId: remapId(s.playerId) }));
       const newActions = (g.actions || []).map(a => ({ ...a, playerId: remapId(a.playerId) }));
@@ -617,10 +617,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Delete the removed player from cloud
     await supabase.from('club_players' as any).delete().eq('id', removeId);
 
+    // Update the kept player's name and number in cloud
+    await supabase.from('club_players' as any).update({ name: keepName, number: keepNumber }).eq('id', keepId);
+
     setState(s => ({
       ...s,
       games: updatedGames,
-      players: s.players.filter(p => p.id !== removeId).map(p => p.id === keepId ? { ...p, number: keepNumber } : p),
+      players: s.players.filter(p => p.id !== removeId).map(p => p.id === keepId ? { ...p, number: keepNumber, name: keepName } : p),
     }));
   }, [state.games]);
 

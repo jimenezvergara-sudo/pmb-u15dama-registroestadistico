@@ -50,7 +50,7 @@ const RosterManager: React.FC = () => {
 
   const confirmMerge = async () => {
     if (!mergeDialog) return;
-    await mergePlayers(mergeDialog.keepId, mergeDialog.removeId, chosenNumber);
+    await mergePlayers(mergeDialog.keepId, mergeDialog.removeId, chosenNumber, chosenName);
     toast.success(`Fusionadas: ${mergeDialog.removeName} → ${chosenName} (#${chosenNumber})`);
     setMergeDialog(null);
   };
