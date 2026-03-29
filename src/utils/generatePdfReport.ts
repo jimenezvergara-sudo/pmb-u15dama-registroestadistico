@@ -373,7 +373,7 @@ export async function generatePdfReport(
 
   // ── Results table ──
   if (filteredGames.length > 0) {
-    sectionTitle('Resultados', '📋');
+    sectionTitle('Resultados');
 
     const gameRows = filteredGames.map(g => {
       const teamPts = g.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
