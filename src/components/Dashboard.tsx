@@ -247,7 +247,8 @@ const Dashboard: React.FC = () => {
               const gameLabel = selectedGameId === 'ALL'
                 ? `Todos los partidos (${tournamentGames.length})`
                 : `vs ${selectedGame?.opponentName || ''}`;
-              generatePdfReport(games, tournamentGames, players, {
+              const pdfGames = selectedGameId !== 'ALL' && selectedGame ? [selectedGame] : tournamentGames;
+              generatePdfReport(games, pdfGames, players, {
                 teamName: myTeamName,
                 teamLogo: myTeamLogo,
                 appLogo: logoBasqest,
