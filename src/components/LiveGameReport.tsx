@@ -2,9 +2,10 @@ import React from 'react';
 import { Game, QUARTER_LABELS } from '@/types/basketball';
 import { useApp } from '@/context/AppContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Share2, FileText, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Share2, FileText, TrendingUp, TrendingDown, Minus, HelpCircle } from 'lucide-react';
 import { generatePdfReport } from '@/utils/generatePdfReport';
 import logoBasqest from '@/assets/logo-basqest-full.png';
 
@@ -257,6 +258,28 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
               </table>
             </div>
           </div>
+
+          {/* Glossary */}
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span className="underline underline-offset-2">¿Qué significa cada sigla?</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[9px] text-muted-foreground bg-muted/30 rounded-lg p-2">
+                {[
+                  ['PTS', 'Puntos'], ['TC', 'Tiros de Campo'], ['2PT', 'Dobles'], ['3PT', 'Triples'],
+                  ['TL', 'Tiros Libres'], ['REB', 'Rebotes Totales'], ['AST', 'Asistencias'], ['STL', 'Robos'],
+                  ['TOV', 'Pérdidas'], ['PF', 'Faltas'], ['eFG%', 'Eficiencia ponderada'], ['TS%', 'Eficiencia real'],
+                ].map(([s, d]) => (
+                  <div key={s} className="flex gap-1">
+                    <span className="font-bold text-primary shrink-0">{s}</span>
+                    <span>{d}</span>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Actions */}
           <div className="flex gap-2 pt-1">
