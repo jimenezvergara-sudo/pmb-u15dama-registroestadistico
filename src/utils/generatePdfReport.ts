@@ -830,6 +830,61 @@ export async function generatePdfReport(
 
   drawFooter(pageNum);
 
+  // ═══════════════ GLOSSARY PAGE ═══════════════
+  doc.addPage();
+  drawPageBg();
+  pageNum++;
+  drawHeader();
+
+  sectionTitle('Glosario de Abreviaturas');
+
+  const glossary: [string, string, string][] = [
+    ['PTS', 'Puntos', 'Total de puntos anotados por la jugadora.'],
+    ['2PT', 'Tiros de 2 puntos', 'Lanzamientos realizados dentro del arco de tres puntos (valen 2 puntos cada uno).'],
+    ['3PT', 'Tiros de 3 puntos', 'Lanzamientos realizados fuera del arco de tres puntos (valen 3 puntos cada uno).'],
+    ['TL', 'Tiros Libres', 'Lanzamientos desde la linea de tiro libre tras una falta (valen 1 punto cada uno).'],
+    ['TC', 'Tiros de Campo', 'Incluye todos los lanzamientos de 2 y 3 puntos (excluye tiros libres).'],
+    ['FGM / FGA', 'Field Goals Made / Attempted', 'Tiros de campo anotados sobre intentados.'],
+    ['REB', 'Rebotes Totales', 'Suma de rebotes ofensivos y defensivos capturados.'],
+    ['RO', 'Rebotes Ofensivos', 'Rebotes recuperados bajo el aro rival tras un tiro fallado del propio equipo.'],
+    ['RD', 'Rebotes Defensivos', 'Rebotes recuperados bajo el aro propio tras un tiro fallado del rival.'],
+    ['AST', 'Asistencias', 'Pases que derivan directamente en una canasta anotada por una companera.'],
+    ['STL', 'Robos (Steals)', 'Recuperaciones de balon por intercepcion o arrebato al rival.'],
+    ['TOV', 'Perdidas (Turnovers)', 'Perdidas de posesion sin lanzar al aro (pase errado, violacion, etc.).'],
+    ['PF', 'Faltas Personales', 'Infracciones cometidas por contacto ilegal con una rival.'],
+    ['eFG%', 'Effective Field Goal %', 'Mide eficiencia de tiro ponderando triples: (2PT anotados + 0.5 x 3PT anotados) / TC intentados.'],
+    ['TS%', 'True Shooting %', 'Eficiencia real incluyendo tiros libres: Puntos / (2 x (TC intentados + 0.44 x TL intentados)).'],
+    ['AST/TOV', 'Ratio Asistencias/Perdidas', 'Relacion entre asistencias y perdidas. Valores altos indican buen cuidado del balon.'],
+    ['MIN%', 'Porcentaje de Minutos', 'Porcentaje del tiempo total de juego que la jugadora estuvo en cancha.'],
+  ];
+
+  autoTable(doc, {
+    startY: y,
+    head: [['Sigla', 'Nombre', 'Definicion']],
+    body: glossary,
+    margin: { left: M, right: M },
+    styles: {
+      fontSize: 7.5,
+      cellPadding: 3,
+      font: 'helvetica',
+      lineColor: TABLE_BORDER,
+      lineWidth: 0.2,
+      overflow: 'linebreak',
+    },
+    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 8 },
+    bodyStyles: { fillColor: WHITE },
+    alternateRowStyles: { fillColor: TABLE_ALT },
+    columnStyles: {
+      0: { cellWidth: 22, fontStyle: 'bold', halign: 'center', textColor: PURPLE },
+      1: { cellWidth: 42, fontStyle: 'bold' },
+      2: { cellWidth: 'auto' },
+    },
+    theme: 'grid',
+  });
+  y = (doc as any).lastAutoTable.finalY + 8;
+
+  drawFooter(pageNum);
+
   // ═══════════════ PREMIUM BANNER ═══════════════
   if (options.premiumBannerUrl) {
     try {
