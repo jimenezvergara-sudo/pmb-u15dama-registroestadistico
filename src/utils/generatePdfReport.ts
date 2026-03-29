@@ -193,7 +193,7 @@ export async function generatePdfReport(
   y += 32;
 
   // ── Productivity cards ──
-  sectionTitle('Productividad del Equipo', '📊');
+  sectionTitle('Productividad del Equipo');
 
   const allShotsGlobal = filteredGames.flatMap(g => g.shots);
   const allActionsGlobal = filteredGames.flatMap(g => g.actions || []);
