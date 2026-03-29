@@ -308,19 +308,19 @@ export async function generatePdfReport(
   const topEfg = [...playerStats].filter(p => p.fgaP >= volThreshold).sort((a, b) => b.eFG - a.eFG)[0];
   const topTs = [...playerStats].filter(p => p.fgaP >= volThreshold).sort((a, b) => b.ts - a.ts)[0];
 
-  sectionTitle('Lideres de Temporada', '👑');
+  sectionTitle('Lideres de Temporada');
 
   const leaderItems = [
-    { label: '🏀 PUNTOS', player: topScorer, value: topScorer?.pts, accent: GOLD },
-    { label: '🔥 TRIPLES', player: topThrees, value: topThrees?.triplesMade, accent: CYAN },
-    { label: '✌ DOBLES', player: topDoubles, value: topDoubles?.doblesMade, accent: PURPLE_LIGHT },
-    { label: '💪 REBOTES', player: topReb, value: topReb?.reb, accent: SUCCESS },
-    { label: '⬆ REB.OFENSIVO', player: topOReb, value: topOReb?.oReb, accent: GOLD },
-    { label: '⬇ REB.DEFENSIVO', player: topDReb, value: topDReb?.dReb, accent: CYAN },
-    { label: '🤝 ASISTENCIAS', player: topAst, value: topAst?.ast, accent: CYAN },
-    { label: '🛡 ROBOS', player: topStl, value: topStl?.stl, accent: GOLD },
-    { label: '📈 eFG%', player: topEfg, value: topEfg ? `${topEfg.eFG}%` : undefined, accent: PURPLE_LIGHT },
-    { label: '⚡ TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: SUCCESS },
+    { label: 'PUNTOS', player: topScorer, value: topScorer?.pts, accent: GOLD },
+    { label: 'TRIPLES', player: topThrees, value: topThrees?.triplesMade, accent: CYAN },
+    { label: 'DOBLES', player: topDoubles, value: topDoubles?.doblesMade, accent: PURPLE_LIGHT },
+    { label: 'REBOTES', player: topReb, value: topReb?.reb, accent: SUCCESS },
+    { label: 'REB.OFENSIVO', player: topOReb, value: topOReb?.oReb, accent: GOLD },
+    { label: 'REB.DEFENSIVO', player: topDReb, value: topDReb?.dReb, accent: CYAN },
+    { label: 'ASISTENCIAS', player: topAst, value: topAst?.ast, accent: CYAN },
+    { label: 'ROBOS', player: topStl, value: topStl?.stl, accent: GOLD },
+    { label: 'eFG%', player: topEfg, value: topEfg ? `${topEfg.eFG}%` : undefined, accent: PURPLE_LIGHT },
+    { label: 'TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: SUCCESS },
   ];
 
   const lColW = (W - M * 2 - 8) / 3;
