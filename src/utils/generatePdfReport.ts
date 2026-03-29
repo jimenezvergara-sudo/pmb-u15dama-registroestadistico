@@ -243,9 +243,9 @@ export async function generatePdfReport(
     doc.roundedRect(cx, cy, pCardW, 19, 3, 3, 'F');
     doc.setFillColor(...c.color);
     doc.roundedRect(cx + 6, cy, pCardW - 12, 1.5, 0.7, 0.7, 'F');
-    // Icon
-    doc.setFontSize(9);
-    doc.text(c.icon, cx + 5, cy + 8);
+    // Colored dot instead of emoji
+    doc.setFillColor(...c.color);
+    doc.circle(cx + 5, cy + 6, 1.8, 'F');
     doc.setFontSize(6);
     doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
