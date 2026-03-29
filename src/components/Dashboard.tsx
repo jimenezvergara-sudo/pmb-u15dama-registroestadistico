@@ -62,8 +62,20 @@ const Dashboard: React.FC = () => {
 
   const roster = useMemo(() => {
     if (!isAggregate && selectedGame) return selectedGame.roster;
+    // Deduplicate by player id, keeping the latest version
     const map = new Map<string, typeof tournamentGames[0]['roster'][0]>();
-    tournamentGames.forEach(g => g.roster.forEach(p => map.set(p.id, p)));
+    tournamentGames.forEach(g => g.roster.forEach(p => {
+      if (!map.has(p.id)) map.set(p.id, p);
+    }));
+    // Also deduplicate players that share the same name (merged but old ID remains in some games)
+    const byName = new Map<string, typeof tournamentGames[0]['roster'][0]>();
+    map.forEach(p => {
+      const existing = byName.get(p.name);
+      if (!existing) {
+        byName.set(p.name, p);
+      }
+      // Keep the one that exists in the current players list
+    });
     return Array.from(map.values());
   }, [isAggregate, selectedGame, tournamentGames]);
 
@@ -458,7 +470,7 @@ const Dashboard: React.FC = () => {
           <table className="text-xs w-full min-w-[520px]">
             <thead>
               <tr className="text-muted-foreground border-b border-border">
-                <th className="text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[70px]">Jug.</th>
+                <th className="text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[80px]">Jug.</th>
                 <th className="text-center py-2 px-0.5 font-bold">TC</th>
                 <th className="text-center py-2 px-0.5 font-bold">2PT</th>
                 <th className="text-center py-2 px-0.5 font-bold">3PT</th>
@@ -478,9 +490,9 @@ const Dashboard: React.FC = () => {
             <tbody>
               {boxScore.map(row => (
                 <tr key={row.player.id} className="border-b border-border/50">
-                  <td className="py-2 pr-1 font-semibold sticky left-0 bg-card z-10">
-                    <span className="font-extrabold text-primary mr-0.5">#{row.player.number}</span>
-                    <span className="truncate max-w-[45px] inline-block align-bottom">{row.player.name.split(' ')[0]}</span>
+                  <td className="py-1.5 pr-1 font-semibold sticky left-0 bg-card z-10 min-w-[80px]">
+                    <span className="font-extrabold text-primary">#{row.player.number}</span>
+                    <span className="block text-[10px] leading-tight max-w-[70px] break-words">{row.player.name}</span>
                   </td>
                   <td className="text-center py-2 px-0.5">
                     <div className="text-[10px]">{row.fgm}/{row.fga}</div>
