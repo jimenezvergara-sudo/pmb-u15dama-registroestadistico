@@ -603,8 +603,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     // Persist each updated game to cloud
+    let failedUpdates = 0;
     for (const g of updatedGames) {
-      await supabase.from('club_games' as any).update({
+      const { error } = await supabase.from('club_games' as any).update({
         roster: g.roster as any,
         shots: g.shots as any,
         actions: g.actions as any,
@@ -612,13 +613,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         on_court_player_ids: g.onCourtPlayerIds as any,
         court_time_ms: g.courtTimeMs as any,
       }).eq('id', g.id);
+      if (error) {
+        console.error('Error updating game during merge:', g.id, error);
+        failedUpdates++;
+      }
+    }
+    if (failedUpdates > 0) {
+      console.error(`Merge: ${failedUpdates}/${updatedGames.length} game updates failed`);
     }
 
     // Delete the removed player from cloud
-    await supabase.from('club_players' as any).delete().eq('id', removeId);
+    const { error: delErr } = await supabase.from('club_players' as any).delete().eq('id', removeId);
+    if (delErr) console.error('Error deleting merged player:', delErr);
 
     // Update the kept player's name and number in cloud
-    await supabase.from('club_players' as any).update({ name: keepName, number: keepNumber }).eq('id', keepId);
+    const { error: updErr } = await supabase.from('club_players' as any).update({ name: keepName, number: keepNumber }).eq('id', keepId);
+    if (updErr) console.error('Error updating kept player:', updErr);
 
     setState(s => ({
       ...s,
