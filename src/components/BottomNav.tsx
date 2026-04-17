@@ -1,8 +1,8 @@
 import React from 'react';
-import { BarChart3, Users, Plus, Trophy, Home, Shield, ShieldAlert } from 'lucide-react';
+import { BarChart3, Users, Plus, Trophy, Home, Shield, ShieldAlert, UserCog } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
-export type TabId = 'home' | 'live' | 'roster' | 'dashboard' | 'tournaments' | 'teams' | 'admin';
+export type TabId = 'home' | 'live' | 'roster' | 'dashboard' | 'tournaments' | 'teams' | 'admin' | 'staff';
 
 interface Props {
   activeTab: TabId;
