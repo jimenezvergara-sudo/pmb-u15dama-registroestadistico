@@ -269,14 +269,35 @@ const LiveGame: React.FC = () => {
               OT
             </button>
           </div>
-          <button
-            onClick={() => setShowReport(true)}
-            className="px-2.5 py-1 rounded text-xs font-bold tap-feedback bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1"
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            📊 Informe
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleTogglePause}
+              aria-label={isPaused ? 'Reanudar partido' : 'Pausar partido'}
+              className={`px-2 py-1 rounded text-xs font-bold tap-feedback flex items-center gap-1 ${
+                isPaused
+                  ? 'bg-success text-success-foreground animate-pulse'
+                  : 'bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30'
+              }`}
+            >
+              {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+              {isPaused ? 'Reanudar' : 'Pausa'}
+            </button>
+            <button
+              onClick={() => setShowReport(true)}
+              className="px-2.5 py-1 rounded text-xs font-bold tap-feedback bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1"
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              📊 Informe
+            </button>
+          </div>
         </div>
+        {isPaused && (
+          <div className="mt-2 px-2 py-1 rounded bg-warning/20 border border-warning/40 text-center">
+            <p className="text-[10px] font-black text-primary-foreground uppercase tracking-widest">
+              ⏸ PARTIDO PAUSADO — Cronómetro detenido
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Rival scoring */}
