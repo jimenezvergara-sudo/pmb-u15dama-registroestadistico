@@ -448,6 +448,24 @@ export type Database = {
           user_id: string
         }[]
       }
+      club_assign_user: {
+        Args: { _email: string; _role: Database["public"]["Enums"]["app_role"] }
+        Returns: Json
+      }
+      club_list_users: {
+        Args: never
+        Returns: {
+          club_id: string
+          created_at: string
+          email: string
+          email_confirmed_at: string
+          full_name: string
+          last_sign_in_at: string
+          role: string
+          user_id: string
+        }[]
+      }
+      club_remove_user: { Args: { _target_user_id: string }; Returns: Json }
       get_user_club_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
