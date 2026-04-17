@@ -76,10 +76,23 @@ const LiveGame: React.FC = () => {
         onConfirm={(starterIds) => {
           snapshotCourtTime();
           setOnCourtPlayers(starterIds);
-          setQuarter(pendingQuarter);
+          const incoming = pendingQuarter;
+          setQuarter(incoming);
           setPendingQuarter(null);
           setSelectedPlayer(null);
           setPendingShot(null);
+          // Suggest sharing the halftime summary when entering Q3
+          if (incoming === 'Q3') {
+            setTimeout(() => {
+              toast('🏀 ¡Medio Tiempo! ¿Compartir resumen?', {
+                duration: 8000,
+                action: {
+                  label: '📊 WhatsApp',
+                  onClick: () => shareHalftimeWhatsApp(activeGame, { myTeamName }),
+                },
+              });
+            }, 400);
+          }
         }}
       />
     );
