@@ -10,6 +10,7 @@ import LiveActionLog from '@/components/LiveActionLog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2, BarChart3 } from 'lucide-react';
+import { shareHalftimeWhatsApp } from '@/utils/halftimeShare';
 import logoBasqest from '@/assets/logo-basqest.png';
 import {
   AlertDialog,
@@ -75,10 +76,23 @@ const LiveGame: React.FC = () => {
         onConfirm={(starterIds) => {
           snapshotCourtTime();
           setOnCourtPlayers(starterIds);
-          setQuarter(pendingQuarter);
+          const incoming = pendingQuarter;
+          setQuarter(incoming);
           setPendingQuarter(null);
           setSelectedPlayer(null);
           setPendingShot(null);
+          // Suggest sharing the halftime summary when entering Q3
+          if (incoming === 'Q3') {
+            setTimeout(() => {
+              toast('🏀 ¡Medio Tiempo! ¿Compartir resumen?', {
+                duration: 8000,
+                action: {
+                  label: '📊 WhatsApp',
+                  onClick: () => shareHalftimeWhatsApp(activeGame, { myTeamName }),
+                },
+              });
+            }, 400);
+          }
         }}
       />
     );

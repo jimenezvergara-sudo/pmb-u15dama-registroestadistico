@@ -5,8 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Share2, FileText, TrendingUp, TrendingDown, Minus, HelpCircle } from 'lucide-react';
+import { Share2, FileText, TrendingUp, TrendingDown, Minus, HelpCircle, Clock } from 'lucide-react';
 import { generatePdfReport } from '@/utils/generatePdfReport';
+import { shareHalftimeWhatsApp, isHalftimeAvailable } from '@/utils/halftimeShare';
 import logoBasqest from '@/assets/logo-basqest-full.png';
 
 const isRebound = (type: string) => type === 'rebound' || type === 'offensive_rebound' || type === 'defensive_rebound';
@@ -282,13 +283,25 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
           </Collapsible>
 
           {/* Actions */}
-          <div className="flex gap-2 pt-1">
-            <Button onClick={handleDownloadPdf} variant="outline" size="sm" className="flex-1 gap-1.5">
-              <FileText className="w-4 h-4" /> PDF
-            </Button>
-            <Button onClick={handleShareWhatsApp} size="sm" className="flex-1 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
-              <Share2 className="w-4 h-4" /> WhatsApp
-            </Button>
+          <div className="flex flex-col gap-2 pt-1">
+            <div className="flex gap-2">
+              <Button onClick={handleDownloadPdf} variant="outline" size="sm" className="flex-1 gap-1.5">
+                <FileText className="w-4 h-4" /> PDF
+              </Button>
+              <Button onClick={handleShareWhatsApp} size="sm" className="flex-1 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Share2 className="w-4 h-4" /> WhatsApp
+              </Button>
+            </div>
+            {isHalftimeAvailable(game) && (
+              <Button
+                onClick={() => shareHalftimeWhatsApp(game, { myTeamName })}
+                size="sm"
+                variant="outline"
+                className="w-full gap-1.5 border-amber-500/60 text-amber-600 hover:bg-amber-500 hover:text-white dark:text-amber-400"
+              >
+                <Clock className="w-4 h-4" /> 📊 Compartir Medio Tiempo (Q1+Q2)
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
