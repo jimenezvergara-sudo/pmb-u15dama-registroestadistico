@@ -5,8 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Share2, FileText, TrendingUp, TrendingDown, Minus, HelpCircle } from 'lucide-react';
+import { Share2, FileText, TrendingUp, TrendingDown, Minus, HelpCircle, Clock } from 'lucide-react';
 import { generatePdfReport } from '@/utils/generatePdfReport';
+import { shareHalftimeWhatsApp, isHalftimeAvailable } from '@/utils/halftimeShare';
 import logoBasqest from '@/assets/logo-basqest-full.png';
 
 const isRebound = (type: string) => type === 'rebound' || type === 'offensive_rebound' || type === 'defensive_rebound';
