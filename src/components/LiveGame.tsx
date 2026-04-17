@@ -9,7 +9,7 @@ import LiveGameReport from '@/components/LiveGameReport';
 import LiveActionLog from '@/components/LiveActionLog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Undo2, BarChart3 } from 'lucide-react';
+import { Undo2, BarChart3, Pause, Play } from 'lucide-react';
 import { shareHalftimeWhatsApp } from '@/utils/halftimeShare';
 import logoBasqest from '@/assets/logo-basqest.png';
 import {
@@ -40,6 +40,28 @@ const LiveGame: React.FC = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [pendingQuarter, setPendingQuarter] = useState<QuarterId | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Periodically flush court time every 10s (skip while paused)
+  useEffect(() => {
+    if (!activeGame || !gameStarted || isPaused) return;
+    const interval = setInterval(() => snapshotCourtTime(), 10000);
+    return () => clearInterval(interval);
+  }, [activeGame, gameStarted, isPaused, snapshotCourtTime]);
+
+  const handleTogglePause = () => {
+    if (isPaused) {
+      // Resume: reset snapshot baseline so paused gap is not added to court time
+      startGameTimer();
+      setIsPaused(false);
+      toast('▶ Partido reanudado', { duration: 1500 });
+    } else {
+      // Pause: flush time accumulated up to now, then stop the interval
+      snapshotCourtTime();
+      setIsPaused(true);
+      toast.warning('⏸ Partido pausado — cronómetro detenido', { duration: 2000 });
+    }
+  };
 
   // Periodically flush court time every 10s
   useEffect(() => {
@@ -247,14 +269,35 @@ const LiveGame: React.FC = () => {
               OT
             </button>
           </div>
-          <button
-            onClick={() => setShowReport(true)}
-            className="px-2.5 py-1 rounded text-xs font-bold tap-feedback bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1"
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            📊 Informe
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleTogglePause}
+              aria-label={isPaused ? 'Reanudar partido' : 'Pausar partido'}
+              className={`px-2 py-1 rounded text-xs font-bold tap-feedback flex items-center gap-1 ${
+                isPaused
+                  ? 'bg-success text-success-foreground animate-pulse'
+                  : 'bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30'
+              }`}
+            >
+              {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+              {isPaused ? 'Reanudar' : 'Pausa'}
+            </button>
+            <button
+              onClick={() => setShowReport(true)}
+              className="px-2.5 py-1 rounded text-xs font-bold tap-feedback bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1"
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              📊 Informe
+            </button>
+          </div>
         </div>
+        {isPaused && (
+          <div className="mt-2 px-2 py-1 rounded bg-warning/20 border border-warning/40 text-center">
+            <p className="text-[10px] font-black text-primary-foreground uppercase tracking-widest">
+              ⏸ PARTIDO PAUSADO — Cronómetro detenido
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Rival scoring */}
