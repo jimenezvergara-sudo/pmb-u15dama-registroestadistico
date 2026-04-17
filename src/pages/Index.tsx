@@ -69,6 +69,7 @@ const AppContent: React.FC = () => {
       {tab === 'dashboard' && <Dashboard />}
       {tab === 'tournaments' && <TournamentManager />}
       {tab === 'admin' && <AdminPanel />}
+      {tab === 'staff' && <ClubStaffManager />}
       <BottomNav activeTab={tab} onTabChange={setTab} hasActiveGame={!!activeGame} />
     </div>
   );
