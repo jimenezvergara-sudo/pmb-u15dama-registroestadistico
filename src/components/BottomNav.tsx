@@ -20,13 +20,17 @@ const baseTabs: { id: TabId; icon: React.ReactNode; label: string }[] = [
 ];
 
 const BottomNav: React.FC<Props> = ({ activeTab, onTabChange, hasActiveGame }) => {
-  const { roles, effectiveRoles } = useAuth();
-  // Show admin tab only if real role is global (not impersonated)
+  const { roles } = useAuth();
   const isGlobalRole = roles.includes('super_admin') || roles.includes('system_operator');
-  // Use effective roles for other visibility decisions in the future
-  const tabs = isGlobalRole
-    ? [...baseTabs, { id: 'admin' as TabId, icon: <ShieldAlert className="w-5 h-5" />, label: 'Admin' }]
-    : baseTabs;
+  const isClubAdmin = roles.some(r => ['club_admin', 'club_admin_pro', 'club_admin_elite'].includes(r));
+
+  let tabs = [...baseTabs];
+  if (isClubAdmin) {
+    tabs = [...tabs, { id: 'staff' as TabId, icon: <UserCog className="w-5 h-5" />, label: 'Staff' }];
+  }
+  if (isGlobalRole) {
+    tabs = [...tabs, { id: 'admin' as TabId, icon: <ShieldAlert className="w-5 h-5" />, label: 'Admin' }];
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-bottom z-50">
