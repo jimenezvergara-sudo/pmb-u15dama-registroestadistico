@@ -40,6 +40,28 @@ const LiveGame: React.FC = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [pendingQuarter, setPendingQuarter] = useState<QuarterId | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Periodically flush court time every 10s (skip while paused)
+  useEffect(() => {
+    if (!activeGame || !gameStarted || isPaused) return;
+    const interval = setInterval(() => snapshotCourtTime(), 10000);
+    return () => clearInterval(interval);
+  }, [activeGame, gameStarted, isPaused, snapshotCourtTime]);
+
+  const handleTogglePause = () => {
+    if (isPaused) {
+      // Resume: reset snapshot baseline so paused gap is not added to court time
+      startGameTimer();
+      setIsPaused(false);
+      toast('▶ Partido reanudado', { duration: 1500 });
+    } else {
+      // Pause: flush time accumulated up to now, then stop the interval
+      snapshotCourtTime();
+      setIsPaused(true);
+      toast.warning('⏸ Partido pausado — cronómetro detenido', { duration: 2000 });
+    }
+  };
 
   // Periodically flush court time every 10s
   useEffect(() => {
