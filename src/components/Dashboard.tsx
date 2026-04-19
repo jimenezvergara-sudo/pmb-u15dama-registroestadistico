@@ -179,7 +179,17 @@ const Dashboard: React.FC = () => {
       ftPct: ftA > 0 ? Math.round((ftM / ftA) * 100) : 0,
       eFG, ts,
     };
-  }).sort((a, b) => b.pts - a.pts);
+  }).sort((a, b) => {
+    const key = sortKey ?? 'pts';
+    const av = (a as any)[key] ?? 0;
+    const bv = (b as any)[key] ?? 0;
+    if (bv !== av) return bv - av;
+    return b.pts - a.pts;
+  });
+
+  const handleSort = (key: string) => {
+    setSortKey(prev => (prev === key ? null : key));
+  };
 
   const totalPoints = filteredShots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
   const totalOpponent = filteredOpponentScores.reduce((sum, s) => sum + s.points, 0);
