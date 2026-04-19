@@ -11,7 +11,7 @@ import HomeScreen from '@/components/HomeScreen';
 import AdminPanel from '@/components/AdminPanel';
 import ClubStaffManager from '@/components/ClubStaffManager';
 import { CATEGORIES, Category } from '@/types/basketball';
-import logoBasqest from '@/assets/logo-basqest.png';
+import logoBasqest from '@/assets/logo-basqest-new.png';
 
 const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSelect }) => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
