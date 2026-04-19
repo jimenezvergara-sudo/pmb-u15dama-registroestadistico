@@ -26,6 +26,7 @@ const Dashboard: React.FC = () => {
   const [filterPlayer, setFilterPlayer] = useState<string>('ALL');
   const [filterTeamId, setFilterTeamId] = useState<string>('ALL');
   const [premiumBanner, setPremiumBanner] = useState<{ url: string; link: string } | null>(null);
+  const [sortKey, setSortKey] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
