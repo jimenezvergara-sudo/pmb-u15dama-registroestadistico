@@ -483,20 +483,34 @@ const Dashboard: React.FC = () => {
             <thead>
               <tr className="text-muted-foreground border-b border-border">
                 <th className="text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[80px]">Jug.</th>
-                <th className="text-center py-2 px-0.5 font-bold">TC</th>
-                <th className="text-center py-2 px-0.5 font-bold">2PT</th>
-                <th className="text-center py-2 px-0.5 font-bold">3PT</th>
-                <th className="text-center py-2 px-0.5 font-bold">TL</th>
-                <th className="text-center py-2 px-0.5 font-bold">PTS</th>
-                <th className="text-center py-2 px-0.5 font-bold">RO</th>
-                <th className="text-center py-2 px-0.5 font-bold">RD</th>
-                <th className="text-center py-2 px-0.5 font-bold">REB</th>
-                <th className="text-center py-2 px-0.5 font-bold">AST</th>
-                <th className="text-center py-2 px-0.5 font-bold">STL</th>
-                <th className="text-center py-2 px-0.5 font-bold">PF</th>
-                <th className="text-center py-2 px-0.5 font-bold">eFG%</th>
-                <th className="text-center py-2 px-0.5 font-bold">TS%</th>
-                <th className="text-center py-2 px-0.5 font-bold">MIN%</th>
+                {[
+                  { label: 'TC', key: 'fgm' },
+                  { label: '2PT', key: 'twoM' },
+                  { label: '3PT', key: 'threeM' },
+                  { label: 'TL', key: 'ftM' },
+                  { label: 'PTS', key: 'pts' },
+                  { label: 'RO', key: 'oReb' },
+                  { label: 'RD', key: 'dReb' },
+                  { label: 'REB', key: 'reb' },
+                  { label: 'AST', key: 'ast' },
+                  { label: 'STL', key: 'stl' },
+                  { label: 'PF', key: 'pf' },
+                  { label: 'eFG%', key: 'eFG' },
+                  { label: 'TS%', key: 'ts' },
+                  { label: 'MIN%', key: 'courtTimePct' },
+                ].map(col => {
+                  const active = (sortKey ?? 'pts') === col.key;
+                  return (
+                    <th
+                      key={col.key}
+                      onClick={() => handleSort(col.key)}
+                      className={`text-center py-2 px-0.5 font-bold cursor-pointer select-none transition-colors hover:text-primary ${active ? 'text-primary' : ''}`}
+                      title={active ? 'Click para volver al orden por PTS' : `Ordenar por ${col.label}`}
+                    >
+                      {col.label}{active ? ' ↓' : ''}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
