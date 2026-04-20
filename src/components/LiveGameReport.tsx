@@ -229,7 +229,7 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
                   {playerStats.map((p, i) => (
                     <tr key={p.id} className={`border-t border-border/20 ${i % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                       <td className="py-1.5 px-2 font-bold truncate max-w-[75px] sticky left-0 z-10" style={{ backgroundColor: 'inherit' }}>
-                        <span className="text-muted-foreground">#{p.number}</span> {p.name.split(' ')[0]}
+                        {p.name.split(' ')[0]}
                       </td>
                       <td className="text-center font-black text-primary">{p.pts}</td>
                       <td className="text-center">{p.p2M}/{p.p2A}</td>
