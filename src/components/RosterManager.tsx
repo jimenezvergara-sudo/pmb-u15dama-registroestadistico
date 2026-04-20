@@ -359,7 +359,7 @@ const RosterManager: React.FC = () => {
             <Button variant="outline" onClick={() => setEditPlayer(null)} disabled={saving}>
               Cancelar
             </Button>
-            <Button onClick={confirmEdit} disabled={saving} className="gap-2">
+            <Button onClick={confirmEdit} disabled={saving || !editNumberValid} className="gap-2">
               <Check className="w-4 h-4" /> Guardar
             </Button>
           </DialogFooter>
