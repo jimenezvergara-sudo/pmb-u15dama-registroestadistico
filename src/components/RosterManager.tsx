@@ -3,7 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Player } from '@/types/basketball';
-import { Plus, Trash2, Merge, Check, X, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Merge, Check, X, AlertTriangle, Pencil } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import { toast } from 'sonner';
 import {
@@ -12,6 +12,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 const RosterManager: React.FC = () => {
   const { players, addPlayer, removePlayer, mergePlayers } = useApp();
