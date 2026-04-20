@@ -684,7 +684,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
       deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
       setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer, setMyTeamName, setMyTeamLogo,
-      mergePlayers,
+      mergePlayers, updatePlayer,
     }}>
       {children}
     </AppContext.Provider>
