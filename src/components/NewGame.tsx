@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Player, GameLeg, Game } from '@/types/basketball';
-import { Play, ClipboardList, Pencil } from 'lucide-react';
+import { Play, ClipboardList, AlertTriangle, Check } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import GameEventEditor from '@/components/GameEventEditor';
 
@@ -12,33 +12,93 @@ const NewGame: React.FC = () => {
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [customOpponent, setCustomOpponent] = useState('');
-  const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set());
+  // Map of confirmed roster: playerId -> jersey number for the game
+  const [rosterNumbers, setRosterNumbers] = useState<Record<string, number>>({});
+  // Map of in-progress edits: playerId -> string being typed
+  const [pendingNumber, setPendingNumber] = useState<Record<string, string>>({});
   const [tournamentId, setTournamentId] = useState<string>('');
   const [leg, setLeg] = useState<GameLeg | ''>('');
   const [isHome, setIsHome] = useState<boolean | undefined>(undefined);
-  const [rosterNumbers, setRosterNumbers] = useState<Record<string, number>>({});
-  const [editingNumberId, setEditingNumberId] = useState<string | null>(null);
-  const [tempNumber, setTempNumber] = useState('');
-
-  const togglePlayer = (id: string) => {
-    setSelectedPlayers(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
 
   const opponentName = selectedTeamId
     ? teams.find(t => t.id === selectedTeamId)?.clubName || ''
     : customOpponent.trim();
 
-  const getPlayerNumber = (p: Player) => rosterNumbers[p.id] ?? p.number;
+  const isSelected = (id: string) => id in rosterNumbers || id in pendingNumber;
+
+  // Count usage of each confirmed number to flag duplicates
+  const numberUsage = useMemo(() => {
+    const usage: Record<number, string[]> = {};
+    Object.entries(rosterNumbers).forEach(([pid, n]) => {
+      if (!usage[n]) usage[n] = [];
+      usage[n].push(pid);
+    });
+    return usage;
+  }, [rosterNumbers]);
+
+  const isDuplicate = (playerId: string) => {
+    const n = rosterNumbers[playerId];
+    if (n === undefined) return false;
+    return (numberUsage[n]?.length ?? 0) > 1;
+  };
+
+  const startEditing = (p: Player) => {
+    const current = rosterNumbers[p.id] ?? p.number;
+    setPendingNumber(prev => ({ ...prev, [p.id]: String(current) }));
+  };
+
+  const confirmNumber = (playerId: string) => {
+    const raw = pendingNumber[playerId];
+    if (raw === undefined) return;
+    const n = parseInt(raw, 10);
+    setPendingNumber(prev => {
+      const next = { ...prev };
+      delete next[playerId];
+      return next;
+    });
+    if (!isNaN(n) && n >= 0) {
+      setRosterNumbers(prev => ({ ...prev, [playerId]: n }));
+    } else {
+      // invalid -> remove from roster
+      setRosterNumbers(prev => {
+        const next = { ...prev };
+        delete next[playerId];
+        return next;
+      });
+    }
+  };
+
+  const removePlayer = (playerId: string) => {
+    setRosterNumbers(prev => {
+      const next = { ...prev };
+      delete next[playerId];
+      return next;
+    });
+    setPendingNumber(prev => {
+      const next = { ...prev };
+      delete next[playerId];
+      return next;
+    });
+  };
+
+  const handlePlayerTap = (p: Player) => {
+    if (isSelected(p.id)) {
+      removePlayer(p.id);
+    } else {
+      startEditing(p);
+    }
+  };
+
+  const selectedCount = Object.keys(rosterNumbers).length + Object.keys(pendingNumber).length;
+  const hasDuplicates = Object.values(numberUsage).some(arr => arr.length > 1);
+  const hasPending = Object.keys(pendingNumber).length > 0;
 
   const handleStart = () => {
-    if (!opponentName || selectedPlayers.size === 0) return;
+    if (!opponentName || Object.keys(rosterNumbers).length === 0) return;
+    if (hasDuplicates || hasPending) return;
     const roster = players
-      .filter(p => selectedPlayers.has(p.id))
-      .map(p => ({ ...p, number: getPlayerNumber(p) }));
+      .filter(p => p.id in rosterNumbers)
+      .map(p => ({ id: p.id, name: p.name, number: rosterNumbers[p.id], photo: p.photo }));
     startGame(
       opponentName,
       roster,
