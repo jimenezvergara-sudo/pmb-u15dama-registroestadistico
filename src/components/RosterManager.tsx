@@ -227,58 +227,75 @@ const RosterManager: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-2">
-        {players.length === 0 && (
-          <p className="text-muted-foreground text-sm text-center py-8 col-span-3">
+      <div className="rounded-lg border border-border/60 overflow-hidden">
+        {players.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center py-8">
             Añade jugadoras para empezar
           </p>
+        ) : (
+          <>
+            {/* Table header */}
+            <div className="grid grid-cols-[3rem_1fr_1fr_auto] gap-2 items-center px-3 py-2 bg-muted/40 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              <span className="text-center">Nº</span>
+              <span>Nombre</span>
+              <span>Apellido</span>
+              <span className="w-[88px] text-right">Acciones</span>
+            </div>
+
+            <ul className="divide-y divide-border/60">
+              {[...players].sort((a, b) => a.number - b.number).map((p: Player) => {
+                const parts = p.name.trim().split(/\s+/);
+                const lastName = parts.length > 1 ? parts.slice(-1)[0] : '';
+                const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0] ?? '';
+                return (
+                  <li
+                    key={p.id}
+                    className="grid grid-cols-[3rem_1fr_1fr_auto] gap-2 items-center px-3 py-2 bg-card hover:bg-accent/5 transition-colors"
+                  >
+                    <span className="text-lg font-extrabold text-primary text-center">{p.number}</span>
+                    <span className="text-sm font-semibold text-foreground truncate">{firstName}</span>
+                    <span className="text-sm text-foreground truncate">{lastName}</span>
+                    <div className="flex items-center justify-end gap-1 w-[88px]">
+                      {players.length >= 2 && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 tap-feedback"
+                              aria-label="Fusionar"
+                            >
+                              <Merge className="w-3.5 h-3.5" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="min-w-[160px]">
+                            {players.filter(x => x.id !== p.id).sort((a, b) => a.number - b.number).map(other => (
+                              <DropdownMenuItem key={other.id} onClick={() => openMergeDialog(p.id, other.id)}>
+                                #{other.number} {other.name}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                      <button
+                        onClick={() => openEdit(p)}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 tap-feedback"
+                        aria-label="Editar"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => removePlayer(p.id)}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 tap-feedback"
+                        aria-label="Eliminar"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
         )}
-        {[...players].sort((a, b) => a.number - b.number).map((p: Player) => (
-          <div
-            key={p.id}
-            className="relative flex flex-col items-center justify-center rounded-lg p-2 aspect-square bg-card border-2 border-[hsl(45,100%,50%)]"
-          >
-            {/* Delete button - top right */}
-            <button
-              onClick={() => removePlayer(p.id)}
-              className="absolute top-1 right-1 text-muted-foreground hover:text-destructive tap-feedback p-0.5"
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
-
-            {/* Edit name button - bottom right */}
-            <button
-              onClick={() => openEdit(p)}
-              className="absolute bottom-1 right-1 text-muted-foreground hover:text-primary tap-feedback p-0.5"
-              aria-label="Editar nombre"
-            >
-              <Pencil className="w-3 h-3" />
-            </button>
-
-            {/* Merge button - top left */}
-            {players.length >= 2 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="absolute top-1 left-1 text-muted-foreground hover:text-primary tap-feedback p-0.5">
-                    <Merge className="w-3 h-3" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="min-w-[140px]">
-                  {players.filter(x => x.id !== p.id).sort((a, b) => a.number - b.number).map(other => (
-                    <DropdownMenuItem key={other.id} onClick={() => openMergeDialog(p.id, other.id)}>
-                      #{other.number} {other.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            <span className="text-2xl font-extrabold text-primary">{p.number}</span>
-            <span className="text-[10px] font-semibold text-foreground truncate w-full text-center leading-tight">
-              {p.name}
-            </span>
-          </div>
-        ))}
       </div>
 
       {/* Edit player name dialog */}
