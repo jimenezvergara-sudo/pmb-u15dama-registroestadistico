@@ -46,6 +46,7 @@ interface AppContextValue extends Omit<AppState, 'loading'> {
   setMyTeamName: (name: string) => void;
   setMyTeamLogo: (logo: string) => void;
   mergePlayers: (keepId: string, removeId: string, keepNumber: number, keepName: string) => Promise<void>;
+  updatePlayer: (id: string, name: string, propagateToHistory: boolean) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -291,6 +292,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await supabase.from('club_players' as any).delete().eq('id', id);
     setState(s => ({ ...s, players: s.players.filter(p => p.id !== id) }));
   }, []);
+
+  const updatePlayer = useCallback(async (id: string, name: string, propagateToHistory: boolean) => {
+    const cleanName = name.trim().replace(/\s+/g, ' ');
+    if (!cleanName) return;
+
+    // 1. Update master record in club_players
+    const { error: updErr } = await supabase
+      .from('club_players' as any)
+      .update({ name: cleanName })
+      .eq('id', id);
+    if (updErr) { console.error('Error updating player name:', updErr); return; }
+
+    let updatedGames = state.games;
+
+    // 2. Optionally propagate to historical games (club_games.roster snapshot)
+    if (propagateToHistory) {
+      const affected = state.games.filter(g => g.roster.some(r => r.id === id));
+      updatedGames = state.games.map(g => {
+        if (!g.roster.some(r => r.id === id)) return g;
+        return { ...g, roster: g.roster.map(r => r.id === id ? { ...r, name: cleanName } : r) };
+      });
+      for (const g of affected) {
+        const newRoster = g.roster.map(r => r.id === id ? { ...r, name: cleanName } : r);
+        const { error } = await supabase
+          .from('club_games' as any)
+          .update({ roster: newRoster as any })
+          .eq('id', g.id);
+        if (error) console.error('Error propagating name to game:', g.id, error);
+      }
+    }
+
+    setState(s => ({
+      ...s,
+      players: s.players.map(p => p.id === id ? { ...p, name: cleanName } : p),
+      games: propagateToHistory ? updatedGames : s.games,
+    }));
+  }, [state.games]);
 
   const removeGame = useCallback(async (id: string) => {
     await supabase.from('club_games' as any).delete().eq('id', id);
@@ -646,7 +684,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
       deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
       setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer, setMyTeamName, setMyTeamLogo,
-      mergePlayers,
+      mergePlayers, updatePlayer,
     }}>
       {children}
     </AppContext.Provider>

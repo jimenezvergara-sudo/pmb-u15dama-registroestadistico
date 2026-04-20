@@ -3,7 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Player } from '@/types/basketball';
-import { Plus, Trash2, Merge, Check, X, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Merge, Check, X, AlertTriangle, Pencil } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import { toast } from 'sonner';
 import {
@@ -12,9 +12,17 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 const RosterManager: React.FC = () => {
-  const { players, addPlayer, removePlayer, mergePlayers } = useApp();
+  const { players, games, addPlayer, removePlayer, mergePlayers, updatePlayer } = useApp();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [number, setNumber] = useState('');
@@ -28,6 +36,55 @@ const RosterManager: React.FC = () => {
   } | null>(null);
   const [chosenName, setChosenName] = useState('');
   const [chosenNumber, setChosenNumber] = useState<number>(0);
+
+  // Edit name dialog state
+  const [editPlayer, setEditPlayer] = useState<Player | null>(null);
+  const [editFirst, setEditFirst] = useState('');
+  const [editLast, setEditLast] = useState('');
+  const [propagate, setPropagate] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const openEdit = (p: Player) => {
+    const parts = p.name.trim().split(/\s+/);
+    const last = parts.length > 1 ? parts.slice(-1)[0] : '';
+    const first = parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0] ?? '';
+    setEditPlayer(p);
+    setEditFirst(first);
+    setEditLast(last);
+    setPropagate(false);
+  };
+
+  const historyCount = useMemo(() => {
+    if (!editPlayer) return 0;
+    return games.filter(g => g.roster.some(r => r.id === editPlayer.id)).length;
+  }, [editPlayer, games]);
+
+  const confirmEdit = async () => {
+    if (!editPlayer) return;
+    if (editFirst.trim().length < 2 || editLast.trim().length < 2) {
+      toast.error('Nombre y apellido deben tener al menos 2 caracteres');
+      return;
+    }
+    const fullName = `${editFirst.trim()} ${editLast.trim()}`.replace(/\s+/g, ' ');
+    if (fullName === editPlayer.name) {
+      setEditPlayer(null);
+      return;
+    }
+    setSaving(true);
+    try {
+      await updatePlayer(editPlayer.id, fullName, propagate);
+      toast.success(
+        propagate
+          ? `Nombre actualizado en plantilla y ${historyCount} partido(s) anteriores`
+          : 'Nombre actualizado solo para partidos futuros'
+      );
+      setEditPlayer(null);
+    } catch (e) {
+      toast.error('Error al actualizar');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const usedNumbers = useMemo(() => new Set(players.map(p => p.number)), [players]);
   const parsedNumber = number.trim() === '' ? NaN : parseInt(number, 10);
@@ -176,6 +233,15 @@ const RosterManager: React.FC = () => {
               <Trash2 className="w-3 h-3" />
             </button>
 
+            {/* Edit name button - bottom right */}
+            <button
+              onClick={() => openEdit(p)}
+              className="absolute bottom-1 right-1 text-muted-foreground hover:text-primary tap-feedback p-0.5"
+              aria-label="Editar nombre"
+            >
+              <Pencil className="w-3 h-3" />
+            </button>
+
             {/* Merge button - top left */}
             {players.length >= 2 && (
               <DropdownMenu>
@@ -201,6 +267,75 @@ const RosterManager: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Edit player name dialog */}
+      <Dialog open={!!editPlayer} onOpenChange={(o) => !o && setEditPlayer(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar nombre de jugadora</DialogTitle>
+            <DialogDescription>
+              Modifica el nombre y apellido. El número de camiseta se edita por separado.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground">Nombre</label>
+                <Input value={editFirst} onChange={e => setEditFirst(e.target.value)} autoFocus />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground">Apellido</label>
+                <Input value={editLast} onChange={e => setEditLast(e.target.value)} />
+              </div>
+            </div>
+
+            {historyCount > 0 && (
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-2">
+                <p className="text-xs font-bold text-foreground">
+                  Esta jugadora aparece en {historyCount} partido(s) anteriores
+                </p>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={!propagate}
+                    onChange={() => setPropagate(false)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-xs">
+                    <strong>Solo partidos futuros</strong> — el historial mantiene el nombre original
+                  </span>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={propagate}
+                    onChange={() => setPropagate(true)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-xs">
+                    <strong>Propagar al historial</strong> — actualiza el nombre en todos los partidos guardados
+                  </span>
+                </label>
+                {propagate && (
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> Esta acción reescribirá los rosters guardados
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEditPlayer(null)} disabled={saving}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmEdit} disabled={saving} className="gap-2">
+              <Check className="w-4 h-4" /> Guardar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
