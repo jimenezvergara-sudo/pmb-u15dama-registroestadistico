@@ -41,6 +41,7 @@ const RosterManager: React.FC = () => {
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [editFirst, setEditFirst] = useState('');
   const [editLast, setEditLast] = useState('');
+  const [editNumber, setEditNumber] = useState('');
   const [propagate, setPropagate] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -51,6 +52,7 @@ const RosterManager: React.FC = () => {
     setEditPlayer(p);
     setEditFirst(first);
     setEditLast(last);
+    setEditNumber(String(p.number));
     setPropagate(false);
   };
 
@@ -59,27 +61,38 @@ const RosterManager: React.FC = () => {
     return games.filter(g => g.roster.some(r => r.id === editPlayer.id)).length;
   }, [editPlayer, games]);
 
+  const editParsedNumber = editNumber.trim() === '' ? NaN : parseInt(editNumber, 10);
+  const editNumberDuplicate = !!editPlayer
+    && !isNaN(editParsedNumber)
+    && players.some(p => p.id !== editPlayer.id && p.number === editParsedNumber);
+  const editNumberValid = !isNaN(editParsedNumber) && editParsedNumber >= 0 && !editNumberDuplicate;
+
   const confirmEdit = async () => {
     if (!editPlayer) return;
     if (editFirst.trim().length < 2 || editLast.trim().length < 2) {
       toast.error('Nombre y apellido deben tener al menos 2 caracteres');
       return;
     }
+    if (!editNumberValid) {
+      if (editNumberDuplicate) toast.error(`El número #${editParsedNumber} ya está en uso por otra jugadora`);
+      else toast.error('Número de camiseta inválido');
+      return;
+    }
     const fullName = `${editFirst.trim()} ${editLast.trim()}`.replace(/\s+/g, ' ');
-    if (fullName === editPlayer.name) {
+    if (fullName === editPlayer.name && editParsedNumber === editPlayer.number) {
       setEditPlayer(null);
       return;
     }
     setSaving(true);
     try {
-      await updatePlayer(editPlayer.id, fullName, propagate);
+      await updatePlayer(editPlayer.id, fullName, editParsedNumber, propagate);
       toast.success(
         propagate
-          ? `Nombre actualizado en plantilla y ${historyCount} partido(s) anteriores`
-          : 'Nombre actualizado solo para partidos futuros'
+          ? `Actualizada en plantilla y ${historyCount} partido(s) anteriores`
+          : 'Actualizada solo para partidos futuros'
       );
       setEditPlayer(null);
-    } catch (e) {
+    } catch {
       toast.error('Error al actualizar');
     } finally {
       setSaving(false);
