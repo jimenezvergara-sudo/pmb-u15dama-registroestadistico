@@ -314,7 +314,7 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
                     </select>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700 text-white h-8 text-xs" disabled={!shotPlayerId} onClick={() => addShot(true)}>
+                    <Button size="sm" className="flex-1 h-8 text-xs" disabled={!shotPlayerId} onClick={() => addShot(true)}>
                       ✅ Anotado
                     </Button>
                     <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" disabled={!shotPlayerId} onClick={() => addShot(false)}>
