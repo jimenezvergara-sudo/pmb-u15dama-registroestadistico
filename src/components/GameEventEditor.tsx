@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Game, QuarterId, QUARTER_LABELS, ShotEvent, OpponentScore, GameAction } from '@/types/basketball';
+import { Game, QuarterId, QUARTER_LABELS, ActionType } from '@/types/basketball';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from 'sonner';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Plus, ChevronDown, Trophy } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
 
 interface Props {
   game: Game;
@@ -35,14 +37,45 @@ const ACTION_LABELS: Record<string, string> = {
   foul: '🟡 Falta',
 };
 
+const ACTION_OPTIONS: { value: ActionType; label: string }[] = [
+  { value: 'offensive_rebound', label: '🏀 Reb. Ofensivo' },
+  { value: 'defensive_rebound', label: '🏀 Reb. Defensivo' },
+  { value: 'assist', label: '🤝 Asistencia' },
+  { value: 'steal', label: '🖐️ Robo' },
+  { value: 'turnover', label: '❌ Pérdida' },
+  { value: 'foul', label: '🟡 Falta' },
+];
+
 type TabId = 'all' | 'shots' | 'opponent' | 'actions';
+type AddTab = 'shot' | 'opponent' | 'action';
+
+const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
+  const { tournaments } = useApp();
   const [editedGame, setEditedGame] = useState<Game>(game);
   const [tab, setTab] = useState<TabId>('all');
+  const [addOpen, setAddOpen] = useState(false);
+  const [addTab, setAddTab] = useState<AddTab>('shot');
+
+  // Shot form
+  const [shotPlayerId, setShotPlayerId] = useState('');
+  const [shotQuarter, setShotQuarter] = useState<QuarterId>('Q1');
+  const [shotPoints, setShotPoints] = useState<1 | 2 | 3>(2);
+
+  // Opponent form
+  const [oppQuarter, setOppQuarter] = useState<QuarterId>('Q1');
+
+  // Action form
+  const [actPlayerId, setActPlayerId] = useState('');
+  const [actQuarter, setActQuarter] = useState<QuarterId>('Q1');
+  const [actType, setActType] = useState<ActionType>('defensive_rebound');
 
   React.useEffect(() => {
     setEditedGame(game);
+    setShotQuarter(game.currentQuarter);
+    setOppQuarter(game.currentQuarter);
+    setActQuarter(game.currentQuarter);
   }, [game]);
 
   const playerMap = useMemo(() => {
@@ -50,6 +83,11 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
     game.roster.forEach(p => map.set(p.id, { name: p.name, number: p.number }));
     return map;
   }, [game.roster]);
+
+  const sortedRoster = useMemo(
+    () => [...game.roster].sort((a, b) => a.number - b.number),
+    [game.roster]
+  );
 
   // Build unified event rows
   const rows = useMemo(() => {
@@ -120,6 +158,60 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
     });
   };
 
+  const addShot = (made: boolean) => {
+    if (!shotPlayerId) return;
+    setEditedGame(g => ({
+      ...g,
+      shots: [
+        ...g.shots,
+        {
+          id: newId(),
+          playerId: shotPlayerId,
+          quarterId: shotQuarter,
+          x: 50,
+          y: 50,
+          made,
+          points: shotPoints,
+          timestamp: Date.now(),
+        },
+      ],
+    }));
+    toast.success(`Tiro ${made ? 'anotado' : 'fallado'} agregado`);
+  };
+
+  const addOpponent = (points: 1 | 2 | 3) => {
+    setEditedGame(g => ({
+      ...g,
+      opponentScores: [
+        ...g.opponentScores,
+        { id: newId(), points, quarterId: oppQuarter, timestamp: Date.now() },
+      ],
+    }));
+    toast.success(`+${points} rival`);
+  };
+
+  const addAction = () => {
+    if (!actPlayerId) return;
+    setEditedGame(g => ({
+      ...g,
+      actions: [
+        ...(g.actions || []),
+        {
+          id: newId(),
+          playerId: actPlayerId,
+          quarterId: actQuarter,
+          type: actType,
+          timestamp: Date.now(),
+        },
+      ],
+    }));
+    toast.success('Acción agregada');
+  };
+
+  const setTournament = (id: string) => {
+    setEditedGame(g => ({ ...g, tournamentId: id || undefined }));
+  };
+
   const handleSave = () => {
     onSave(editedGame);
     toast.success('Registros actualizados');
@@ -149,16 +241,131 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
     );
   };
 
+  const selectCls = "h-8 rounded border border-input bg-background px-2 text-xs font-bold";
+
+  const addTabBtn = (id: AddTab, label: string) => (
+    <button
+      onClick={() => setAddTab(id)}
+      className={`flex-1 px-2 py-1.5 rounded text-xs font-bold transition-colors ${
+        addTab === id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+      }`}
+    >
+      {label}
+    </button>
+  );
+
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0">
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="p-4 pb-2">
           <DialogTitle className="text-base">Editar Registros del Partido</DialogTitle>
           <DialogDescription className="text-xs">
             vs {game.opponentName} — {new Date(game.date).toLocaleDateString()}
-            {' · '}Selecciona el cuarto correcto para cada registro o elimínalo.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Tournament selector */}
+        <div className="px-4 pb-2">
+          <label className="flex items-center gap-2 text-xs font-bold text-muted-foreground mb-1">
+            <Trophy className="h-3.5 w-3.5" /> Campeonato
+          </label>
+          <select
+            value={editedGame.tournamentId || ''}
+            onChange={e => setTournament(e.target.value)}
+            className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm font-medium"
+          >
+            <option value="">Sin campeonato</option>
+            {tournaments.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Add event collapsible */}
+        <div className="px-4 pb-2">
+          <Collapsible open={addOpen} onOpenChange={setAddOpen}>
+            <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors">
+              <span className="flex items-center gap-1.5"><Plus className="h-3.5 w-3.5" /> Agregar evento</span>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${addOpen ? 'rotate-180' : ''}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2 space-y-2 p-2 rounded-md border border-border bg-muted/30">
+              <div className="flex gap-1">
+                {addTabBtn('shot', 'Tiro')}
+                {addTabBtn('opponent', 'Rival')}
+                {addTabBtn('action', 'Acción')}
+              </div>
+
+              {addTab === 'shot' && (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    <select value={shotPlayerId} onChange={e => setShotPlayerId(e.target.value)} className={`${selectCls} flex-1 min-w-[140px]`}>
+                      <option value="">— Jugadora —</option>
+                      {sortedRoster.map(p => (
+                        <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
+                      ))}
+                    </select>
+                    <select value={shotQuarter} onChange={e => setShotQuarter(e.target.value as QuarterId)} className={selectCls}>
+                      {QUARTERS.map(q => <option key={q} value={q}>{QUARTER_LABELS[q]}</option>)}
+                    </select>
+                    <select value={shotPoints} onChange={e => setShotPoints(Number(e.target.value) as 1 | 2 | 3)} className={selectCls}>
+                      <option value={1}>1 PT</option>
+                      <option value={2}>2 PT</option>
+                      <option value={3}>3 PT</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" className="flex-1 h-8 text-xs" disabled={!shotPlayerId} onClick={() => addShot(true)}>
+                      ✅ Anotado
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" disabled={!shotPlayerId} onClick={() => addShot(false)}>
+                      ❌ Fallado
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {addTab === 'opponent' && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-muted-foreground">Cuarto:</span>
+                    <select value={oppQuarter} onChange={e => setOppQuarter(e.target.value as QuarterId)} className={selectCls}>
+                      {QUARTERS.map(q => <option key={q} value={q}>{QUARTER_LABELS[q]}</option>)}
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    {([1, 2, 3] as const).map(pts => (
+                      <Button key={pts} size="sm" variant="destructive" className="flex-1 h-8 text-xs" onClick={() => addOpponent(pts)}>
+                        +{pts} PT
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {addTab === 'action' && (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    <select value={actPlayerId} onChange={e => setActPlayerId(e.target.value)} className={`${selectCls} flex-1 min-w-[140px]`}>
+                      <option value="">— Jugadora —</option>
+                      {sortedRoster.map(p => (
+                        <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
+                      ))}
+                    </select>
+                    <select value={actQuarter} onChange={e => setActQuarter(e.target.value as QuarterId)} className={selectCls}>
+                      {QUARTERS.map(q => <option key={q} value={q}>{QUARTER_LABELS[q]}</option>)}
+                    </select>
+                    <select value={actType} onChange={e => setActType(e.target.value as ActionType)} className={`${selectCls} flex-1 min-w-[140px]`}>
+                      {ACTION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </div>
+                  <Button size="sm" className="w-full h-8 text-xs" disabled={!actPlayerId} onClick={addAction}>
+                    <Plus className="h-3.5 w-3.5" /> Agregar acción
+                  </Button>
+                </div>
+              )}
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
 
         {/* Tabs */}
         <div className="flex gap-1 px-4">
