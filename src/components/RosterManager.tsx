@@ -267,6 +267,75 @@ const RosterManager: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Edit player name dialog */}
+      <Dialog open={!!editPlayer} onOpenChange={(o) => !o && setEditPlayer(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar nombre de jugadora</DialogTitle>
+            <DialogDescription>
+              Modifica el nombre y apellido. El número de camiseta se edita por separado.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground">Nombre</label>
+                <Input value={editFirst} onChange={e => setEditFirst(e.target.value)} autoFocus />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground">Apellido</label>
+                <Input value={editLast} onChange={e => setEditLast(e.target.value)} />
+              </div>
+            </div>
+
+            {historyCount > 0 && (
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-2">
+                <p className="text-xs font-bold text-foreground">
+                  Esta jugadora aparece en {historyCount} partido(s) anteriores
+                </p>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={!propagate}
+                    onChange={() => setPropagate(false)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-xs">
+                    <strong>Solo partidos futuros</strong> — el historial mantiene el nombre original
+                  </span>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={propagate}
+                    onChange={() => setPropagate(true)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-xs">
+                    <strong>Propagar al historial</strong> — actualiza el nombre en todos los partidos guardados
+                  </span>
+                </label>
+                {propagate && (
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> Esta acción reescribirá los rosters guardados
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEditPlayer(null)} disabled={saving}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmEdit} disabled={saving} className="gap-2">
+              <Check className="w-4 h-4" /> Guardar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
