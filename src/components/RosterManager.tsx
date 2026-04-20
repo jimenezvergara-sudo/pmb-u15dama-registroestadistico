@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Player } from '@/types/basketball';
-import { Plus, Trash2, Merge, Check, X } from 'lucide-react';
+import { Plus, Trash2, Merge, Check, X, AlertTriangle } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import { toast } from 'sonner';
 import {
@@ -15,7 +15,8 @@ import {
 
 const RosterManager: React.FC = () => {
   const { players, addPlayer, removePlayer, mergePlayers } = useApp();
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [number, setNumber] = useState('');
   const [mergeDialog, setMergeDialog] = useState<{
     keepId: string;
@@ -28,10 +29,25 @@ const RosterManager: React.FC = () => {
   const [chosenName, setChosenName] = useState('');
   const [chosenNumber, setChosenNumber] = useState<number>(0);
 
+  const usedNumbers = useMemo(() => new Set(players.map(p => p.number)), [players]);
+  const parsedNumber = number.trim() === '' ? NaN : parseInt(number, 10);
+  const numberDuplicate = !isNaN(parsedNumber) && usedNumbers.has(parsedNumber);
+  const firstOk = firstName.trim().length >= 2;
+  const lastOk = lastName.trim().length >= 2;
+  const numberOk = !isNaN(parsedNumber) && parsedNumber >= 0 && !numberDuplicate;
+  const canAdd = firstOk && lastOk && numberOk;
+
   const handleAdd = () => {
-    if (!name.trim() || !number.trim()) return;
-    addPlayer({ name: name.trim(), number: parseInt(number) });
-    setName('');
+    if (!canAdd) {
+      if (!firstOk || !lastOk) toast.error('Ingresa nombre y apellido (mín. 2 caracteres cada uno)');
+      else if (numberDuplicate) toast.error(`El número #${parsedNumber} ya está en uso`);
+      else toast.error('Número inválido');
+      return;
+    }
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.replace(/\s+/g, ' ');
+    addPlayer({ name: fullName, number: parsedNumber });
+    setFirstName('');
+    setLastName('');
     setNumber('');
   };
 
@@ -62,12 +78,41 @@ const RosterManager: React.FC = () => {
         <img src={logoHorizontal} alt="BASQUEST+" className="h-8 object-contain" />
       </div>
 
-      <div className="flex gap-2">
-        <Input placeholder="Nombre" value={name} onChange={e => setName(e.target.value)} className="flex-1" />
-        <Input placeholder="#" type="number" value={number} onChange={e => setNumber(e.target.value)} className="w-16 text-center" />
-        <Button onClick={handleAdd} size="icon" className="tap-feedback shrink-0">
-          <Plus className="w-5 h-5" />
-        </Button>
+      <div className="space-y-2 rounded-lg border border-border/60 bg-card p-3">
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Agregar jugadora</p>
+        <div className="grid grid-cols-2 gap-2">
+          <Input
+            placeholder="Nombre"
+            value={firstName}
+            onChange={e => setFirstName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+          />
+          <Input
+            placeholder="Apellido"
+            value={lastName}
+            onChange={e => setLastName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Nº camiseta"
+            type="number"
+            inputMode="numeric"
+            value={number}
+            onChange={e => setNumber(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+            className={`flex-1 text-center font-bold ${numberDuplicate ? 'border-destructive ring-2 ring-destructive/40' : ''}`}
+          />
+          <Button onClick={handleAdd} disabled={!canAdd} className="tap-feedback shrink-0 gap-1">
+            <Plus className="w-4 h-4" /> Añadir
+          </Button>
+        </div>
+        {numberDuplicate && (
+          <p className="text-xs text-destructive flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> El número #{parsedNumber} ya está asignado
+          </p>
+        )}
       </div>
 
       {/* Merge confirmation dialog */}
