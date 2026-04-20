@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dialog';
 
 const RosterManager: React.FC = () => {
-  const { players, addPlayer, removePlayer, mergePlayers } = useApp();
+  const { players, games, addPlayer, removePlayer, mergePlayers, updatePlayer } = useApp();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [number, setNumber] = useState('');
@@ -36,6 +36,55 @@ const RosterManager: React.FC = () => {
   } | null>(null);
   const [chosenName, setChosenName] = useState('');
   const [chosenNumber, setChosenNumber] = useState<number>(0);
+
+  // Edit name dialog state
+  const [editPlayer, setEditPlayer] = useState<Player | null>(null);
+  const [editFirst, setEditFirst] = useState('');
+  const [editLast, setEditLast] = useState('');
+  const [propagate, setPropagate] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const openEdit = (p: Player) => {
+    const parts = p.name.trim().split(/\s+/);
+    const last = parts.length > 1 ? parts.slice(-1)[0] : '';
+    const first = parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0] ?? '';
+    setEditPlayer(p);
+    setEditFirst(first);
+    setEditLast(last);
+    setPropagate(false);
+  };
+
+  const historyCount = useMemo(() => {
+    if (!editPlayer) return 0;
+    return games.filter(g => g.roster.some(r => r.id === editPlayer.id)).length;
+  }, [editPlayer, games]);
+
+  const confirmEdit = async () => {
+    if (!editPlayer) return;
+    if (editFirst.trim().length < 2 || editLast.trim().length < 2) {
+      toast.error('Nombre y apellido deben tener al menos 2 caracteres');
+      return;
+    }
+    const fullName = `${editFirst.trim()} ${editLast.trim()}`.replace(/\s+/g, ' ');
+    if (fullName === editPlayer.name) {
+      setEditPlayer(null);
+      return;
+    }
+    setSaving(true);
+    try {
+      await updatePlayer(editPlayer.id, fullName, propagate);
+      toast.success(
+        propagate
+          ? `Nombre actualizado en plantilla y ${historyCount} partido(s) anteriores`
+          : 'Nombre actualizado solo para partidos futuros'
+      );
+      setEditPlayer(null);
+    } catch (e) {
+      toast.error('Error al actualizar');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const usedNumbers = useMemo(() => new Set(players.map(p => p.number)), [players]);
   const parsedNumber = number.trim() === '' ? NaN : parseInt(number, 10);
