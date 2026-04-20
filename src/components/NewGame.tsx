@@ -191,77 +191,103 @@ const NewGame: React.FC = () => {
       </div>
 
       <div>
-        <p className="text-sm font-semibold text-muted-foreground mb-2">
-          Selecciona roster ({selectedPlayers.size})
-        </p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm font-semibold text-muted-foreground">
+            Selecciona roster ({selectedCount})
+          </p>
+          {hasDuplicates && (
+            <span className="text-xs font-bold text-destructive flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" /> Números duplicados
+            </span>
+          )}
+        </div>
         {players.length === 0 && (
           <p className="text-muted-foreground text-sm text-center py-6">
             Primero añade jugadoras en Plantilla
           </p>
         )}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="space-y-1.5">
           {players.map((p: Player) => {
-            const displayNum = getPlayerNumber(p);
-            const isEditing = editingNumberId === p.id;
-            const isSelected = selectedPlayers.has(p.id);
+            const inRoster = p.id in rosterNumbers;
+            const isPending = p.id in pendingNumber;
+            const selected = inRoster || isPending;
+            const dup = isDuplicate(p.id);
+            const displayNum = isPending ? pendingNumber[p.id] : rosterNumbers[p.id];
+
             return (
-              <div key={p.id} className="relative">
+              <div
+                key={p.id}
+                className={`flex items-center gap-2 p-2 rounded-lg border transition-colors ${
+                  selected
+                    ? dup
+                      ? 'bg-destructive/10 border-destructive'
+                      : isPending
+                        ? 'bg-accent/10 border-accent'
+                        : 'bg-primary/10 border-primary'
+                    : 'bg-card border-border/50'
+                }`}
+              >
                 <button
-                  onClick={() => togglePlayer(p.id)}
-                  className={`w-full flex flex-col items-center py-3 px-2 rounded-lg tap-feedback min-h-[60px] transition-colors ${
-                    isSelected
-                      ? 'bg-primary text-primary-foreground ring-2 ring-primary'
-                      : 'bg-card text-card-foreground'
-                  }`}
+                  onClick={() => handlePlayerTap(p)}
+                  className="flex-1 flex items-center gap-2 text-left tap-feedback min-h-[40px]"
                 >
-                  <span className="text-xl font-extrabold">{displayNum}</span>
-                  <span className="text-xs font-medium truncate w-full text-center">{p.name.split(' ')[0]}</span>
-                </button>
-                {isSelected && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingNumberId(p.id);
-                      setTempNumber(String(displayNum));
-                    }}
-                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-accent text-accent-foreground flex items-center justify-center"
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                      selected
+                        ? dup
+                          ? 'bg-destructive text-destructive-foreground'
+                          : 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground'
+                    }`}
                   >
-                    <Pencil className="w-3 h-3" />
-                  </button>
-                )}
-                {isEditing && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/90 rounded-lg border-2 border-primary p-1">
+                    {selected ? <Check className="w-4 h-4" /> : '+'}
+                  </div>
+                  <span className="text-sm font-semibold text-foreground truncate">{p.name}</span>
+                </button>
+
+                {selected ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-muted-foreground">Nº</span>
                     <Input
                       type="number"
-                      value={tempNumber}
-                      onChange={e => setTempNumber(e.target.value)}
-                      className="w-12 h-8 text-center text-sm p-0"
-                      autoFocus
+                      inputMode="numeric"
+                      value={displayNum ?? ''}
+                      autoFocus={isPending}
+                      onFocus={(e) => {
+                        if (!isPending) {
+                          setPendingNumber(prev => ({ ...prev, [p.id]: String(rosterNumbers[p.id] ?? p.number) }));
+                        }
+                        e.currentTarget.select();
+                      }}
+                      onChange={e => setPendingNumber(prev => ({ ...prev, [p.id]: e.target.value }))}
+                      onBlur={() => confirmNumber(p.id)}
                       onKeyDown={e => {
                         if (e.key === 'Enter') {
-                          const num = parseInt(tempNumber);
-                          if (!isNaN(num)) setRosterNumbers(prev => ({ ...prev, [p.id]: num }));
-                          setEditingNumberId(null);
+                          e.currentTarget.blur();
                         }
-                        if (e.key === 'Escape') setEditingNumberId(null);
                       }}
-                      onBlur={() => {
-                        const num = parseInt(tempNumber);
-                        if (!isNaN(num)) setRosterNumbers(prev => ({ ...prev, [p.id]: num }));
-                        setEditingNumberId(null);
-                      }}
+                      className={`w-14 h-9 text-center text-base font-extrabold p-1 ${
+                        dup ? 'border-destructive ring-2 ring-destructive/40' : ''
+                      }`}
                     />
                   </div>
+                ) : (
+                  <span className="text-xs text-muted-foreground pr-2">#{p.number}</span>
                 )}
               </div>
             );
           })}
         </div>
+        {hasDuplicates && (
+          <p className="text-xs text-destructive mt-2 flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> Hay jugadoras con el mismo número. Corrige antes de iniciar.
+          </p>
+        )}
       </div>
 
       <Button
         onClick={handleStart}
-        disabled={!opponentName || selectedPlayers.size === 0}
+        disabled={!opponentName || Object.keys(rosterNumbers).length === 0 || hasDuplicates || hasPending}
         className="w-full h-14 text-lg font-bold tap-feedback gap-2"
       >
         <Play className="w-5 h-5" /> Iniciar Partido
