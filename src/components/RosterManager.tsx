@@ -233,6 +233,15 @@ const RosterManager: React.FC = () => {
               <Trash2 className="w-3 h-3" />
             </button>
 
+            {/* Edit name button - bottom right */}
+            <button
+              onClick={() => openEdit(p)}
+              className="absolute bottom-1 right-1 text-muted-foreground hover:text-primary tap-feedback p-0.5"
+              aria-label="Editar nombre"
+            >
+              <Pencil className="w-3 h-3" />
+            </button>
+
             {/* Merge button - top left */}
             {players.length >= 2 && (
               <DropdownMenu>
