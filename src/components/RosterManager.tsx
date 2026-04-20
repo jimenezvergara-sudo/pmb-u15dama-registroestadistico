@@ -303,6 +303,22 @@ const RosterManager: React.FC = () => {
               </div>
             </div>
 
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground">Nº camiseta</label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={editNumber}
+                onChange={e => setEditNumber(e.target.value)}
+                className={`text-center font-bold ${editNumberDuplicate ? 'border-destructive ring-2 ring-destructive/40' : ''}`}
+              />
+              {editNumberDuplicate && (
+                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> #{editParsedNumber} ya está asignado a otra jugadora
+                </p>
+              )}
+            </div>
+
             {historyCount > 0 && (
               <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-2">
                 <p className="text-xs font-bold text-foreground">
