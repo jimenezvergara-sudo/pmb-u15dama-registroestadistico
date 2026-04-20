@@ -293,16 +293,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => ({ ...s, players: s.players.filter(p => p.id !== id) }));
   }, []);
 
-  const updatePlayer = useCallback(async (id: string, name: string, propagateToHistory: boolean) => {
+  const updatePlayer = useCallback(async (id: string, name: string, number: number, propagateToHistory: boolean) => {
     const cleanName = name.trim().replace(/\s+/g, ' ');
     if (!cleanName) return;
+    if (!Number.isFinite(number) || number < 0) return;
 
     // 1. Update master record in club_players
     const { error: updErr } = await supabase
       .from('club_players' as any)
-      .update({ name: cleanName })
+      .update({ name: cleanName, number })
       .eq('id', id);
-    if (updErr) { console.error('Error updating player name:', updErr); return; }
+    if (updErr) { console.error('Error updating player:', updErr); return; }
 
     let updatedGames = state.games;
 
@@ -311,21 +312,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const affected = state.games.filter(g => g.roster.some(r => r.id === id));
       updatedGames = state.games.map(g => {
         if (!g.roster.some(r => r.id === id)) return g;
-        return { ...g, roster: g.roster.map(r => r.id === id ? { ...r, name: cleanName } : r) };
+        return { ...g, roster: g.roster.map(r => r.id === id ? { ...r, name: cleanName, number } : r) };
       });
       for (const g of affected) {
-        const newRoster = g.roster.map(r => r.id === id ? { ...r, name: cleanName } : r);
+        const newRoster = g.roster.map(r => r.id === id ? { ...r, name: cleanName, number } : r);
         const { error } = await supabase
           .from('club_games' as any)
           .update({ roster: newRoster as any })
           .eq('id', g.id);
-        if (error) console.error('Error propagating name to game:', g.id, error);
+        if (error) console.error('Error propagating to game:', g.id, error);
       }
     }
 
     setState(s => ({
       ...s,
-      players: s.players.map(p => p.id === id ? { ...p, name: cleanName } : p),
+      players: s.players.map(p => p.id === id ? { ...p, name: cleanName, number } : p),
       games: propagateToHistory ? updatedGames : s.games,
     }));
   }, [state.games]);
