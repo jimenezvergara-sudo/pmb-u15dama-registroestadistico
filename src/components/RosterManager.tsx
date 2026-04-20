@@ -41,6 +41,7 @@ const RosterManager: React.FC = () => {
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [editFirst, setEditFirst] = useState('');
   const [editLast, setEditLast] = useState('');
+  const [editNumber, setEditNumber] = useState('');
   const [propagate, setPropagate] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -51,6 +52,7 @@ const RosterManager: React.FC = () => {
     setEditPlayer(p);
     setEditFirst(first);
     setEditLast(last);
+    setEditNumber(String(p.number));
     setPropagate(false);
   };
 
@@ -59,27 +61,38 @@ const RosterManager: React.FC = () => {
     return games.filter(g => g.roster.some(r => r.id === editPlayer.id)).length;
   }, [editPlayer, games]);
 
+  const editParsedNumber = editNumber.trim() === '' ? NaN : parseInt(editNumber, 10);
+  const editNumberDuplicate = !!editPlayer
+    && !isNaN(editParsedNumber)
+    && players.some(p => p.id !== editPlayer.id && p.number === editParsedNumber);
+  const editNumberValid = !isNaN(editParsedNumber) && editParsedNumber >= 0 && !editNumberDuplicate;
+
   const confirmEdit = async () => {
     if (!editPlayer) return;
     if (editFirst.trim().length < 2 || editLast.trim().length < 2) {
       toast.error('Nombre y apellido deben tener al menos 2 caracteres');
       return;
     }
+    if (!editNumberValid) {
+      if (editNumberDuplicate) toast.error(`El número #${editParsedNumber} ya está en uso por otra jugadora`);
+      else toast.error('Número de camiseta inválido');
+      return;
+    }
     const fullName = `${editFirst.trim()} ${editLast.trim()}`.replace(/\s+/g, ' ');
-    if (fullName === editPlayer.name) {
+    if (fullName === editPlayer.name && editParsedNumber === editPlayer.number) {
       setEditPlayer(null);
       return;
     }
     setSaving(true);
     try {
-      await updatePlayer(editPlayer.id, fullName, propagate);
+      await updatePlayer(editPlayer.id, fullName, editParsedNumber, propagate);
       toast.success(
         propagate
-          ? `Nombre actualizado en plantilla y ${historyCount} partido(s) anteriores`
-          : 'Nombre actualizado solo para partidos futuros'
+          ? `Actualizada en plantilla y ${historyCount} partido(s) anteriores`
+          : 'Actualizada solo para partidos futuros'
       );
       setEditPlayer(null);
-    } catch (e) {
+    } catch {
       toast.error('Error al actualizar');
     } finally {
       setSaving(false);
@@ -290,6 +303,22 @@ const RosterManager: React.FC = () => {
               </div>
             </div>
 
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground">Nº camiseta</label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={editNumber}
+                onChange={e => setEditNumber(e.target.value)}
+                className={`text-center font-bold ${editNumberDuplicate ? 'border-destructive ring-2 ring-destructive/40' : ''}`}
+              />
+              {editNumberDuplicate && (
+                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> #{editParsedNumber} ya está asignado a otra jugadora
+                </p>
+              )}
+            </div>
+
             {historyCount > 0 && (
               <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-2">
                 <p className="text-xs font-bold text-foreground">
@@ -330,7 +359,7 @@ const RosterManager: React.FC = () => {
             <Button variant="outline" onClick={() => setEditPlayer(null)} disabled={saving}>
               Cancelar
             </Button>
-            <Button onClick={confirmEdit} disabled={saving} className="gap-2">
+            <Button onClick={confirmEdit} disabled={saving || !editNumberValid} className="gap-2">
               <Check className="w-4 h-4" /> Guardar
             </Button>
           </DialogFooter>
