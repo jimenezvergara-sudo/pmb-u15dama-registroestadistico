@@ -977,6 +977,7 @@ export async function generatePdfReport(
   drawFooter(pageNum);
 
   // ═══════════════ PREMIUM BANNER ═══════════════
+  // Only adds a dedicated page when an actual banner exists; otherwise skipped entirely.
   if (options.premiumBannerUrl) {
     try {
       const img = new Image();
@@ -994,32 +995,43 @@ export async function generatePdfReport(
       ctx.drawImage(img, 0, 0);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 
-      const bannerW = W - M * 2;
-      const bannerH = Math.min(30, (img.naturalHeight / img.naturalWidth) * bannerW);
+      // Dedicated page so the banner reads as a clean sponsor placement
+      doc.addPage();
+      drawPageBg();
+      pageNum++;
+      drawHeader();
 
-      const spaceNeeded = bannerH + 14;
-      const availableSpace = H - 16 - y;
+      const bannerMaxW = W - M * 2;
+      const aspect = img.naturalHeight / img.naturalWidth;
+      // Larger banner: target ~70% page width, capped to a reasonable height
+      const bannerW = bannerMaxW;
+      const bannerH = Math.min(80, aspect * bannerW);
 
-      if (availableSpace < spaceNeeded) {
-        doc.addPage();
-        drawPageBg();
-        pageNum++;
-        drawHeader();
-        y = 46;
-      }
-
+      // PREMIUM tag (centered, above banner)
+      const tagY = (H - bannerH) / 2 - 18;
       doc.setFillColor(...GOLD);
-      doc.roundedRect(M, y, 28, 5, 1, 1, 'F');
-      doc.setFontSize(6);
+      doc.roundedRect(W / 2 - 16, tagY, 32, 6, 1.5, 1.5, 'F');
+      doc.setFontSize(7);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...NEAR_BLACK);
-      doc.text('PREMIUM', M + 14, y + 3.5, { align: 'center' });
-      y += 7;
+      doc.text('PREMIUM', W / 2, tagY + 4.2, { align: 'center' });
 
-      doc.addImage(dataUrl, 'JPEG', M, y, bannerW, bannerH);
+      // Centered banner
+      const bannerY = (H - bannerH) / 2;
+      doc.addImage(dataUrl, 'JPEG', M, bannerY, bannerW, bannerH);
       doc.setDrawColor(...GOLD);
-      doc.setLineWidth(0.5);
-      doc.roundedRect(M, y, bannerW, bannerH, 2, 2, 'S');
+      doc.setLineWidth(0.6);
+      doc.roundedRect(M, bannerY, bannerW, bannerH, 3, 3, 'S');
+
+      // "Powered by BASQUEST+" caption
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...PURPLE);
+      doc.text('Powered by BASQUEST+', W / 2, bannerY + bannerH + 14, { align: 'center' });
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...MUTED);
+      doc.text('Inteligencia Deportiva · basquestplus.cl', W / 2, bannerY + bannerH + 20, { align: 'center' });
 
       drawFooter(pageNum);
     } catch {
