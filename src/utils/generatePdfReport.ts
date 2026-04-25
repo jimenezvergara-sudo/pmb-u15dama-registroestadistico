@@ -462,8 +462,9 @@ export async function generatePdfReport(
     };
   }).sort((a, b) => b.pts - a.pts);
 
+  const isSingleGame = filteredGames.length === 1;
   const tableBody = boxRows.map(r => [
-    `#${r.number} ${r.name}`,
+    isSingleGame ? `#${r.number} ${r.name}` : r.name,
     `${r.fgm}/${r.fga}`, `${r.fgPct}%`,
     `${r.twoM}/${r.twoA}`, `${r.twoPct}%`,
     `${r.threeM}/${r.threeA}`, `${r.threePct}%`,
