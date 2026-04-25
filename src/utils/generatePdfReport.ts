@@ -845,9 +845,21 @@ export async function generatePdfReport(
     doc.line(sx(140), sy(270), sx(160), sy(270));
 
     // Shot markers — coords are stored as 0-100 percentages of the 300×280 viewBox
+    // Apply clipping region so no marker can draw outside the court rectangle
+    doc.saveGraphicsState();
+    // @ts-ignore - jsPDF supports rect+clip path
+    doc.rect(courtX, courtY, courtW, courtH);
+    // @ts-ignore
+    doc.clip();
+    // @ts-ignore - discard the path used for clipping
+    doc.discardPath();
+
     shotsForChart.forEach(s => {
-      const px = courtX + (s.x / 100) * courtW;
-      const py = courtY + (s.y / 100) * courtH;
+      // Clamp to [0,100] in case stored coords slightly exceed bounds
+      const cxPct = Math.max(0, Math.min(100, s.x));
+      const cyPct = Math.max(0, Math.min(100, s.y));
+      const px = courtX + (cxPct / 100) * courtW;
+      const py = courtY + (cyPct / 100) * courtH;
 
       if (s.made) {
         doc.setFillColor(...SUCCESS);
@@ -866,6 +878,8 @@ export async function generatePdfReport(
         doc.line(px - d, py + d, px + d, py - d);
       }
     });
+
+    doc.restoreGraphicsState();
 
     y = courtY + courtH + 10;
 
