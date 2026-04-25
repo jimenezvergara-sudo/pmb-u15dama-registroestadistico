@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, GameLeg, Category, ActionType, GameAction, SubstitutionEvent } from '@/types/basketball';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { enqueue as enqueueSync, flushQueue } from '@/utils/syncQueue';
 
 interface AppState {
   players: Player[];
@@ -278,6 +279,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     saveActiveGame(state.activeGame);
   }, [state.activeGame]);
 
+  // Try flushing the offline queue once data is loaded
+  useEffect(() => {
+    if (!state.loading && userId && clubId) {
+      flushQueue();
+    }
+  }, [state.loading, userId, clubId]);
+
   const addPlayer = useCallback(async (p: Omit<Player, 'id'>) => {
     if (!userId || !clubId) return;
     const { data, error } = await supabase.from('club_players' as any).insert({
@@ -337,24 +345,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const updateGame = useCallback(async (game: Game) => {
-    await supabase.from('club_games' as any).update({
-      opponent_name: game.opponentName,
-      date: game.date,
-      category: game.category,
-      roster: game.roster as any,
-      shots: game.shots as any,
-      actions: game.actions as any,
-      substitutions: game.substitutions as any,
-      opponent_scores: game.opponentScores as any,
-      on_court_player_ids: game.onCourtPlayerIds as any,
-      court_time_ms: game.courtTimeMs as any,
-      current_quarter: game.currentQuarter,
-      tournament_id: game.tournamentId || null,
-      opponent_team_id: game.opponentTeamId || null,
-      leg: game.leg || null,
-      is_home: game.isHome ?? null,
-    }).eq('id', game.id);
+    // Optimistic update local state immediately
     setState(s => ({ ...s, games: s.games.map(g => g.id === game.id ? game : g) }));
+
+    const isOnline = typeof navigator === 'undefined' ? true : navigator.onLine;
+    if (!isOnline) {
+      enqueueSync({ kind: 'updateGame', game, queuedAt: Date.now() });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('club_games' as any).update({
+        opponent_name: game.opponentName,
+        date: game.date,
+        category: game.category,
+        roster: game.roster as any,
+        shots: game.shots as any,
+        actions: game.actions as any,
+        substitutions: game.substitutions as any,
+        opponent_scores: game.opponentScores as any,
+        on_court_player_ids: game.onCourtPlayerIds as any,
+        court_time_ms: game.courtTimeMs as any,
+        current_quarter: game.currentQuarter,
+        tournament_id: game.tournamentId || null,
+        opponent_team_id: game.opponentTeamId || null,
+        leg: game.leg || null,
+        is_home: game.isHome ?? null,
+      }).eq('id', game.id);
+      if (error) throw error;
+    } catch (err) {
+      console.warn('[updateGame] failed, queueing for retry', err);
+      enqueueSync({ kind: 'updateGame', game, queuedAt: Date.now() });
+    }
   }, []);
 
   const addTournament = useCallback(async (t: Omit<Tournament, 'id'>) => {
@@ -414,48 +436,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => {
       if (!s.activeGame) return s;
       const flushed = flushCourtTime(s.activeGame);
+      const isOnline = typeof navigator === 'undefined' ? true : navigator.onLine;
 
-      // Save to cloud asynchronously
+      // Always optimistically add to local games list (with local id)
+      const localGame = { ...flushed };
+
       if (userId && clubId) {
-        supabase.from('club_games' as any).insert({
-          club_id: clubId,
-          user_id: userId,
-          opponent_name: flushed.opponentName,
-          date: flushed.date,
-          category: flushed.category || 'U15',
-          roster: flushed.roster as any,
-          shots: flushed.shots as any,
-          actions: flushed.actions as any,
-          substitutions: flushed.substitutions as any,
-          opponent_scores: flushed.opponentScores as any,
-          on_court_player_ids: flushed.onCourtPlayerIds as any,
-          court_time_ms: flushed.courtTimeMs as any,
-          current_quarter: flushed.currentQuarter,
-          tournament_id: flushed.tournamentId || null,
-          opponent_team_id: flushed.opponentTeamId || null,
-          leg: flushed.leg || null,
-          is_home: flushed.isHome ?? null,
-          game_start_timestamp: flushed.gameStartTimestamp || null,
-          last_timer_snapshot: flushed.lastTimerSnapshot || null,
-        }).select().single().then(({ data }) => {
-          if (data) {
-            const row = data as any;
-            // Update the game in state with the cloud ID
-            setState(prev => ({
-              ...prev,
-              games: [
-                {
-                  ...flushed,
-                  id: row.id,
-                },
-                ...prev.games,
-              ],
-            }));
-          }
-        });
+        if (!isOnline) {
+          // Offline: queue the insert and add locally with the local id
+          enqueueSync({
+            kind: 'insertGame',
+            game: localGame,
+            clubId,
+            userId,
+            queuedAt: Date.now(),
+          });
+        } else {
+          // Online: try to insert; on failure queue
+          supabase.from('club_games' as any).insert({
+            club_id: clubId,
+            user_id: userId,
+            opponent_name: flushed.opponentName,
+            date: flushed.date,
+            category: flushed.category || 'U15',
+            roster: flushed.roster as any,
+            shots: flushed.shots as any,
+            actions: flushed.actions as any,
+            substitutions: flushed.substitutions as any,
+            opponent_scores: flushed.opponentScores as any,
+            on_court_player_ids: flushed.onCourtPlayerIds as any,
+            court_time_ms: flushed.courtTimeMs as any,
+            current_quarter: flushed.currentQuarter,
+            tournament_id: flushed.tournamentId || null,
+            opponent_team_id: flushed.opponentTeamId || null,
+            leg: flushed.leg || null,
+            is_home: flushed.isHome ?? null,
+            game_start_timestamp: flushed.gameStartTimestamp || null,
+            last_timer_snapshot: flushed.lastTimerSnapshot || null,
+          }).select().single().then(({ data, error }) => {
+            if (error) {
+              console.warn('[endGame] insert failed, queueing', error);
+              enqueueSync({
+                kind: 'insertGame',
+                game: localGame,
+                clubId,
+                userId,
+                queuedAt: Date.now(),
+              });
+              return;
+            }
+            if (data) {
+              const row = data as any;
+              setState(prev => ({
+                ...prev,
+                games: prev.games.map(g => g.id === localGame.id ? { ...flushed, id: row.id } : g),
+              }));
+            }
+          });
+        }
       }
 
-      return { ...s, activeGame: null };
+      return {
+        ...s,
+        activeGame: null,
+        games: [localGame, ...s.games],
+      };
     });
   }, [userId, clubId]);
 

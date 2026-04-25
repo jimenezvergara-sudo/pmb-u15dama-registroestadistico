@@ -2,10 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { Game, QuarterId, QUARTER_LABELS, ActionType } from '@/types/basketball';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import CourtDiagram from '@/components/CourtDiagram';
 import { toast } from 'sonner';
-import { Trash2, Plus, ChevronDown, Trophy } from 'lucide-react';
+import { Trash2, Plus, ChevronDown, Trophy, Calendar, Users } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 interface Props {
@@ -57,11 +59,13 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
   const [tab, setTab] = useState<TabId>('all');
   const [addOpen, setAddOpen] = useState(false);
   const [addTab, setAddTab] = useState<AddTab>('shot');
+  const [courtRotation, setCourtRotation] = useState(0);
 
   // Shot form
   const [shotPlayerId, setShotPlayerId] = useState('');
   const [shotQuarter, setShotQuarter] = useState<QuarterId>('Q1');
   const [shotPoints, setShotPoints] = useState<1 | 2 | 3>(2);
+  const [shotCoords, setShotCoords] = useState<{ x: number; y: number } | null>(null);
 
   // Opponent form
   const [oppQuarter, setOppQuarter] = useState<QuarterId>('Q1');
@@ -76,6 +80,7 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
     setShotQuarter(game.currentQuarter);
     setOppQuarter(game.currentQuarter);
     setActQuarter(game.currentQuarter);
+    setShotCoords(null);
   }, [game]);
 
   const playerMap = useMemo(() => {
@@ -160,6 +165,10 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
 
   const addShot = (made: boolean) => {
     if (!shotPlayerId) return;
+    if (!shotCoords) {
+      toast.error('Toca la cancha para indicar la zona del tiro');
+      return;
+    }
     setEditedGame(g => ({
       ...g,
       shots: [
@@ -168,14 +177,15 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
           id: newId(),
           playerId: shotPlayerId,
           quarterId: shotQuarter,
-          x: 50,
-          y: 50,
+          x: shotCoords.x,
+          y: shotCoords.y,
           made,
           points: shotPoints,
           timestamp: Date.now(),
         },
       ],
     }));
+    setShotCoords(null);
     toast.success(`Tiro ${made ? 'anotado' : 'fallado'} agregado`);
   };
 
@@ -264,6 +274,42 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
           </DialogDescription>
         </DialogHeader>
 
+        {/* Date + Opponent editing */}
+        <div className="px-4 pb-2 grid grid-cols-2 gap-2">
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground mb-1">
+              <Calendar className="h-3.5 w-3.5" /> Fecha
+            </label>
+            <Input
+              type="date"
+              value={editedGame.date ? new Date(editedGame.date).toISOString().slice(0, 10) : ''}
+              onChange={e => {
+                const v = e.target.value;
+                if (!v) return;
+                // Preserve time-of-day from the original timestamp
+                const original = new Date(editedGame.date);
+                const [y, m, d] = v.split('-').map(Number);
+                const next = new Date(original);
+                next.setFullYear(y, m - 1, d);
+                setEditedGame(g => ({ ...g, date: next.toISOString() }));
+              }}
+              className="h-9 text-sm"
+            />
+          </div>
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground mb-1">
+              <Users className="h-3.5 w-3.5" /> Rival
+            </label>
+            <Input
+              type="text"
+              value={editedGame.opponentName}
+              onChange={e => setEditedGame(g => ({ ...g, opponentName: e.target.value }))}
+              placeholder="Nombre del rival"
+              className="h-9 text-sm"
+            />
+          </div>
+        </div>
+
         {/* Tournament selector */}
         <div className="px-4 pb-2">
           <label className="flex items-center gap-2 text-xs font-bold text-muted-foreground mb-1">
@@ -307,17 +353,49 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
                     <select value={shotQuarter} onChange={e => setShotQuarter(e.target.value as QuarterId)} className={selectCls}>
                       {QUARTERS.map(q => <option key={q} value={q}>{QUARTER_LABELS[q]}</option>)}
                     </select>
+                  </div>
+
+                  {/* Interactive court — tap a zone to choose location and points */}
+                  <div className="rounded-md border border-border bg-background/60 p-1">
+                    <p className="text-[10px] text-muted-foreground text-center font-bold pt-1">
+                      {shotCoords
+                        ? `📍 Zona seleccionada — ${shotPoints} PT`
+                        : 'Toca la cancha para indicar la zona del tiro'}
+                    </p>
+                    <CourtDiagram
+                      onZoneTap={({ x, y, points }) => {
+                        setShotCoords({ x, y });
+                        setShotPoints(points);
+                      }}
+                      shots={shotCoords ? [{ x: shotCoords.x, y: shotCoords.y, made: true, points: shotPoints }] : []}
+                      rotation={courtRotation}
+                      onRotate={() => setCourtRotation(r => (r + 180) % 360)}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-muted-foreground font-bold">Puntos:</span>
                     <select value={shotPoints} onChange={e => setShotPoints(Number(e.target.value) as 1 | 2 | 3)} className={selectCls}>
                       <option value={1}>1 PT</option>
                       <option value={2}>2 PT</option>
                       <option value={3}>3 PT</option>
                     </select>
+                    {shotCoords && (
+                      <button
+                        type="button"
+                        onClick={() => setShotCoords(null)}
+                        className="text-[11px] text-muted-foreground hover:text-foreground underline ml-auto"
+                      >
+                        Cambiar zona
+                      </button>
+                    )}
                   </div>
+
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 h-8 text-xs" disabled={!shotPlayerId} onClick={() => addShot(true)}>
+                    <Button size="sm" className="flex-1 h-8 text-xs" disabled={!shotPlayerId || !shotCoords} onClick={() => addShot(true)}>
                       ✅ Anotado
                     </Button>
-                    <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" disabled={!shotPlayerId} onClick={() => addShot(false)}>
+                    <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" disabled={!shotPlayerId || !shotCoords} onClick={() => addShot(false)}>
                       ❌ Fallado
                     </Button>
                   </div>
