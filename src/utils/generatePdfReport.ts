@@ -662,7 +662,10 @@ export async function generatePdfReport(
     const chartX = M;
     const chartW = W - M * 2;
     const chartH = 58;
-    const maxVal = Math.max(...qData.map(d => Math.max(d.pts, d.opp)), 1);
+    // Y-axis is per-quarter (NOT cumulative). Round to a clean scale: nearest 5, capped at 120.
+    const rawMax = Math.max(...qData.map(d => Math.max(d.pts, d.opp)), 1);
+    const niceMax = Math.min(120, Math.max(10, Math.ceil(rawMax / 5) * 5));
+    const maxVal = niceMax;
     const barGroupW = chartW / qData.length;
     const barW = barGroupW * 0.28;
     const gap = 4;
@@ -680,6 +683,7 @@ export async function generatePdfReport(
       doc.line(chartX + 14, gy, chartX + chartW - 8, gy);
       doc.setFontSize(6);
       doc.setTextColor(...MUTED);
+      // Label rounded to integer; scale is per-quarter points (0..niceMax)
       doc.text(`${Math.round(maxVal * i / 4)}`, chartX + 4, gy + 1.5);
     }
 
