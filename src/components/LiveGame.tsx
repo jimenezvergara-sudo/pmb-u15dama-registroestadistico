@@ -458,14 +458,21 @@ const LiveGame: React.FC = () => {
             </div>
           </div>
         )}
-        <div className="flex gap-2 px-3 pb-2 pt-1">
-          <Button variant="outline" size="sm" onClick={handleUndo} className="flex-1 gap-1">
-            <Undo2 className="w-4 h-4" /> Deshacer
+        <div className="flex gap-3 px-3 pb-3 pt-2">
+          <Button
+            variant="outline"
+            onClick={handleUndo}
+            className="flex-1 gap-2 min-h-[48px] text-sm font-bold rounded-xl"
+          >
+            <Undo2 className="w-5 h-5" /> Deshacer
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="secondary" size="sm" className="flex-1">
-                Finalizar
+              <Button
+                variant="secondary"
+                className="flex-1 min-h-[48px] text-sm font-bold rounded-xl"
+              >
+                ⏹ Finalizar
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
