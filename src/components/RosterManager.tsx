@@ -37,6 +37,19 @@ const RosterManager: React.FC = () => {
   const [chosenName, setChosenName] = useState('');
   const [chosenNumber, setChosenNumber] = useState<number>(0);
 
+  // Ordenamiento de la tabla
+  type SortKey = 'number' | 'firstName' | 'lastName';
+  const [sortKey, setSortKey] = useState<SortKey>('number');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortKey(key); setSortDir('asc'); }
+  };
+  const SortIcon: React.FC<{ k: SortKey }> = ({ k }) => {
+    if (sortKey !== k) return <ArrowUpDown className="w-3 h-3 opacity-50" />;
+    return sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />;
+  };
+
   // Edit name dialog state
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [editFirst, setEditFirst] = useState('');
