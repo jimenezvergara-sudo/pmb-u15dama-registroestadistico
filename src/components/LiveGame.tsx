@@ -42,7 +42,7 @@ const LiveGame: React.FC = () => {
   const [pendingQuarter, setPendingQuarter] = useState<QuarterId | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [actionSheetOpen, setActionSheetOpen] = useState(false);
+  
   // Flash visual de confirmación tras registrar una acción
   const [flash, setFlash] = useState<{ playerId: string; color: string } | null>(null);
 
