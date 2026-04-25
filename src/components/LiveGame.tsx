@@ -42,6 +42,14 @@ const LiveGame: React.FC = () => {
   const [pendingQuarter, setPendingQuarter] = useState<QuarterId | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [actionSheetOpen, setActionSheetOpen] = useState(false);
+  // Flash visual de confirmación tras registrar una acción
+  const [flash, setFlash] = useState<{ playerId: string; color: string } | null>(null);
+
+  const triggerFlash = (playerId: string, color: string) => {
+    setFlash({ playerId, color });
+    window.setTimeout(() => setFlash(f => (f && f.playerId === playerId ? null : f)), 500);
+  };
 
   // Periodically flush court time every 10s (skip while paused)
   useEffect(() => {
