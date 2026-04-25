@@ -830,21 +830,31 @@ export async function generatePdfReport(
     const ftS = shotsForChart.filter(s => s.points === 1);
 
     const breakdown = [
-      ['✌ 2PT', `${twoS.filter(s => s.made).length}/${twoS.length}`, `${twoS.length > 0 ? Math.round((twoS.filter(s => s.made).length / twoS.length) * 100) : 0}%`],
-      ['🔥 3PT', `${threeS.filter(s => s.made).length}/${threeS.length}`, `${threeS.length > 0 ? Math.round((threeS.filter(s => s.made).length / threeS.length) * 100) : 0}%`],
-      ['🏹 TL', `${ftS.filter(s => s.made).length}/${ftS.length}`, `${ftS.length > 0 ? Math.round((ftS.filter(s => s.made).length / ftS.length) * 100) : 0}%`],
+      ['2PT', `${twoS.filter(s => s.made).length}/${twoS.length}`, `${twoS.length > 0 ? Math.round((twoS.filter(s => s.made).length / twoS.length) * 100) : 0}%`],
+      ['3PT', `${threeS.filter(s => s.made).length}/${threeS.length}`, `${threeS.length > 0 ? Math.round((threeS.filter(s => s.made).length / threeS.length) * 100) : 0}%`],
+      ['TL',  `${ftS.filter(s => s.made).length}/${ftS.length}`,     `${ftS.length > 0 ? Math.round((ftS.filter(s => s.made).length / ftS.length) * 100) : 0}%`],
     ];
+
+    // Color tag for each shot type (no emojis — jsPDF Unicode is unreliable)
+    const typeColors: [number, number, number][] = [PURPLE, CYAN, GOLD];
 
     autoTable(doc, {
       startY: y,
       head: [['Tipo', 'Aciertos / Intentos', 'Eficiencia']],
       body: breakdown,
       margin: { left: M + 20, right: M + 20 },
-      styles: { fontSize: 9, cellPadding: 3, font: 'helvetica', halign: 'center', lineColor: TABLE_BORDER, lineWidth: 0.2 },
-      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold' },
+      styles: { fontSize: 10, cellPadding: 4, font: 'helvetica', halign: 'center', lineColor: TABLE_BORDER, lineWidth: 0.2 },
+      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 9 },
       bodyStyles: { fillColor: WHITE },
       alternateRowStyles: { fillColor: TABLE_ALT },
       theme: 'grid',
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 0) {
+          const c = typeColors[data.row.index] || NEAR_BLACK;
+          data.cell.styles.textColor = [...c];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
     });
     y = (doc as any).lastAutoTable.finalY + 8;
   }
