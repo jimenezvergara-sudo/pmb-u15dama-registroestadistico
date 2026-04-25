@@ -505,6 +505,21 @@ const LiveGame: React.FC = () => {
       {showReport && activeGame && (
         <LiveGameReport game={activeGame} onClose={() => setShowReport(false)} />
       )}
+      {/* Bottom-sheet de acciones rápidas (no flota sobre las jugadoras) */}
+      <LiveActionSheet
+        open={actionSheetOpen && !!selectedPlayer}
+        playerLabel={(() => {
+          const p = activeGame.roster.find(p => p.id === selectedPlayer);
+          return p ? `#${p.number} ${p.name}` : '';
+        })()}
+        onClose={() => { setActionSheetOpen(false); setSelectedPlayer(null); }}
+        onAction={handleQuickAction}
+        onShotShortcut={() => {
+          // Cierra el sheet y mantiene la jugadora seleccionada para tocar la cancha
+          setActionSheetOpen(false);
+          toast('Toca la zona en la cancha para registrar el tiro', { duration: 2000 });
+        }}
+      />
     </div>
   );
 };
