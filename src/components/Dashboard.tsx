@@ -27,6 +27,7 @@ const Dashboard: React.FC = () => {
   const [filterTeamId, setFilterTeamId] = useState<string>('ALL');
   const [premiumBanner, setPremiumBanner] = useState<{ url: string; link: string } | null>(null);
   const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     supabase
@@ -181,14 +182,29 @@ const Dashboard: React.FC = () => {
     };
   }).sort((a, b) => {
     const key = sortKey ?? 'pts';
+    if (key === 'name') {
+      const cmp = a.player.name.localeCompare(b.player.name, 'es', { sensitivity: 'base' });
+      if (cmp !== 0) return sortDir === 'asc' ? cmp : -cmp;
+      return b.pts - a.pts;
+    }
     const av = (a as any)[key] ?? 0;
     const bv = (b as any)[key] ?? 0;
-    if (bv !== av) return bv - av;
+    if (bv !== av) return sortDir === 'asc' ? av - bv : bv - av;
     return b.pts - a.pts;
   });
 
   const handleSort = (key: string) => {
-    setSortKey(prev => (prev === key ? null : key));
+    if (sortKey === key) {
+      if (key === 'name') {
+        setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortKey(null);
+        setSortDir('desc');
+      }
+    } else {
+      setSortKey(key);
+      setSortDir(key === 'name' ? 'asc' : 'desc');
+    }
   };
 
   const totalPoints = filteredShots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
@@ -482,7 +498,13 @@ const Dashboard: React.FC = () => {
           <table className="text-xs w-full min-w-[520px]">
             <thead>
               <tr className="text-muted-foreground border-b border-border">
-                <th className="text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[80px]">Jug.</th>
+                <th
+                  onClick={() => handleSort('name')}
+                  className={`text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[80px] cursor-pointer select-none transition-colors hover:text-primary ${sortKey === 'name' ? 'text-primary' : ''}`}
+                  title={sortKey === 'name' ? 'Cambiar dirección de orden' : 'Ordenar alfabéticamente'}
+                >
+                  Jug.{sortKey === 'name' ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ' ⇅'}
+                </th>
                 {[
                   { label: 'TC', key: 'fgm' },
                   { label: '2PT', key: 'twoM' },
@@ -507,7 +529,7 @@ const Dashboard: React.FC = () => {
                       className={`text-center py-2 px-0.5 font-bold cursor-pointer select-none transition-colors hover:text-primary ${active ? 'text-primary' : ''}`}
                       title={active ? 'Click para volver al orden por PTS' : `Ordenar por ${col.label}`}
                     >
-                      {col.label}{active ? ' ↓' : ''}
+                      {col.label}{active ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''}
                     </th>
                   );
                 })}
