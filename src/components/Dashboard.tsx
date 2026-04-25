@@ -498,7 +498,13 @@ const Dashboard: React.FC = () => {
           <table className="text-xs w-full min-w-[520px]">
             <thead>
               <tr className="text-muted-foreground border-b border-border">
-                <th className="text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[80px]">Jug.</th>
+                <th
+                  onClick={() => handleSort('name')}
+                  className={`text-left py-2 pr-1 font-bold sticky left-0 bg-card z-10 min-w-[80px] cursor-pointer select-none transition-colors hover:text-primary ${sortKey === 'name' ? 'text-primary' : ''}`}
+                  title={sortKey === 'name' ? 'Cambiar dirección de orden' : 'Ordenar alfabéticamente'}
+                >
+                  Jug.{sortKey === 'name' ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ' ⇅'}
+                </th>
                 {[
                   { label: 'TC', key: 'fgm' },
                   { label: '2PT', key: 'twoM' },
@@ -523,7 +529,7 @@ const Dashboard: React.FC = () => {
                       className={`text-center py-2 px-0.5 font-bold cursor-pointer select-none transition-colors hover:text-primary ${active ? 'text-primary' : ''}`}
                       title={active ? 'Click para volver al orden por PTS' : `Ordenar por ${col.label}`}
                     >
-                      {col.label}{active ? ' ↓' : ''}
+                      {col.label}{active ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''}
                     </th>
                   );
                 })}
