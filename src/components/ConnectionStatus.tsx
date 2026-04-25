@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { subscribeSync, SyncStatus, flushQueue } from '@/utils/syncQueue';
-import { Wifi, WifiOff, CloudCheck, CloudUpload, RefreshCw } from 'lucide-react';
+import { Wifi, WifiOff, CheckCircle2, CloudUpload, RefreshCw } from 'lucide-react';
 
 const ConnectionStatus: React.FC = () => {
   const online = useOnlineStatus();
@@ -66,7 +66,7 @@ const ConnectionStatus: React.FC = () => {
     text = 'Error al sincronizar — reintentando...';
   } else if (showSynced) {
     bg = 'bg-emerald-600/95';
-    icon = <CloudCheck className="h-3.5 w-3.5" />;
+    icon = <CheckCircle2 className="h-3.5 w-3.5" />;
     text = 'Sincronizado ✅';
   } else if (online) {
     bg = 'bg-emerald-600/95';
