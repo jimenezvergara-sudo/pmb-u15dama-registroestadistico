@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { QuarterId, QUARTER_LABELS, ActionType } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
-import QuickActionFAB from '@/components/QuickActionFAB';
+
 import SubstitutionDialog from '@/components/SubstitutionDialog';
 import StartingLineup from '@/components/StartingLineup';
 import LiveGameReport from '@/components/LiveGameReport';
