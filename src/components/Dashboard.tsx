@@ -224,14 +224,16 @@ const Dashboard: React.FC = () => {
     const withTriples = boxScore.filter(r => r.threeA >= MIN_TRIPLES).sort((a, b) => b.threePct - a.threePct || b.threeM - a.threeM);
     const withDoubles = boxScore.filter(r => r.twoA >= MIN_DOBLES).sort((a, b) => b.twoPct - a.twoPct || b.twoM - a.twoM);
     const withFt = boxScore.filter(r => r.ftA >= MIN_FT).sort((a, b) => b.ftPct - a.ftPct || b.ftM - a.ftM);
-    const withEfg = boxScore.filter(r => r.fga >= MIN_FGA).sort((a, b) => b.eFG - a.eFG || b.fgm - a.fgm);
-    const withTs = boxScore.filter(r => r.fga >= MIN_FGA).sort((a, b) => b.ts - a.ts || b.pts - a.pts);
+    const withReb = boxScore.filter(r => r.reb > 0).sort((a, b) => b.reb - a.reb);
+    const withAst = boxScore.filter(r => r.ast > 0).sort((a, b) => b.ast - a.ast);
+    const withStl = boxScore.filter(r => r.stl > 0).sort((a, b) => b.stl - a.stl);
     return {
       triples: withTriples[0] || null,
       dobles: withDoubles[0] || null,
       tl: withFt[0] || null,
-      efg: withEfg[0] || null,
-      ts: withTs[0] || null,
+      reb: withReb[0] || null,
+      ast: withAst[0] || null,
+      stl: withStl[0] || null,
     };
   })();
 
