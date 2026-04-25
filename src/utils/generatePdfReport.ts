@@ -131,12 +131,12 @@ export async function generatePdfReport(
 
   const sectionTitle = (title: string) => {
     doc.setFillColor(...PURPLE);
-    doc.roundedRect(M, y, 3, 7, 1.5, 1.5, 'F');
-    doc.setFontSize(12);
+    doc.roundedRect(M, y, 3.5, 8, 1.7, 1.7, 'F');
+    doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...NEAR_BLACK);
-    doc.text(title, M + 6, y + 5.5);
-    y += 10;
+    doc.text(title, M + 7, y + 6);
+    y += 12;
   };
 
   // ═══════════════ PAGE 1: Overview ═══════════════
