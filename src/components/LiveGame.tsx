@@ -163,6 +163,7 @@ const LiveGame: React.FC = () => {
       duration: 1500,
       action: { label: 'Deshacer', onClick: undoLastShot },
     });
+    triggerFlash(selectedPlayer, made ? 'hsl(142_72%_38%)' : 'hsl(0_75%_50%)');
     setPendingShot(null);
     setSelectedPlayer(null);
   };
