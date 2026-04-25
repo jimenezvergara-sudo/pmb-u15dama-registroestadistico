@@ -780,6 +780,7 @@ export async function generatePdfReport(
     y += 18;
 
     // Court — half-court layout matching app SVG (viewBox 0 0 300 280)
+    // (Clipping region applied below to prevent shot dots from drawing outside the court rect)
     const courtW = 140;
     const courtH = (280 / 300) * courtW; // preserve aspect ratio
     const courtX = (W - courtW) / 2;
