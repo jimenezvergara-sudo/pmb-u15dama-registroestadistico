@@ -486,7 +486,17 @@ export async function generatePdfReport(
       pf: pActions.filter(a => a.type === 'foul').length,
       eFG, ts,
     };
-  }).sort((a, b) => b.pts - a.pts);
+  }).sort((a, b) => {
+    // Players with zero activity go to the bottom (sorted by jersey number among themselves)
+    const aInactive = a.pts === 0 && a.reb === 0 && a.ast === 0 && a.stl === 0 && a.tov === 0 && a.pf === 0 && a.fga === 0 && a.ftA === 0;
+    const bInactive = b.pts === 0 && b.reb === 0 && b.ast === 0 && b.stl === 0 && b.tov === 0 && b.pf === 0 && b.fga === 0 && b.ftA === 0;
+    if (aInactive !== bInactive) return aInactive ? 1 : -1;
+    if (aInactive && bInactive) return a.number - b.number;
+    return b.pts - a.pts;
+  });
+
+  const isInactiveRow = (r: BoxScoreRow) =>
+    r.pts === 0 && r.reb === 0 && r.ast === 0 && r.stl === 0 && r.tov === 0 && r.pf === 0 && r.fga === 0 && r.ftA === 0;
 
   const isSingleGame = filteredGames.length === 1;
 
@@ -530,6 +540,16 @@ export async function generatePdfReport(
         if (data.section === 'body') {
           const ci = data.column.index;
           const raw = String(data.cell.raw ?? '');
+          const rowData = rows[data.row.index];
+          const inactive = rowData ? isInactiveRow(rowData) : false;
+
+          if (inactive) {
+            // Gray-out inactive players (no participation) — light gray text
+            data.cell.styles.textColor = [180, 180, 190];
+            data.cell.styles.fontStyle = ci === 0 ? 'italic' : 'normal';
+            return; // skip color-coding logic for inactive rows
+          }
+
           const pctMatch = raw.match(/\((\d+)%\)/);
           // Color-code shooting cells (TC, 2PT, 3PT, TL) by their %
           if ([1, 2, 3, 4].includes(ci) && pctMatch) {
@@ -642,7 +662,10 @@ export async function generatePdfReport(
     const chartX = M;
     const chartW = W - M * 2;
     const chartH = 58;
-    const maxVal = Math.max(...qData.map(d => Math.max(d.pts, d.opp)), 1);
+    // Y-axis is per-quarter (NOT cumulative). Round to a clean scale: nearest 5, capped at 120.
+    const rawMax = Math.max(...qData.map(d => Math.max(d.pts, d.opp)), 1);
+    const niceMax = Math.min(120, Math.max(10, Math.ceil(rawMax / 5) * 5));
+    const maxVal = niceMax;
     const barGroupW = chartW / qData.length;
     const barW = barGroupW * 0.28;
     const gap = 4;
@@ -660,6 +683,7 @@ export async function generatePdfReport(
       doc.line(chartX + 14, gy, chartX + chartW - 8, gy);
       doc.setFontSize(6);
       doc.setTextColor(...MUTED);
+      // Label rounded to integer; scale is per-quarter points (0..niceMax)
       doc.text(`${Math.round(maxVal * i / 4)}`, chartX + 4, gy + 1.5);
     }
 
@@ -780,6 +804,7 @@ export async function generatePdfReport(
     y += 18;
 
     // Court — half-court layout matching app SVG (viewBox 0 0 300 280)
+    // (Clipping region applied below to prevent shot dots from drawing outside the court rect)
     const courtW = 140;
     const courtH = (280 / 300) * courtW; // preserve aspect ratio
     const courtX = (W - courtW) / 2;
@@ -844,9 +869,21 @@ export async function generatePdfReport(
     doc.line(sx(140), sy(270), sx(160), sy(270));
 
     // Shot markers — coords are stored as 0-100 percentages of the 300×280 viewBox
+    // Apply clipping region so no marker can draw outside the court rectangle
+    doc.saveGraphicsState();
+    // @ts-ignore - jsPDF supports rect+clip path
+    doc.rect(courtX, courtY, courtW, courtH);
+    // @ts-ignore
+    doc.clip();
+    // @ts-ignore - discard the path used for clipping
+    doc.discardPath();
+
     shotsForChart.forEach(s => {
-      const px = courtX + (s.x / 100) * courtW;
-      const py = courtY + (s.y / 100) * courtH;
+      // Clamp to [0,100] in case stored coords slightly exceed bounds
+      const cxPct = Math.max(0, Math.min(100, s.x));
+      const cyPct = Math.max(0, Math.min(100, s.y));
+      const px = courtX + (cxPct / 100) * courtW;
+      const py = courtY + (cyPct / 100) * courtH;
 
       if (s.made) {
         doc.setFillColor(...SUCCESS);
@@ -865,6 +902,8 @@ export async function generatePdfReport(
         doc.line(px - d, py + d, px + d, py - d);
       }
     });
+
+    doc.restoreGraphicsState();
 
     y = courtY + courtH + 10;
 
@@ -889,7 +928,8 @@ export async function generatePdfReport(
     const threeS = shotsForChart.filter(s => s.points === 3);
     const ftS = shotsForChart.filter(s => s.points === 1);
 
-    const breakdown = [
+    // Plain ASCII labels — never use emojis or special chars (jsPDF does not embed unicode glyphs)
+    const breakdown: [string, string, string][] = [
       ['2PT', `${twoS.filter(s => s.made).length}/${twoS.length}`, `${twoS.length > 0 ? Math.round((twoS.filter(s => s.made).length / twoS.length) * 100) : 0}%`],
       ['3PT', `${threeS.filter(s => s.made).length}/${threeS.length}`, `${threeS.length > 0 ? Math.round((threeS.filter(s => s.made).length / threeS.length) * 100) : 0}%`],
       ['TL',  `${ftS.filter(s => s.made).length}/${ftS.length}`,     `${ftS.length > 0 ? Math.round((ftS.filter(s => s.made).length / ftS.length) * 100) : 0}%`],
@@ -973,7 +1013,38 @@ export async function generatePdfReport(
     },
     theme: 'grid',
   });
-  y = (doc as any).lastAutoTable.finalY + 8;
+  y = (doc as any).lastAutoTable.finalY + 10;
+
+  // ── About BASQUEST+ (only if there's room left on the glossary page) ──
+  if (y + 36 < H - 16) {
+    // Card background
+    doc.setFillColor(...WHITE);
+    doc.roundedRect(M, y, W - M * 2, 32, 4, 4, 'F');
+    doc.setFillColor(...PURPLE);
+    doc.roundedRect(M, y, 3, 32, 1.5, 1.5, 'F');
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...PURPLE);
+    doc.text('Acerca de BASQUEST+', M + 7, y + 8);
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...NEAR_BLACK);
+    const aboutLines = [
+      'BASQUEST+ es una plataforma de inteligencia deportiva diseñada para clubes de básquetbol formativo y',
+      'competitivo. Permite registrar estadísticas en vivo, generar reportes avanzados, analizar el rendimiento',
+      'individual y colectivo, y compartir resultados con la comunidad.',
+    ];
+    aboutLines.forEach((line, i) => {
+      doc.text(line, M + 7, y + 14 + i * 4.5);
+    });
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...CYAN);
+    doc.text('basquestplus.cl', M + 7, y + 29);
+  }
 
   drawFooter(pageNum);
 
@@ -1004,12 +1075,15 @@ export async function generatePdfReport(
 
       const bannerMaxW = W - M * 2;
       const aspect = img.naturalHeight / img.naturalWidth;
-      // Larger banner: target ~70% page width, capped to a reasonable height
       const bannerW = bannerMaxW;
       const bannerH = Math.min(80, aspect * bannerW);
 
+      // Vertically center the whole composition (tag + banner + captions) on the page
+      const blockH = 6 /*tag*/ + 6 /*tag→banner gap*/ + bannerH + 8 /*banner→caption*/ + 6 /*caption*/ + 6 /*caption2*/ + 5 /*spacer*/ + 5 /*footer caption*/;
+      const blockTop = Math.max(50, (H - blockH) / 2);
+
       // PREMIUM tag (centered, above banner)
-      const tagY = (H - bannerH) / 2 - 18;
+      const tagY = blockTop;
       doc.setFillColor(...GOLD);
       doc.roundedRect(W / 2 - 16, tagY, 32, 6, 1.5, 1.5, 'F');
       doc.setFontSize(7);
@@ -1018,21 +1092,27 @@ export async function generatePdfReport(
       doc.text('PREMIUM', W / 2, tagY + 4.2, { align: 'center' });
 
       // Centered banner
-      const bannerY = (H - bannerH) / 2;
+      const bannerY = tagY + 12;
       doc.addImage(dataUrl, 'JPEG', M, bannerY, bannerW, bannerH);
       doc.setDrawColor(...GOLD);
       doc.setLineWidth(0.6);
       doc.roundedRect(M, bannerY, bannerW, bannerH, 3, 3, 'S');
 
+      // Caption directly under banner (gray)
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(...MUTED);
+      doc.text('Espacio publicitario BASQUEST+', W / 2, bannerY + bannerH + 8, { align: 'center' });
+
       // "Powered by BASQUEST+" caption
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...PURPLE);
-      doc.text('Powered by BASQUEST+', W / 2, bannerY + bannerH + 14, { align: 'center' });
+      doc.text('Powered by BASQUEST+', W / 2, bannerY + bannerH + 18, { align: 'center' });
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...MUTED);
-      doc.text('Inteligencia Deportiva · basquestplus.cl', W / 2, bannerY + bannerH + 20, { align: 'center' });
+      doc.text('Inteligencia Deportiva · basquestplus.cl', W / 2, bannerY + bannerH + 24, { align: 'center' });
 
       drawFooter(pageNum);
     } catch {
