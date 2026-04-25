@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, GameLeg, Category, ActionType, GameAction, SubstitutionEvent } from '@/types/basketball';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { enqueue as enqueueSync, flushQueue } from '@/utils/syncQueue';
 
 interface AppState {
   players: Player[];
@@ -337,24 +338,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const updateGame = useCallback(async (game: Game) => {
-    await supabase.from('club_games' as any).update({
-      opponent_name: game.opponentName,
-      date: game.date,
-      category: game.category,
-      roster: game.roster as any,
-      shots: game.shots as any,
-      actions: game.actions as any,
-      substitutions: game.substitutions as any,
-      opponent_scores: game.opponentScores as any,
-      on_court_player_ids: game.onCourtPlayerIds as any,
-      court_time_ms: game.courtTimeMs as any,
-      current_quarter: game.currentQuarter,
-      tournament_id: game.tournamentId || null,
-      opponent_team_id: game.opponentTeamId || null,
-      leg: game.leg || null,
-      is_home: game.isHome ?? null,
-    }).eq('id', game.id);
+    // Optimistic update local state immediately
     setState(s => ({ ...s, games: s.games.map(g => g.id === game.id ? game : g) }));
+
+    const isOnline = typeof navigator === 'undefined' ? true : navigator.onLine;
+    if (!isOnline) {
+      enqueueSync({ kind: 'updateGame', game, queuedAt: Date.now() });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('club_games' as any).update({
+        opponent_name: game.opponentName,
+        date: game.date,
+        category: game.category,
+        roster: game.roster as any,
+        shots: game.shots as any,
+        actions: game.actions as any,
+        substitutions: game.substitutions as any,
+        opponent_scores: game.opponentScores as any,
+        on_court_player_ids: game.onCourtPlayerIds as any,
+        court_time_ms: game.courtTimeMs as any,
+        current_quarter: game.currentQuarter,
+        tournament_id: game.tournamentId || null,
+        opponent_team_id: game.opponentTeamId || null,
+        leg: game.leg || null,
+        is_home: game.isHome ?? null,
+      }).eq('id', game.id);
+      if (error) throw error;
+    } catch (err) {
+      console.warn('[updateGame] failed, queueing for retry', err);
+      enqueueSync({ kind: 'updateGame', game, queuedAt: Date.now() });
+    }
   }, []);
 
   const addTournament = useCallback(async (t: Omit<Tournament, 'id'>) => {
