@@ -347,7 +347,7 @@ export async function generatePdfReport(
       doc.setFontSize(8);
       doc.setTextColor(...NEAR_BLACK);
       doc.setFont('helvetica', 'bold');
-      doc.text(`#${item.player.number} ${item.player.name}`, lx + 6, ly + 12.5);
+      doc.text(filteredGames.length === 1 ? `#${item.player.number} ${item.player.name}` : item.player.name, lx + 6, ly + 12.5);
       const valStr = `${item.value}`;
       const valW = Math.max(doc.getTextWidth(valStr) + 5, 10);
       doc.setFillColor(...item.accent);
@@ -462,8 +462,9 @@ export async function generatePdfReport(
     };
   }).sort((a, b) => b.pts - a.pts);
 
+  const isSingleGame = filteredGames.length === 1;
   const tableBody = boxRows.map(r => [
-    `#${r.number} ${r.name}`,
+    isSingleGame ? `#${r.number} ${r.name}` : r.name,
     `${r.fgm}/${r.fga}`, `${r.fgPct}%`,
     `${r.twoM}/${r.twoA}`, `${r.twoPct}%`,
     `${r.threeM}/${r.threeA}`, `${r.threePct}%`,

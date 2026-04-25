@@ -321,7 +321,7 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
       lines.push('Jugador | PTS | TC (%) | 2PT (%) | 3PT (%) | TL (%) | REB | AST | STL | PF | MIN%');
       boxScore.forEach(r => {
         lines.push(
-          `#${r.number} ${r.playerName} | ${r.pts} | ${r.fgm}/${r.fga} (${r.fgPct}%) | ${r.twoM}/${r.twoA} (${r.twoPct}%) | ${r.threeM}/${r.threeA} (${r.threePct}%) | ${r.ftM}/${r.ftA} (${r.ftPct}%) | ${r.reb} | ${r.ast} | ${r.stl} | ${r.pf} | ${r.courtTimePct}%`
+          `${r.playerName} | ${r.pts} | ${r.fgm}/${r.fga} (${r.fgPct}%) | ${r.twoM}/${r.twoA} (${r.twoPct}%) | ${r.threeM}/${r.threeA} (${r.threePct}%) | ${r.ftM}/${r.ftA} (${r.ftPct}%) | ${r.reb} | ${r.ast} | ${r.stl} | ${r.pf} | ${r.courtTimePct}%`
         );
       });
 
