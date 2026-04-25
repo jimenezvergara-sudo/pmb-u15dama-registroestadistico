@@ -955,14 +955,15 @@ export async function generatePdfReport(
     body: glossary,
     margin: { left: M, right: M },
     styles: {
-      fontSize: 7.5,
-      cellPadding: 3,
+      fontSize: 8.5,
+      cellPadding: 4,
       font: 'helvetica',
       lineColor: TABLE_BORDER,
       lineWidth: 0.2,
       overflow: 'linebreak',
+      minCellHeight: 8,
     },
-    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 8 },
+    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 9 },
     bodyStyles: { fillColor: WHITE },
     alternateRowStyles: { fillColor: TABLE_ALT },
     columnStyles: {
