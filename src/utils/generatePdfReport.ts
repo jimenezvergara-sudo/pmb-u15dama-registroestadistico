@@ -540,6 +540,16 @@ export async function generatePdfReport(
         if (data.section === 'body') {
           const ci = data.column.index;
           const raw = String(data.cell.raw ?? '');
+          const rowData = rows[data.row.index];
+          const inactive = rowData ? isInactiveRow(rowData) : false;
+
+          if (inactive) {
+            // Gray-out inactive players (no participation) — light gray text
+            data.cell.styles.textColor = [180, 180, 190];
+            data.cell.styles.fontStyle = ci === 0 ? 'italic' : 'normal';
+            return; // skip color-coding logic for inactive rows
+          }
+
           const pctMatch = raw.match(/\((\d+)%\)/);
           // Color-code shooting cells (TC, 2PT, 3PT, TL) by their %
           if ([1, 2, 3, 4].includes(ci) && pctMatch) {
