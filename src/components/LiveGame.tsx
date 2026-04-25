@@ -447,40 +447,48 @@ const LiveGame: React.FC = () => {
         />
       </div>
 
-      {/* Court */}
-      <div className="px-2 flex-1 overflow-hidden min-h-[200px]">
+      {/* Court (con overlay de Acciones encima) */}
+      <div className="relative px-2 flex-1 overflow-hidden min-h-[200px]">
         <CourtDiagram
           onZoneTap={handleZoneTap}
           shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
           rotation={courtRotation}
           onRotate={() => setCourtRotation(r => (r + 90) % 360)}
         />
-      </div>
 
-      {/* Panel de acciones secundarias — se abre con el botón "Acciones" tras seleccionar jugadora */}
-      {actionsPanelOpen && selectedPlayer && (
-        <div className="px-3 pt-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
-          <div className="grid grid-cols-3 gap-1.5" style={{ maxHeight: 120 }}>
-            {([
-              { key: 'offensive_rebound', label: 'Reb OF', emoji: '⬛', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
-              { key: 'defensive_rebound', label: 'Reb DEF', emoji: '⬛', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
-              { key: 'assist', label: 'Asistencia', emoji: '💛', cls: 'bg-accent text-accent-foreground hover:bg-accent/90' },
-              { key: 'steal', label: 'Robo', emoji: '🖐️', cls: 'bg-primary text-primary-foreground hover:bg-primary/90' },
-              { key: 'turnover', label: 'Pérdida', emoji: '❌', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
-              { key: 'foul', label: 'Falta', emoji: '🟡', cls: 'bg-accent text-accent-foreground hover:bg-accent/90' },
-            ] as const).map(a => (
-              <button
-                key={a.key}
-                onClick={() => handleQuickAction(a.key as ActionType)}
-                className={`min-h-[52px] rounded-xl text-sm font-bold tap-feedback flex flex-col items-center justify-center gap-0.5 border-2 border-transparent transition-all active:scale-95 ${a.cls}`}
-              >
-                <span className="text-base leading-none">{a.emoji}</span>
-                <span className="text-xs leading-none">{a.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+        {/* Panel de acciones secundarias — overlay flotante sobre la cancha */}
+        {actionsPanelOpen && selectedPlayer && (
+          <>
+            {/* Backdrop tenue para cerrar tocando afuera */}
+            <button
+              aria-label="Cerrar acciones"
+              onClick={() => setActionsPanelOpen(false)}
+              className="absolute inset-0 z-20 bg-background/40 backdrop-blur-[1px] animate-in fade-in duration-100"
+            />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[92%] max-w-md p-2 rounded-2xl bg-card border-2 border-primary shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+              <div className="grid grid-cols-3 gap-1.5" style={{ maxHeight: 120 }}>
+                {([
+                  { key: 'offensive_rebound', label: 'Reb OF', emoji: '⬛', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
+                  { key: 'defensive_rebound', label: 'Reb DEF', emoji: '⬛', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
+                  { key: 'assist', label: 'Asistencia', emoji: '💛', cls: 'bg-accent text-accent-foreground hover:bg-accent/90' },
+                  { key: 'steal', label: 'Robo', emoji: '🖐️', cls: 'bg-primary text-primary-foreground hover:bg-primary/90' },
+                  { key: 'turnover', label: 'Pérdida', emoji: '❌', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
+                  { key: 'foul', label: 'Falta', emoji: '🟡', cls: 'bg-accent text-accent-foreground hover:bg-accent/90' },
+                ] as const).map(a => (
+                  <button
+                    key={a.key}
+                    onClick={() => handleQuickAction(a.key as ActionType)}
+                    className={`min-h-[52px] rounded-xl text-sm font-bold tap-feedback flex flex-col items-center justify-center gap-0.5 border-2 border-transparent transition-all active:scale-95 ${a.cls}`}
+                  >
+                    <span className="text-base leading-none">{a.emoji}</span>
+                    <span className="text-xs leading-none">{a.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Made / Missed + Acciones inferiores */}
       <div className="relative z-10 bg-background pt-2 mt-2">
