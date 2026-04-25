@@ -517,7 +517,9 @@ const Dashboard: React.FC = () => {
               {boxScore.map(row => (
                 <tr key={row.player.id} className="border-b border-border/50">
                   <td className="py-1.5 pr-1 font-semibold sticky left-0 bg-card z-10 min-w-[80px]">
-                    <span className="block text-[10px] leading-tight max-w-[70px] break-words">{row.player.name}</span>
+                    <span className="block text-[10px] leading-tight max-w-[70px] break-words">
+                      {!isAggregate ? `#${row.player.number} ${row.player.name}` : row.player.name}
+                    </span>
                   </td>
                   <td className="text-center py-2 px-0.5">
                     <div className="text-[10px]">{row.fgm}/{row.fga}</div>
