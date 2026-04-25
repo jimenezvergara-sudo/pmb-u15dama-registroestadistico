@@ -904,7 +904,8 @@ export async function generatePdfReport(
     const threeS = shotsForChart.filter(s => s.points === 3);
     const ftS = shotsForChart.filter(s => s.points === 1);
 
-    const breakdown = [
+    // Plain ASCII labels — never use emojis or special chars (jsPDF does not embed unicode glyphs)
+    const breakdown: [string, string, string][] = [
       ['2PT', `${twoS.filter(s => s.made).length}/${twoS.length}`, `${twoS.length > 0 ? Math.round((twoS.filter(s => s.made).length / twoS.length) * 100) : 0}%`],
       ['3PT', `${threeS.filter(s => s.made).length}/${threeS.length}`, `${threeS.length > 0 ? Math.round((threeS.filter(s => s.made).length / threeS.length) * 100) : 0}%`],
       ['TL',  `${ftS.filter(s => s.made).length}/${ftS.length}`,     `${ftS.length > 0 ? Math.round((ftS.filter(s => s.made).length / ftS.length) * 100) : 0}%`],
