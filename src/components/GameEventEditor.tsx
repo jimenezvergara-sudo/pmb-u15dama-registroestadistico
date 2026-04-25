@@ -274,6 +274,42 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
           </DialogDescription>
         </DialogHeader>
 
+        {/* Date + Opponent editing */}
+        <div className="px-4 pb-2 grid grid-cols-2 gap-2">
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground mb-1">
+              <Calendar className="h-3.5 w-3.5" /> Fecha
+            </label>
+            <Input
+              type="date"
+              value={editedGame.date ? new Date(editedGame.date).toISOString().slice(0, 10) : ''}
+              onChange={e => {
+                const v = e.target.value;
+                if (!v) return;
+                // Preserve time-of-day from the original timestamp
+                const original = new Date(editedGame.date);
+                const [y, m, d] = v.split('-').map(Number);
+                const next = new Date(original);
+                next.setFullYear(y, m - 1, d);
+                setEditedGame(g => ({ ...g, date: next.toISOString() }));
+              }}
+              className="h-9 text-sm"
+            />
+          </div>
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground mb-1">
+              <Users className="h-3.5 w-3.5" /> Rival
+            </label>
+            <Input
+              type="text"
+              value={editedGame.opponentName}
+              onChange={e => setEditedGame(g => ({ ...g, opponentName: e.target.value }))}
+              placeholder="Nombre del rival"
+              className="h-9 text-sm"
+            />
+          </div>
+        </div>
+
         {/* Tournament selector */}
         <div className="px-4 pb-2">
           <label className="flex items-center gap-2 text-xs font-bold text-muted-foreground mb-1">
