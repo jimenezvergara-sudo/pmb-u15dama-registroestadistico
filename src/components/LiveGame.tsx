@@ -403,17 +403,34 @@ const LiveGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Free throw + Substitution (acciones se acceden tocando jugadora) */}
-      <div className="grid grid-cols-2 gap-2 px-3 pt-4 mb-1">
+      {/* Tiro Libre + Acciones + Cambios */}
+      <div className="grid grid-cols-3 gap-2 px-3 pt-4 mb-1">
         <button
           onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
-          className={`w-full min-h-[48px] px-4 py-3 rounded-xl text-sm font-bold tap-feedback border-2 flex items-center justify-center gap-1.5 ${
+          className={`w-full min-h-[48px] px-2 py-3 rounded-xl text-sm font-bold tap-feedback border-2 flex items-center justify-center gap-1 ${
             pendingShot?.points === 1
               ? 'bg-primary text-primary-foreground border-primary'
               : 'bg-card text-card-foreground border-border hover:border-primary'
           }`}
         >
-          🏀 Tiro Libre
+          🏀 TL
+        </button>
+        <button
+          onClick={() => {
+            if (!selectedPlayer) {
+              toast('Selecciona una jugadora primero', { duration: 1500 });
+              return;
+            }
+            setActionSheetOpen(true);
+          }}
+          disabled={!selectedPlayer}
+          className={`w-full min-h-[48px] px-2 py-3 rounded-xl text-sm font-bold tap-feedback border-2 flex items-center justify-center gap-1 ${
+            !selectedPlayer
+              ? 'bg-muted text-muted-foreground border-border opacity-60 cursor-not-allowed'
+              : 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+          }`}
+        >
+          ⚡ Acciones
         </button>
         <SubstitutionDialog
           roster={activeGame.roster}
