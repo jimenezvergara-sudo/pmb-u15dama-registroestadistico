@@ -279,6 +279,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     saveActiveGame(state.activeGame);
   }, [state.activeGame]);
 
+  // Try flushing the offline queue once data is loaded
+  useEffect(() => {
+    if (!state.loading && userId && clubId) {
+      flushQueue();
+    }
+  }, [state.loading, userId, clubId]);
+
   const addPlayer = useCallback(async (p: Omit<Player, 'id'>) => {
     if (!userId || !clubId) return;
     const { data, error } = await supabase.from('club_players' as any).insert({
