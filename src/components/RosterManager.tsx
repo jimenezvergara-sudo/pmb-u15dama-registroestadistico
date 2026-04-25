@@ -3,7 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Player } from '@/types/basketball';
-import { Plus, Trash2, Merge, Check, X, AlertTriangle, Pencil } from 'lucide-react';
+import { Plus, Trash2, Merge, Check, X, AlertTriangle, Pencil, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import { toast } from 'sonner';
 import {
