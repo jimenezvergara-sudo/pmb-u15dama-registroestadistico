@@ -486,7 +486,17 @@ export async function generatePdfReport(
       pf: pActions.filter(a => a.type === 'foul').length,
       eFG, ts,
     };
-  }).sort((a, b) => b.pts - a.pts);
+  }).sort((a, b) => {
+    // Players with zero activity go to the bottom (sorted by jersey number among themselves)
+    const aInactive = a.pts === 0 && a.reb === 0 && a.ast === 0 && a.stl === 0 && a.tov === 0 && a.pf === 0 && a.fga === 0 && a.ftA === 0;
+    const bInactive = b.pts === 0 && b.reb === 0 && b.ast === 0 && b.stl === 0 && b.tov === 0 && b.pf === 0 && b.fga === 0 && b.ftA === 0;
+    if (aInactive !== bInactive) return aInactive ? 1 : -1;
+    if (aInactive && bInactive) return a.number - b.number;
+    return b.pts - a.pts;
+  });
+
+  const isInactiveRow = (r: BoxScoreRow) =>
+    r.pts === 0 && r.reb === 0 && r.ast === 0 && r.stl === 0 && r.tov === 0 && r.pf === 0 && r.fga === 0 && r.ftA === 0;
 
   const isSingleGame = filteredGames.length === 1;
 
