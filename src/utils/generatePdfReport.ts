@@ -323,45 +323,71 @@ export async function generatePdfReport(
     { label: 'TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: SUCCESS },
   ];
 
-  const lColW = (W - M * 2 - 8) / 3;
+  // Larger leader cards: bigger names + prominent stat number
+  const lColGap = 5;
+  const lRowGap = 5;
+  const lCardH = 26;
+  const lColW = (W - M * 2 - lColGap * 2) / 3;
   leaderItems.forEach((item, i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
-    const lx = M + col * (lColW + 4);
-    const ly = y + row * 22;
+    const lx = M + col * (lColW + lColGap);
+    const ly = y + row * (lCardH + lRowGap);
 
-    // Check page overflow
-    if (ly + 19 > H - 16) return;
+    if (ly + lCardH > H - 16) return;
 
+    // Card background with subtle shadow simulation
+    doc.setFillColor(220, 215, 235);
+    doc.roundedRect(lx + 0.6, ly + 0.6, lColW, lCardH, 3.5, 3.5, 'F');
     doc.setFillColor(...WHITE);
-    doc.roundedRect(lx, ly, lColW, 19, 3, 3, 'F');
-    doc.setFillColor(...item.accent);
-    doc.roundedRect(lx, ly + 3, 2.5, 13, 1.2, 1.2, 'F');
+    doc.roundedRect(lx, ly, lColW, lCardH, 3.5, 3.5, 'F');
 
-    doc.setFontSize(6);
+    // Accent bar (left)
+    doc.setFillColor(...item.accent);
+    doc.roundedRect(lx, ly + 3, 3, lCardH - 6, 1.5, 1.5, 'F');
+
+    // Section label (top)
+    doc.setFontSize(6.5);
     doc.setTextColor(...MUTED);
     doc.setFont('helvetica', 'bold');
-    doc.text(item.label, lx + 6, ly + 6);
+    doc.text(item.label, lx + 7, ly + 6);
 
     if (item.player) {
-      doc.setFontSize(8);
+      // Big stat value (right side, prominent)
+      const valStr = `${item.value}`;
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...item.accent);
+      const vw = doc.getTextWidth(valStr);
+      doc.text(valStr, lx + lColW - 5, ly + 18, { align: 'right' });
+
+      // Player name (left, bigger and bolder)
+      const nameStr = filteredGames.length === 1 ? `#${item.player.number} ${item.player.name}` : item.player.name;
+      const maxNameW = lColW - 12 - vw - 4;
+      doc.setFontSize(10);
       doc.setTextColor(...NEAR_BLACK);
       doc.setFont('helvetica', 'bold');
-      doc.text(filteredGames.length === 1 ? `#${item.player.number} ${item.player.name}` : item.player.name, lx + 6, ly + 12.5);
-      const valStr = `${item.value}`;
-      const valW = Math.max(doc.getTextWidth(valStr) + 5, 10);
-      doc.setFillColor(...item.accent);
-      doc.roundedRect(lx + lColW - valW - 3, ly + 8, valW, 8, 3, 3, 'F');
-      doc.setFontSize(10);
-      doc.setTextColor(...(item.accent === GOLD ? NEAR_BLACK : WHITE));
-      doc.text(valStr, lx + lColW - valW / 2 - 0.5, ly + 14, { align: 'center' });
+      // Truncate if too long
+      let displayName = nameStr;
+      while (doc.getTextWidth(displayName) > maxNameW && displayName.length > 4) {
+        displayName = displayName.slice(0, -1);
+      }
+      if (displayName.length < nameStr.length) displayName = displayName.slice(0, -1) + '…';
+      doc.text(displayName, lx + 7, ly + 15);
+
+      // Subtle "líder" hint
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...MUTED);
+      doc.text('Líder', lx + 7, ly + 21);
     } else {
       doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
       doc.setTextColor(...MUTED);
-      doc.text('Sin datos', lx + 6, ly + 13);
+      doc.text('Sin datos suficientes', lx + 7, ly + 17);
     }
   });
-  y += Math.ceil(leaderItems.length / 3) * 22 + 6;
+  y += Math.ceil(leaderItems.length / 3) * (lCardH + lRowGap) + 4;
 
   drawFooter(pageNum);
 
