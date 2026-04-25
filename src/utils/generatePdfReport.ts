@@ -1044,12 +1044,15 @@ export async function generatePdfReport(
 
       const bannerMaxW = W - M * 2;
       const aspect = img.naturalHeight / img.naturalWidth;
-      // Larger banner: target ~70% page width, capped to a reasonable height
       const bannerW = bannerMaxW;
       const bannerH = Math.min(80, aspect * bannerW);
 
+      // Vertically center the whole composition (tag + banner + captions) on the page
+      const blockH = 6 /*tag*/ + 6 /*tag→banner gap*/ + bannerH + 8 /*banner→caption*/ + 6 /*caption*/ + 6 /*caption2*/ + 5 /*spacer*/ + 5 /*footer caption*/;
+      const blockTop = Math.max(50, (H - blockH) / 2);
+
       // PREMIUM tag (centered, above banner)
-      const tagY = (H - bannerH) / 2 - 18;
+      const tagY = blockTop;
       doc.setFillColor(...GOLD);
       doc.roundedRect(W / 2 - 16, tagY, 32, 6, 1.5, 1.5, 'F');
       doc.setFontSize(7);
@@ -1058,21 +1061,27 @@ export async function generatePdfReport(
       doc.text('PREMIUM', W / 2, tagY + 4.2, { align: 'center' });
 
       // Centered banner
-      const bannerY = (H - bannerH) / 2;
+      const bannerY = tagY + 12;
       doc.addImage(dataUrl, 'JPEG', M, bannerY, bannerW, bannerH);
       doc.setDrawColor(...GOLD);
       doc.setLineWidth(0.6);
       doc.roundedRect(M, bannerY, bannerW, bannerH, 3, 3, 'S');
 
+      // Caption directly under banner (gray)
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(...MUTED);
+      doc.text('Espacio publicitario BASQUEST+', W / 2, bannerY + bannerH + 8, { align: 'center' });
+
       // "Powered by BASQUEST+" caption
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...PURPLE);
-      doc.text('Powered by BASQUEST+', W / 2, bannerY + bannerH + 14, { align: 'center' });
+      doc.text('Powered by BASQUEST+', W / 2, bannerY + bannerH + 18, { align: 'center' });
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...MUTED);
-      doc.text('Inteligencia Deportiva · basquestplus.cl', W / 2, bannerY + bannerH + 20, { align: 'center' });
+      doc.text('Inteligencia Deportiva · basquestplus.cl', W / 2, bannerY + bannerH + 24, { align: 'center' });
 
       drawFooter(pageNum);
     } catch {
