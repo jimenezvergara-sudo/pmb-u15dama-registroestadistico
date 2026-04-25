@@ -368,22 +368,22 @@ const LiveGame: React.FC = () => {
                 key={player.id}
                 onClick={() => handlePlayerSelect(player.id)}
                 style={isFlashing ? { backgroundColor: flash!.color, color: '#fff' } : undefined}
-                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl tap-feedback min-h-[78px] transition-all relative border-2 ${
+                className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl tap-feedback min-h-[64px] transition-all relative border-2 ${
                   isFlashing
-                    ? 'scale-105 border-white shadow-lg'
+                    ? 'scale-105 border-accent shadow-lg'
                     : isSelected
-                      ? 'bg-[hsl(220_25%_15%)] text-white border-primary ring-2 ring-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.35)] scale-[1.03]'
-                      : 'bg-[hsl(220_20%_18%)] text-white border-transparent hover:border-primary/50'
+                      ? 'bg-card text-card-foreground border-accent ring-2 ring-accent shadow-[0_0_0_3px_hsl(var(--accent)/0.4)] scale-[1.03]'
+                      : 'bg-card text-card-foreground border-transparent hover:border-primary/50'
                 } ${!isOnCourt ? 'opacity-40' : ''}`}
               >
                 <span
-                  className={`text-[32px] font-black leading-none ${
-                    isSelected || isFlashing ? 'text-white' : 'text-[hsl(45_95%_55%)]'
+                  className={`text-[28px] font-black leading-none ${
+                    isSelected || isFlashing ? 'text-accent' : 'text-foreground'
                   }`}
                 >
                   {player.number}
                 </span>
-                <span className="text-[11px] font-semibold leading-tight mt-1 truncate w-full text-center text-white/80">
+                <span className="text-[11px] font-semibold leading-tight mt-0.5 truncate w-full text-center text-muted-foreground">
                   {player.name.split(' ')[0]}
                 </span>
                 {isOnCourt && (
