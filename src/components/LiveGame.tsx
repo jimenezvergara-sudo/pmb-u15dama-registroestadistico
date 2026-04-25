@@ -465,7 +465,7 @@ const LiveGame: React.FC = () => {
               onClick={() => setActionsPanelOpen(false)}
               className="absolute inset-0 z-20 bg-background/40 backdrop-blur-[1px] animate-in fade-in duration-100"
             />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[92%] max-w-md p-2 rounded-2xl bg-card border-2 border-primary shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute left-1/2 top-2 -translate-x-1/2 z-30 w-[92%] max-w-md p-2 rounded-2xl bg-card border-2 border-primary shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
               <div className="grid grid-cols-3 gap-1.5" style={{ maxHeight: 120 }}>
                 {([
                   { key: 'offensive_rebound', label: 'Reb OF', emoji: '⬛', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
