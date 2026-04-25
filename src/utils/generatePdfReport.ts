@@ -719,51 +719,71 @@ export async function generatePdfReport(
     });
     y += 18;
 
-    // Court
-    const courtW = 130;
-    const courtH = 121;
+    // Court — half-court layout matching app SVG (viewBox 0 0 300 280)
+    const courtW = 140;
+    const courtH = (280 / 300) * courtW; // preserve aspect ratio
     const courtX = (W - courtW) / 2;
     const courtY = y;
 
+    // Outer card (white frame)
     doc.setFillColor(...WHITE);
     doc.roundedRect(courtX - 5, courtY - 5, courtW + 10, courtH + 10, 5, 5, 'F');
 
+    // Court floor (wood color)
     doc.setFillColor(225, 200, 165);
     doc.rect(courtX, courtY, courtW, courtH, 'F');
 
+    // Coordinate mappers — domain matches app SVG (300×280)
+    const sx = (v: number) => courtX + (v / 300) * courtW;
+    const sy = (v: number) => courtY + (v / 280) * courtH;
+    const scaleX = courtW / 300;
+    const scaleY = courtH / 280;
+
+    // Outer boundary
     doc.setDrawColor(190, 165, 130);
     doc.setLineWidth(0.6);
     doc.rect(courtX, courtY, courtW, courtH);
 
-    const sx = (v: number) => courtX + (v / 300) * courtW;
-    const sy = (v: number) => courtY + (v / 280) * courtH;
-
+    // Painted area (key) — app: rect 100,200,100,80
     doc.setFillColor(215, 185, 150);
-    const paintX = sx(100);
-    const paintY = sy(200);
-    const paintW = (100 / 300) * courtW;
-    const paintH = (80 / 280) * courtH;
-    doc.rect(paintX, paintY, paintW, paintH, 'F');
-    doc.rect(paintX, paintY, paintW, paintH);
+    doc.rect(sx(100), sy(200), 100 * scaleX, 80 * scaleY, 'F');
+    doc.rect(sx(100), sy(200), 100 * scaleX, 80 * scaleY);
 
-    doc.circle(sx(150), sy(200), (40 / 300) * courtW);
+    // Free-throw circle — app: cx=150 cy=200 r=30
+    doc.setLineWidth(0.5);
+    doc.ellipse(sx(150), sy(200), 30 * scaleX, 30 * scaleY);
 
-    doc.line(sx(40), sy(280), sx(40), sy(170));
-    doc.line(sx(260), sy(280), sx(260), sy(170));
+    // 3-point arc — app path: M 40,170 L 40,280 (sideline) and arc Q 150,40 260,170 then L 260,280
+    // Sidelines (corner triple lines)
+    doc.setLineWidth(0.5);
+    doc.line(sx(40), sy(170), sx(40), sy(280));
+    doc.line(sx(260), sy(170), sx(260), sy(280));
 
-    for (let angle = 0; angle <= 180; angle += 8) {
-      const rad = (angle * Math.PI) / 180;
-      const rad2 = ((angle + 8) * Math.PI) / 180;
-      const x1 = 150 + 110 * Math.cos(rad), y1 = 220 - 110 * Math.sin(rad);
-      const x2 = 150 + 110 * Math.cos(rad2), y2 = 220 - 110 * Math.sin(rad2);
-      doc.line(sx(x1), sy(y1), sx(x2), sy(y2));
+    // 3-pt arc — sample the quadratic Bezier Q(150,40) from (40,170) to (260,170)
+    const arcSteps = 36;
+    let prevX = 40, prevY = 170;
+    for (let i = 1; i <= arcSteps; i++) {
+      const t = i / arcSteps;
+      // Quadratic Bezier: (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
+      const u = 1 - t;
+      const cx = u * u * 40 + 2 * u * t * 150 + t * t * 260;
+      const cy = u * u * 170 + 2 * u * t * 40 + t * t * 170;
+      doc.line(sx(prevX), sy(prevY), sx(cx), sy(cy));
+      prevX = cx; prevY = cy;
     }
 
-    doc.setFillColor(...GOLD);
-    doc.circle(sx(150), sy(270), 2, 'F');
-    doc.setDrawColor(...GOLD);
-    doc.circle(sx(150), sy(270), 3.5);
+    // Half-court line (app draws it at y=0 — top of the half court)
+    doc.setLineWidth(0.6);
+    doc.line(sx(0), sy(0), sx(300), sy(0));
 
+    // Hoop + backboard — app: hoop circle cx=150 cy=265 r=5; backboard line 140,270 → 160,270
+    doc.setDrawColor(...GOLD);
+    doc.setFillColor(...GOLD);
+    doc.setLineWidth(0.6);
+    doc.circle(sx(150), sy(265), 5 * scaleX);
+    doc.line(sx(140), sy(270), sx(160), sy(270));
+
+    // Shot markers — coords are stored as 0-100 percentages of the 300×280 viewBox
     shotsForChart.forEach(s => {
       const px = courtX + (s.x / 100) * courtW;
       const py = courtY + (s.y / 100) * courtH;
@@ -772,15 +792,15 @@ export async function generatePdfReport(
         doc.setFillColor(...SUCCESS);
         // @ts-ignore
         doc.setGState(new doc.GState({ opacity: 0.85 }));
-        doc.circle(px, py, 2.2, 'F');
+        doc.circle(px, py, 1.8, 'F');
         // @ts-ignore
         doc.setGState(new doc.GState({ opacity: 1 }));
         doc.setFillColor(...WHITE);
-        doc.circle(px, py, 0.7, 'F');
+        doc.circle(px, py, 0.5, 'F');
       } else {
         doc.setDrawColor(...DESTRUCTIVE);
-        doc.setLineWidth(0.6);
-        const d = 1.6;
+        doc.setLineWidth(0.55);
+        const d = 1.4;
         doc.line(px - d, py - d, px + d, py + d);
         doc.line(px - d, py + d, px + d, py - d);
       }
