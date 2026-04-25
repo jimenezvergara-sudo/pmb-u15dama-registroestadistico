@@ -553,8 +553,6 @@ export async function generatePdfReport(
     y = (doc as any).lastAutoTable.finalY + 8;
   }
 
-  y = (doc as any).lastAutoTable.finalY + 8;
-
   // ── Team totals ──
   const tt = boxRows.reduce((a, r) => ({
     pts: a.pts + r.pts, fgm: a.fgm + r.fgm, fga: a.fga + r.fga,
