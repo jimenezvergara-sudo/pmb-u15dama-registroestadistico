@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { QuarterId, QUARTER_LABELS, ActionType } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
-import QuickActionFAB from '@/components/QuickActionFAB';
+
 import SubstitutionDialog from '@/components/SubstitutionDialog';
 import StartingLineup from '@/components/StartingLineup';
 import LiveGameReport from '@/components/LiveGameReport';
 import LiveActionLog from '@/components/LiveActionLog';
+import LiveActionSheet from '@/components/LiveActionSheet';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2, BarChart3, Pause, Play } from 'lucide-react';
@@ -41,6 +42,14 @@ const LiveGame: React.FC = () => {
   const [pendingQuarter, setPendingQuarter] = useState<QuarterId | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [actionSheetOpen, setActionSheetOpen] = useState(false);
+  // Flash visual de confirmación tras registrar una acción
+  const [flash, setFlash] = useState<{ playerId: string; color: string } | null>(null);
+
+  const triggerFlash = (playerId: string, color: string) => {
+    setFlash({ playerId, color });
+    window.setTimeout(() => setFlash(f => (f && f.playerId === playerId ? null : f)), 500);
+  };
 
   // Periodically flush court time every 10s (skip while paused)
   useEffect(() => {
@@ -128,6 +137,7 @@ const LiveGame: React.FC = () => {
   const handlePlayerSelect = (playerId: string) => {
     setSelectedPlayer(playerId);
     setPendingShot(null);
+    setActionSheetOpen(true);
   };
 
   const handleZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
@@ -153,6 +163,7 @@ const LiveGame: React.FC = () => {
       duration: 1500,
       action: { label: 'Deshacer', onClick: undoLastShot },
     });
+    triggerFlash(selectedPlayer, made ? 'hsl(142_72%_38%)' : 'hsl(0_75%_50%)');
     setPendingShot(null);
     setSelectedPlayer(null);
   };
@@ -167,18 +178,30 @@ const LiveGame: React.FC = () => {
       toast('Selecciona una jugadora primero', { duration: 1500 });
       return;
     }
-    recordAction(selectedPlayer, action);
-    const player = activeGame.roster.find(p => p.id === selectedPlayer);
+    const playerId = selectedPlayer;
+    recordAction(playerId, action);
+    const player = activeGame.roster.find(p => p.id === playerId);
     const labels: Record<string, string> = {
       rebound: 'Rebote', offensive_rebound: 'Rebote Ofensivo', defensive_rebound: 'Rebote Defensivo',
       assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida', foul: 'Falta',
     };
+    const colors: Record<string, string> = {
+      offensive_rebound: 'hsl(220_15%_25%)',
+      defensive_rebound: 'hsl(220_15%_35%)',
+      rebound: 'hsl(220_15%_30%)',
+      assist: 'hsl(45_95%_50%)',
+      steal: 'hsl(142_72%_38%)',
+      turnover: 'hsl(0_75%_50%)',
+      foul: 'hsl(25_95%_53%)',
+    };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
+    triggerFlash(playerId, colors[action] || 'hsl(var(--primary))');
+    setActionSheetOpen(false);
     setSelectedPlayer(null);
 
     if (action === 'foul') {
       const currentFouls = (activeGame.actions || []).filter(
-        a => a.playerId === selectedPlayer && a.type === 'foul'
+        a => a.playerId === playerId && a.type === 'foul'
       ).length + 1; // +1 for the one just recorded
       if (currentFouls >= 5) {
         toast.error(`⚠️ #${player?.number} ${player?.name} tiene ${currentFouls} faltas!`, {
@@ -339,23 +362,36 @@ const LiveGame: React.FC = () => {
           {activeGame.roster.map(player => {
             const isOnCourt = onCourtIds.includes(player.id);
             const fouls = (activeGame.actions || []).filter(a => a.playerId === player.id && a.type === 'foul').length;
+            const isSelected = selectedPlayer === player.id;
+            const isFlashing = flash?.playerId === player.id;
             return (
               <button
                 key={player.id}
                 onClick={() => handlePlayerSelect(player.id)}
-                className={`flex flex-col items-center py-2 px-1 rounded-lg tap-feedback min-h-[52px] transition-colors relative ${
-                  selectedPlayer === player.id
-                    ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
-                    : 'bg-card text-card-foreground hover:bg-accent'
+                style={isFlashing ? { backgroundColor: flash!.color, color: '#fff' } : undefined}
+                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl tap-feedback min-h-[78px] transition-all relative border-2 ${
+                  isFlashing
+                    ? 'scale-105 border-white shadow-lg'
+                    : isSelected
+                      ? 'bg-[hsl(220_25%_15%)] text-white border-primary ring-2 ring-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.35)] scale-[1.03]'
+                      : 'bg-[hsl(220_20%_18%)] text-white border-transparent hover:border-primary/50'
                 } ${!isOnCourt ? 'opacity-40' : ''}`}
               >
-                <span className="text-lg font-extrabold leading-none">{player.number}</span>
-                <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-center">{player.name.split(' ')[0]}</span>
+                <span
+                  className={`text-[32px] font-black leading-none ${
+                    isSelected || isFlashing ? 'text-white' : 'text-[hsl(45_95%_55%)]'
+                  }`}
+                >
+                  {player.number}
+                </span>
+                <span className="text-[11px] font-semibold leading-tight mt-1 truncate w-full text-center text-white/80">
+                  {player.name.split(' ')[0]}
+                </span>
                 {isOnCourt && (
-                  <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-background" />
                 )}
                 {fouls > 0 && (
-                  <span className={`absolute top-0.5 left-0.5 min-w-[16px] h-4 rounded-full text-[9px] font-black flex items-center justify-center px-0.5 ${
+                  <span className={`absolute top-1 left-1 min-w-[18px] h-[18px] rounded-full text-[10px] font-black flex items-center justify-center px-1 ${
                     fouls >= 5 ? 'bg-destructive text-destructive-foreground animate-pulse' : fouls === 4 ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'
                   }`}>
                     {fouls}F
@@ -367,19 +403,18 @@ const LiveGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Free throw + Actions + Substitution */}
-      <div className="grid grid-cols-3 gap-1.5 px-3 pt-4 mb-1">
+      {/* Free throw + Substitution (acciones se acceden tocando jugadora) */}
+      <div className="grid grid-cols-2 gap-2 px-3 pt-4 mb-1">
         <button
           onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
-          className={`w-full px-3 py-2 rounded-lg text-xs font-bold tap-feedback border-2 flex items-center justify-center gap-1 ${
+          className={`w-full min-h-[48px] px-4 py-3 rounded-xl text-sm font-bold tap-feedback border-2 flex items-center justify-center gap-1.5 ${
             pendingShot?.points === 1
               ? 'bg-primary text-primary-foreground border-primary'
               : 'bg-card text-card-foreground border-border hover:border-primary'
           }`}
         >
-          🏀 TL
+          🏀 Tiro Libre
         </button>
-        <QuickActionFAB disabled={!selectedPlayer} onAction={handleQuickAction} />
         <SubstitutionDialog
           roster={activeGame.roster}
           onCourtIds={onCourtIds}
@@ -423,14 +458,21 @@ const LiveGame: React.FC = () => {
             </div>
           </div>
         )}
-        <div className="flex gap-2 px-3 pb-2 pt-1">
-          <Button variant="outline" size="sm" onClick={handleUndo} className="flex-1 gap-1">
-            <Undo2 className="w-4 h-4" /> Deshacer
+        <div className="flex gap-3 px-3 pb-3 pt-2">
+          <Button
+            variant="outline"
+            onClick={handleUndo}
+            className="flex-1 gap-2 min-h-[48px] text-sm font-bold rounded-xl"
+          >
+            <Undo2 className="w-5 h-5" /> Deshacer
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="secondary" size="sm" className="flex-1">
-                Finalizar
+              <Button
+                variant="secondary"
+                className="flex-1 min-h-[48px] text-sm font-bold rounded-xl"
+              >
+                ⏹ Finalizar
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -463,6 +505,21 @@ const LiveGame: React.FC = () => {
       {showReport && activeGame && (
         <LiveGameReport game={activeGame} onClose={() => setShowReport(false)} />
       )}
+      {/* Bottom-sheet de acciones rápidas (no flota sobre las jugadoras) */}
+      <LiveActionSheet
+        open={actionSheetOpen && !!selectedPlayer}
+        playerLabel={(() => {
+          const p = activeGame.roster.find(p => p.id === selectedPlayer);
+          return p ? `#${p.number} ${p.name}` : '';
+        })()}
+        onClose={() => { setActionSheetOpen(false); setSelectedPlayer(null); }}
+        onAction={handleQuickAction}
+        onShotShortcut={() => {
+          // Cierra el sheet y mantiene la jugadora seleccionada para tocar la cancha
+          setActionSheetOpen(false);
+          toast('Toca la zona en la cancha para registrar el tiro', { duration: 2000 });
+        }}
+      />
     </div>
   );
 };
