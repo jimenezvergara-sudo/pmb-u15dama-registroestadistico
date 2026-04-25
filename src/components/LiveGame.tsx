@@ -178,18 +178,30 @@ const LiveGame: React.FC = () => {
       toast('Selecciona una jugadora primero', { duration: 1500 });
       return;
     }
-    recordAction(selectedPlayer, action);
-    const player = activeGame.roster.find(p => p.id === selectedPlayer);
+    const playerId = selectedPlayer;
+    recordAction(playerId, action);
+    const player = activeGame.roster.find(p => p.id === playerId);
     const labels: Record<string, string> = {
       rebound: 'Rebote', offensive_rebound: 'Rebote Ofensivo', defensive_rebound: 'Rebote Defensivo',
       assist: 'Asistencia', steal: 'Robo', turnover: 'Pérdida', foul: 'Falta',
     };
+    const colors: Record<string, string> = {
+      offensive_rebound: 'hsl(220_15%_25%)',
+      defensive_rebound: 'hsl(220_15%_35%)',
+      rebound: 'hsl(220_15%_30%)',
+      assist: 'hsl(45_95%_50%)',
+      steal: 'hsl(142_72%_38%)',
+      turnover: 'hsl(0_75%_50%)',
+      foul: 'hsl(25_95%_53%)',
+    };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
+    triggerFlash(playerId, colors[action] || 'hsl(var(--primary))');
+    setActionSheetOpen(false);
     setSelectedPlayer(null);
 
     if (action === 'foul') {
       const currentFouls = (activeGame.actions || []).filter(
-        a => a.playerId === selectedPlayer && a.type === 'foul'
+        a => a.playerId === playerId && a.type === 'foul'
       ).length + 1; // +1 for the one just recorded
       if (currentFouls >= 5) {
         toast.error(`⚠️ #${player?.number} ${player?.name} tiene ${currentFouls} faltas!`, {
