@@ -468,12 +468,12 @@ const LiveGame: React.FC = () => {
             <div className="absolute left-1/2 top-2 -translate-x-1/2 z-30 w-[92%] max-w-md p-2 rounded-2xl bg-card border-2 border-primary shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
               <div className="grid grid-cols-3 gap-1.5" style={{ maxHeight: 120 }}>
                 {([
-                  { key: 'offensive_rebound', label: 'Reb OF', emoji: '💪', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
-                  { key: 'defensive_rebound', label: 'Reb DEF', emoji: '🛡️', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
-                  { key: 'assist', label: 'Asistencia', emoji: '🤝', cls: 'bg-accent text-accent-foreground hover:bg-accent/90' },
+                  { key: 'offensive_rebound', label: 'Reb OF', emoji: '💪', cls: 'bg-primary text-primary-foreground hover:bg-primary/90' },
+                  { key: 'defensive_rebound', label: 'Reb DEF', emoji: '🛡️', cls: 'bg-primary text-primary-foreground hover:bg-primary/90' },
+                  { key: 'assist', label: 'Asistencia', emoji: '🤝', cls: 'bg-primary text-primary-foreground hover:bg-primary/90' },
                   { key: 'steal', label: 'Robo', emoji: '⚡', cls: 'bg-primary text-primary-foreground hover:bg-primary/90' },
-                  { key: 'turnover', label: 'Pérdida', emoji: '💨', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
-                  { key: 'foul', label: 'Falta', emoji: '✋', cls: 'bg-accent text-accent-foreground hover:bg-accent/90' },
+                  { key: 'turnover', label: 'Pérdida', emoji: '💨', cls: 'bg-primary text-primary-foreground hover:bg-primary/90' },
+                  { key: 'foul', label: 'Falta', emoji: '✋', cls: 'bg-primary text-primary-foreground hover:bg-primary/90' },
                 ] as const).map(a => (
                   <button
                     key={a.key}
