@@ -463,59 +463,95 @@ export async function generatePdfReport(
   }).sort((a, b) => b.pts - a.pts);
 
   const isSingleGame = filteredGames.length === 1;
-  const tableBody = boxRows.map(r => [
-    isSingleGame ? `#${r.number} ${r.name}` : r.name,
-    `${r.fgm}/${r.fga}`, `${r.fgPct}%`,
-    `${r.twoM}/${r.twoA}`, `${r.twoPct}%`,
-    `${r.threeM}/${r.threeA}`, `${r.threePct}%`,
-    `${r.ftM}/${r.ftA}`, `${r.ftPct}%`,
-    `${r.pts}`, `${r.oReb}`, `${r.dReb}`, `${r.reb}`, `${r.ast}`, `${r.stl}`, `${r.tov}`, `${r.pf}`,
-    `${r.eFG}%`, `${r.ts}%`,
-  ]);
 
-  autoTable(doc, {
-    startY: y,
-    head: [['Jugadora', 'TC', '%', '2PT', '%', '3PT', '%', 'TL', '%', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG%', 'TS%']],
-    body: tableBody,
-    margin: { left: M, right: M },
-    styles: { fontSize: 6.5, cellPadding: 1.5, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2 },
-    headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 6.5 },
-    bodyStyles: { fillColor: WHITE },
-    alternateRowStyles: { fillColor: TABLE_ALT },
-    columnStyles: {
-      0: { cellWidth: 28, fontStyle: 'bold' },
-      9: { fontStyle: 'bold', halign: 'center', fillColor: [245, 240, 255] },
-      1: { halign: 'center' }, 2: { halign: 'center' }, 3: { halign: 'center' }, 4: { halign: 'center' },
-      5: { halign: 'center' }, 6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
-      10: { halign: 'center' }, 11: { halign: 'center' }, 12: { halign: 'center' }, 13: { halign: 'center' },
-      14: { halign: 'center' }, 15: { halign: 'center' }, 16: { halign: 'center' },
-      17: { halign: 'center' }, 18: { halign: 'center' },
-    },
-    theme: 'grid',
-    didParseCell: (data) => {
-      if (data.section === 'body') {
-        const ci = data.column.index;
-        const val = parseInt(data.cell.raw as string);
-        if ([2, 4, 6, 8].includes(ci) && !isNaN(val)) {
-          if (ci === 6 && val >= 40) data.cell.styles.textColor = [...SUCCESS];
-          else if (ci === 6 && val < 25 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
-          else if ([2, 4].includes(ci) && val >= 50) data.cell.styles.textColor = [...SUCCESS];
-          else if ([2, 4].includes(ci) && val < 30 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
-          else if (ci === 8 && val >= 75) data.cell.styles.textColor = [...SUCCESS];
-          else if (ci === 8 && val < 50 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+  // Helper: render the box score body in chunks of 12 across multiple pages if needed
+  const renderBoxScoreChunk = (rows: BoxScoreRow[], startY: number) => {
+    const tableBody = rows.map(r => [
+      isSingleGame ? `#${r.number} ${r.name}` : r.name,
+      r.fga > 0 ? `${r.fgm}/${r.fga} (${r.fgPct}%)` : '—',
+      r.twoA > 0 ? `${r.twoM}/${r.twoA} (${r.twoPct}%)` : '—',
+      r.threeA > 0 ? `${r.threeM}/${r.threeA} (${r.threePct}%)` : '—',
+      r.ftA > 0 ? `${r.ftM}/${r.ftA} (${r.ftPct}%)` : '—',
+      `${r.pts}`,
+      `${r.oReb}`, `${r.dReb}`, `${r.reb}`,
+      `${r.ast}`, `${r.stl}`, `${r.tov}`, `${r.pf}`,
+      r.fga > 0 ? `${r.eFG}%` : '—',
+      r.fga > 0 ? `${r.ts}%` : '—',
+    ]);
+
+    autoTable(doc, {
+      startY,
+      head: [['Jugadora', 'TC', '2PT', '3PT', 'TL', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG%', 'TS%']],
+      body: tableBody,
+      margin: { left: M, right: M },
+      styles: { fontSize: 8, cellPadding: 2.2, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2, valign: 'middle' },
+      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 8, halign: 'center' },
+      bodyStyles: { fillColor: WHITE },
+      alternateRowStyles: { fillColor: TABLE_ALT },
+      columnStyles: {
+        0: { cellWidth: 32, fontStyle: 'bold', halign: 'left' },
+        1: { halign: 'center', cellWidth: 18 },
+        2: { halign: 'center', cellWidth: 18 },
+        3: { halign: 'center', cellWidth: 18 },
+        4: { halign: 'center', cellWidth: 18 },
+        5: { fontStyle: 'bold', halign: 'center', fillColor: [245, 240, 255], cellWidth: 11 },
+        6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
+        9: { halign: 'center' }, 10: { halign: 'center' }, 11: { halign: 'center' }, 12: { halign: 'center' },
+        13: { halign: 'center' }, 14: { halign: 'center' },
+      },
+      theme: 'grid',
+      didParseCell: (data) => {
+        if (data.section === 'body') {
+          const ci = data.column.index;
+          const raw = String(data.cell.raw ?? '');
+          const pctMatch = raw.match(/\((\d+)%\)/);
+          // Color-code shooting cells (TC, 2PT, 3PT, TL) by their %
+          if ([1, 2, 3, 4].includes(ci) && pctMatch) {
+            const v = parseInt(pctMatch[1]);
+            const isFt = ci === 4;
+            const isThree = ci === 3;
+            if (isFt) {
+              if (v >= 75) data.cell.styles.textColor = [...SUCCESS];
+              else if (v < 50 && v > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+            } else if (isThree) {
+              if (v >= 40) data.cell.styles.textColor = [...SUCCESS];
+              else if (v < 25 && v > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+            } else {
+              if (v >= 50) data.cell.styles.textColor = [...SUCCESS];
+              else if (v < 30 && v > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+            }
+          }
+          // eFG% / TS%
+          if ([13, 14].includes(ci)) {
+            const v = parseInt(raw);
+            if (!isNaN(v)) {
+              if (v >= 55) data.cell.styles.textColor = [...SUCCESS];
+              else if (v < 40 && v > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
+            }
+          }
+          // TOV highlight
+          if (ci === 11 && parseInt(raw) >= 4) data.cell.styles.textColor = [...DESTRUCTIVE];
+          // PTS column always purple bold
+          if (ci === 5) data.cell.styles.textColor = [...PURPLE];
         }
-        // eFG% and TS% color coding
-        if ([17, 18].includes(ci) && !isNaN(val)) {
-          if (val >= 55) data.cell.styles.textColor = [...SUCCESS];
-          else if (val < 40 && val > 0) data.cell.styles.textColor = [...DESTRUCTIVE];
-        }
-        // TOV highlight (red if high)
-        if (ci === 15 && val >= 4) data.cell.styles.textColor = [...DESTRUCTIVE];
-        // PTS column
-        if (ci === 9) data.cell.styles.textColor = [...PURPLE];
-      }
-    },
-  });
+      },
+    });
+  };
+
+  // Split into chunks of 12 — one chunk per page if needed
+  const chunkSize = 12;
+  for (let i = 0; i < boxRows.length; i += chunkSize) {
+    if (i > 0) {
+      drawFooter(pageNum);
+      doc.addPage();
+      drawPageBg();
+      pageNum++;
+      drawHeader();
+      sectionTitle(`Box Score (cont. ${Math.floor(i / chunkSize) + 1})`);
+    }
+    renderBoxScoreChunk(boxRows.slice(i, i + chunkSize), y);
+    y = (doc as any).lastAutoTable.finalY + 8;
+  }
 
   y = (doc as any).lastAutoTable.finalY + 8;
 
