@@ -138,6 +138,7 @@ const LiveGame: React.FC = () => {
   const handlePlayerSelect = (playerId: string) => {
     setSelectedPlayer(playerId);
     setPendingShot(null);
+    setActionsPanelOpen(false); // Cambiar de jugadora cierra el panel
   };
 
   const handleZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
