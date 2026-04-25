@@ -460,7 +460,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">{item.label}</p>
                 {item.data ? (
                   <>
-                    <p className="text-xs font-bold text-foreground mt-1 truncate">#{item.data.player.number} {item.data.player.name.split(' ')[0]}</p>
+                    <p className="text-xs font-bold text-foreground mt-1 truncate">{!isAggregate ? `#${item.data.player.number} ` : ''}{item.data.player.name.split(' ')[0]}</p>
                     <p className="text-lg font-black text-primary leading-tight">{item.pct}%</p>
                     <p className="text-[10px] text-muted-foreground">{item.made}</p>
                   </>
