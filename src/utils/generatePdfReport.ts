@@ -146,12 +146,12 @@ export async function generatePdfReport(
 
   // Filter badge
   doc.setFillColor(...CARD_BG);
-  doc.roundedRect(M, y, W - M * 2, 7, 3, 3, 'F');
-  doc.setFontSize(7);
+  doc.roundedRect(M, y, W - M * 2, 8, 3, 3, 'F');
+  doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${options.filterLabel}  ·  ${options.gameLabel}`, M + 4, y + 5);
-  y += 12;
+  doc.text(`${options.filterLabel}  ·  ${options.gameLabel}`, M + 4, y + 5.5);
+  y += 13;
 
   // ── Team summary cards ──
   const totalGames = filteredGames.length;
