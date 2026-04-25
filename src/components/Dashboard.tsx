@@ -477,14 +477,16 @@ const Dashboard: React.FC = () => {
       <div className="bg-card rounded-xl p-3">
         <p className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Líderes de Eficiencia</p>
         <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: 'Triples', icon: <Target className="w-4 h-4" />, data: efficiencyLeaders.triples, pct: efficiencyLeaders.triples?.threePct, made: efficiencyLeaders.triples ? `${efficiencyLeaders.triples.threeM}/${efficiencyLeaders.triples.threeA}` : '-', volume: efficiencyLeaders.triples?.threeA ?? 0, min: MIN_TRIPLES },
-            { label: 'Dobles', icon: <CircleDot className="w-4 h-4" />, data: efficiencyLeaders.dobles, pct: efficiencyLeaders.dobles?.twoPct, made: efficiencyLeaders.dobles ? `${efficiencyLeaders.dobles.twoM}/${efficiencyLeaders.dobles.twoA}` : '-', volume: efficiencyLeaders.dobles?.twoA ?? 0, min: MIN_DOBLES },
-            { label: 'Tiros Libres', icon: <Crosshair className="w-4 h-4" />, data: efficiencyLeaders.tl, pct: efficiencyLeaders.tl?.ftPct, made: efficiencyLeaders.tl ? `${efficiencyLeaders.tl.ftM}/${efficiencyLeaders.tl.ftA}` : '-', volume: efficiencyLeaders.tl?.ftA ?? 0, min: MIN_FT },
-            { label: 'eFG%', icon: <Target className="w-4 h-4" />, data: efficiencyLeaders.efg, pct: efficiencyLeaders.efg?.eFG, made: efficiencyLeaders.efg ? `${efficiencyLeaders.efg.fgm}/${efficiencyLeaders.efg.fga}` : '-', volume: efficiencyLeaders.efg?.fga ?? 0, min: MIN_FGA },
-            { label: 'TS%', icon: <Crosshair className="w-4 h-4" />, data: efficiencyLeaders.ts, pct: efficiencyLeaders.ts?.ts, made: efficiencyLeaders.ts ? `${efficiencyLeaders.ts.fgm}/${efficiencyLeaders.ts.fga}` : '-', volume: efficiencyLeaders.ts?.fga ?? 0, min: MIN_FGA },
-          ].map(item => {
-            const lowSample = item.data && item.volume < item.min * 1.5;
+          {([
+            { kind: 'pct' as const, label: 'Triples', icon: <Target className="w-4 h-4" />, data: efficiencyLeaders.triples, pct: efficiencyLeaders.triples?.threePct ?? 0, made: efficiencyLeaders.triples ? `${efficiencyLeaders.triples.threeM}/${efficiencyLeaders.triples.threeA}` : '-', volume: efficiencyLeaders.triples?.threeA ?? 0, min: MIN_TRIPLES },
+            { kind: 'pct' as const, label: 'Dobles', icon: <CircleDot className="w-4 h-4" />, data: efficiencyLeaders.dobles, pct: efficiencyLeaders.dobles?.twoPct ?? 0, made: efficiencyLeaders.dobles ? `${efficiencyLeaders.dobles.twoM}/${efficiencyLeaders.dobles.twoA}` : '-', volume: efficiencyLeaders.dobles?.twoA ?? 0, min: MIN_DOBLES },
+            { kind: 'pct' as const, label: 'Tiros Libres', icon: <Crosshair className="w-4 h-4" />, data: efficiencyLeaders.tl, pct: efficiencyLeaders.tl?.ftPct ?? 0, made: efficiencyLeaders.tl ? `${efficiencyLeaders.tl.ftM}/${efficiencyLeaders.tl.ftA}` : '-', volume: efficiencyLeaders.tl?.ftA ?? 0, min: MIN_FT },
+            { kind: 'count' as const, label: 'Rebotes', icon: <Grab className="w-4 h-4" />, data: efficiencyLeaders.reb, count: efficiencyLeaders.reb?.reb ?? 0 },
+            { kind: 'count' as const, label: 'Asistencias', icon: <Handshake className="w-4 h-4" />, data: efficiencyLeaders.ast, count: efficiencyLeaders.ast?.ast ?? 0 },
+            { kind: 'count' as const, label: 'Robos', icon: <ShieldCheck className="w-4 h-4" />, data: efficiencyLeaders.stl, count: efficiencyLeaders.stl?.stl ?? 0 },
+          ]).map(item => {
+            const lowSample = item.kind === 'pct' && item.data && item.volume < item.min * 1.5;
+            const perGame = item.kind === 'count' && item.data && numGames > 0 ? (item.count / numGames).toFixed(1) : null;
             return (
               <Card key={item.label} className="border-border/40 bg-background">
                 <CardContent className="p-3 text-center">
@@ -493,14 +495,23 @@ const Dashboard: React.FC = () => {
                   {item.data ? (
                     <>
                       <p className="text-xs font-bold text-foreground mt-1 truncate">{!isAggregate ? `#${item.data.player.number} ` : ''}{item.data.player.name.split(' ')[0]}</p>
-                      <p className="text-lg font-black text-primary leading-tight">{item.pct}%</p>
-                      <p className="text-[10px] text-muted-foreground">({item.made})</p>
-                      {lowSample && (
-                        <p className="mt-1 inline-block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-500/40">⚠️ Muestra pequeña ({item.volume})</p>
+                      {item.kind === 'pct' ? (
+                        <>
+                          <p className="text-lg font-black text-primary leading-tight">{item.pct}%</p>
+                          <p className="text-[10px] text-muted-foreground">({item.made})</p>
+                          {lowSample && (
+                            <p className="mt-1 inline-block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-500/40">⚠️ Muestra pequeña ({item.volume})</p>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-lg font-black text-primary leading-tight">{item.count}</p>
+                          {perGame && <p className="text-[10px] text-muted-foreground">{perGame}/partido</p>}
+                        </>
                       )}
                     </>
                   ) : (
-                    <p className="text-[10px] text-muted-foreground italic mt-2 leading-tight">Sin datos suficientes — se requieren más partidos (mín. {item.min} intentos)</p>
+                    <p className="text-[10px] text-muted-foreground italic mt-2 leading-tight">{item.kind === 'pct' ? `Sin datos suficientes — se requieren más partidos (mín. ${item.min} intentos)` : 'Sin datos suficientes — se requieren más partidos'}</p>
                   )}
                 </CardContent>
               </Card>
