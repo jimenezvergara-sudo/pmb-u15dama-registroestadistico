@@ -2,10 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { Game, QuarterId, QUARTER_LABELS, ActionType } from '@/types/basketball';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import CourtDiagram from '@/components/CourtDiagram';
 import { toast } from 'sonner';
-import { Trash2, Plus, ChevronDown, Trophy } from 'lucide-react';
+import { Trash2, Plus, ChevronDown, Trophy, Calendar, Users } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 interface Props {
@@ -57,11 +59,13 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
   const [tab, setTab] = useState<TabId>('all');
   const [addOpen, setAddOpen] = useState(false);
   const [addTab, setAddTab] = useState<AddTab>('shot');
+  const [courtRotation, setCourtRotation] = useState(0);
 
   // Shot form
   const [shotPlayerId, setShotPlayerId] = useState('');
   const [shotQuarter, setShotQuarter] = useState<QuarterId>('Q1');
   const [shotPoints, setShotPoints] = useState<1 | 2 | 3>(2);
+  const [shotCoords, setShotCoords] = useState<{ x: number; y: number } | null>(null);
 
   // Opponent form
   const [oppQuarter, setOppQuarter] = useState<QuarterId>('Q1');
@@ -76,6 +80,7 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
     setShotQuarter(game.currentQuarter);
     setOppQuarter(game.currentQuarter);
     setActQuarter(game.currentQuarter);
+    setShotCoords(null);
   }, [game]);
 
   const playerMap = useMemo(() => {
@@ -160,6 +165,10 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
 
   const addShot = (made: boolean) => {
     if (!shotPlayerId) return;
+    if (!shotCoords) {
+      toast.error('Toca la cancha para indicar la zona del tiro');
+      return;
+    }
     setEditedGame(g => ({
       ...g,
       shots: [
@@ -168,14 +177,15 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
           id: newId(),
           playerId: shotPlayerId,
           quarterId: shotQuarter,
-          x: 50,
-          y: 50,
+          x: shotCoords.x,
+          y: shotCoords.y,
           made,
           points: shotPoints,
           timestamp: Date.now(),
         },
       ],
     }));
+    setShotCoords(null);
     toast.success(`Tiro ${made ? 'anotado' : 'fallado'} agregado`);
   };
 
