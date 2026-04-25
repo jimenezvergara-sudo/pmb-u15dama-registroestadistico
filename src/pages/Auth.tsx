@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -23,8 +24,27 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
 
   const role = ROLE_INFO.find(r => r.key === selectedRole);
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      toast.error('Ingresa tu correo electrónico');
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Te enviamos un correo con el enlace para restablecer tu contraseña.');
+      setForgotMode(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,30 +153,70 @@ const Auth: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex rounded-lg bg-[hsl(268,40%,16%)] p-1 mb-5">
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(true)}
-                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
-                    isLogin
-                      ? 'bg-gradient-to-r from-primary to-[hsl(280,70%,55%)] text-primary-foreground shadow-lg'
-                      : 'text-[hsl(250,20%,65%)] hover:text-white'
-                  }`}
-                >
-                  Iniciar Sesión
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(false)}
-                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
-                    !isLogin
-                      ? 'bg-gradient-to-r from-[hsl(45,100%,45%)] to-[hsl(35,100%,50%)] text-[hsl(268,50%,12%)] shadow-lg'
-                      : 'text-[hsl(250,20%,65%)] hover:text-white'
-                  }`}
-                >
-                  Registrarse
-                </button>
-              </div>
+              {!forgotMode && (
+                <div className="flex rounded-lg bg-[hsl(268,40%,16%)] p-1 mb-5">
+                  <button
+                    type="button"
+                    onClick={() => setIsLogin(true)}
+                    className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
+                      isLogin
+                        ? 'bg-gradient-to-r from-primary to-[hsl(280,70%,55%)] text-primary-foreground shadow-lg'
+                        : 'text-[hsl(250,20%,65%)] hover:text-white'
+                    }`}
+                  >
+                    Iniciar Sesión
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsLogin(false)}
+                    className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
+                      !isLogin
+                        ? 'bg-gradient-to-r from-[hsl(45,100%,45%)] to-[hsl(35,100%,50%)] text-[hsl(268,50%,12%)] shadow-lg'
+                        : 'text-[hsl(250,20%,65%)] hover:text-white'
+                    }`}
+                  >
+                    Registrarse
+                  </button>
+                </div>
+              )}
+
+              {forgotMode ? (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-white text-lg font-bold mb-1">Recuperar contraseña</h3>
+                    <p className="text-[hsl(250,20%,65%)] text-xs">
+                      Te enviaremos un enlace a tu correo para crear una nueva contraseña.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-[hsl(250,20%,70%)] uppercase tracking-wider mb-1.5 block">
+                      Correo Electrónico
+                    </label>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="tu@correo.com"
+                      className="bg-[hsl(268,40%,16%)] border-[hsl(268,30%,28%)] text-white placeholder:text-[hsl(250,15%,40%)] focus-visible:ring-[hsl(45,100%,50%)]"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={loading}
+                    className="w-full h-12 font-bold text-base bg-gradient-to-r from-primary to-[hsl(280,70%,55%)] hover:from-[hsl(268,76%,58%)] hover:to-[hsl(280,70%,60%)] text-primary-foreground shadow-xl shadow-primary/30"
+                  >
+                    {loading ? 'Enviando...' : 'Enviar enlace'}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setForgotMode(false)}
+                    className="w-full text-center text-[hsl(250,20%,65%)] hover:text-white text-sm transition-colors"
+                  >
+                    ← Volver a iniciar sesión
+                  </button>
+                </div>
+              ) : (
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
