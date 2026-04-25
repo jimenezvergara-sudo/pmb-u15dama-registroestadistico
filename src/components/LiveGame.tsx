@@ -137,6 +137,7 @@ const LiveGame: React.FC = () => {
   const handlePlayerSelect = (playerId: string) => {
     setSelectedPlayer(playerId);
     setPendingShot(null);
+    setActionSheetOpen(true);
   };
 
   const handleZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
