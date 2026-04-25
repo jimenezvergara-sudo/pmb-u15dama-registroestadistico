@@ -214,14 +214,24 @@ const Dashboard: React.FC = () => {
   const ppg = numGames > 0 ? (totalPoints / numGames).toFixed(1) : '0';
   const oppPpg = numGames > 0 ? (totalOpponent / numGames).toFixed(1) : '0';
 
+  // Mínimos estadísticamente significativos para líderes de eficiencia
+  const MIN_TRIPLES = 5;
+  const MIN_DOBLES = 8;
+  const MIN_FT = 4;
+  const MIN_FGA = 10;
+
   const efficiencyLeaders = (() => {
-    const withTriples = boxScore.filter(r => r.threeA > 0).sort((a, b) => b.threePct - a.threePct || b.threeM - a.threeM);
-    const withDoubles = boxScore.filter(r => r.twoA > 0).sort((a, b) => b.twoPct - a.twoPct || b.twoM - a.twoM);
-    const withFt = boxScore.filter(r => r.ftA > 0).sort((a, b) => b.ftPct - a.ftPct || b.ftM - a.ftM);
+    const withTriples = boxScore.filter(r => r.threeA >= MIN_TRIPLES).sort((a, b) => b.threePct - a.threePct || b.threeM - a.threeM);
+    const withDoubles = boxScore.filter(r => r.twoA >= MIN_DOBLES).sort((a, b) => b.twoPct - a.twoPct || b.twoM - a.twoM);
+    const withFt = boxScore.filter(r => r.ftA >= MIN_FT).sort((a, b) => b.ftPct - a.ftPct || b.ftM - a.ftM);
+    const withEfg = boxScore.filter(r => r.fga >= MIN_FGA).sort((a, b) => b.eFG - a.eFG || b.fgm - a.fgm);
+    const withTs = boxScore.filter(r => r.fga >= MIN_FGA).sort((a, b) => b.ts - a.ts || b.pts - a.pts);
     return {
       triples: withTriples[0] || null,
       dobles: withDoubles[0] || null,
       tl: withFt[0] || null,
+      efg: withEfg[0] || null,
+      ts: withTs[0] || null,
     };
   })();
 
