@@ -262,6 +262,18 @@ const Auth: React.FC = () => {
                   />
                 </div>
 
+                {isLogin && (
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => setForgotMode(true)}
+                      className="text-[hsl(45,100%,65%)] hover:text-[hsl(45,100%,75%)] text-xs font-semibold transition-colors"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   disabled={loading}
@@ -274,6 +286,7 @@ const Auth: React.FC = () => {
                   {loading ? '...' : isLogin ? 'Entrar →' : 'Crear Cuenta →'}
                 </Button>
               </form>
+              )}
 
               <p className="text-center text-[hsl(250,15%,45%)] text-[11px] mt-6">
                 Tu rol real se valida en el servidor tras iniciar sesión.
