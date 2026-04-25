@@ -129,6 +129,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     number: number | null;
     mainValue: string;
     subValue: string;
+    contextValue?: string;
+    lowSample?: boolean;
+    emptyMessage?: string;
   }
 
   const leaders: LeaderCard[] = [
@@ -138,31 +141,43 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       name: topScorer?.name || null,
       number: topScorer?.number ?? null,
       mainValue: topScorer ? `${topScorer.totalPts}` : '—',
-      subValue: topScorer ? `Efic: ${topScorer.fieldPct.toFixed(0)}% TC` : '',
+      subValue: topScorer ? `${topScorer.fieldPct.toFixed(0)}% TC (${topScorer.fieldMade}/${topScorer.fieldAttempts})` : '',
+      contextValue: topScorer ? `${topScorer.gamesPlayed} ${topScorer.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      lowSample: topScorer ? topScorer.fieldAttempts < minFieldAttempts * 1.5 : false,
+      emptyMessage: `Sin datos suficientes — se requieren más partidos (mín. ${minFieldAttempts} TC intentados)`,
     },
     {
       title: 'Líder Dobles',
       icon: <CircleDot className="w-5 h-5" />,
       name: topDoubles?.name || null,
       number: topDoubles?.number ?? null,
-      mainValue: topDoubles ? `${topDoubles.doblesMade}` : '—',
-      subValue: topDoubles ? `Efic: ${topDoubles.doblesPct.toFixed(0)}% (${topDoubles.doblesMade}/${topDoubles.doblesAttempts})` : '',
+      mainValue: topDoubles ? `${topDoubles.doblesPct.toFixed(0)}%` : '—',
+      subValue: topDoubles ? `(${topDoubles.doblesMade}/${topDoubles.doblesAttempts})` : '',
+      contextValue: topDoubles ? `${topDoubles.gamesPlayed} ${topDoubles.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      lowSample: topDoubles ? topDoubles.doblesAttempts < minDoubleAttempts * 1.5 : false,
+      emptyMessage: `Sin datos suficientes — se requieren más partidos (mín. ${minDoubleAttempts} dobles intentados)`,
     },
     {
       title: 'Líder Triples',
       icon: <Target className="w-5 h-5" />,
       name: topThrees?.name || null,
       number: topThrees?.number ?? null,
-      mainValue: topThrees ? `${topThrees.triplesMade}` : '—',
-      subValue: topThrees ? `Efic: ${topThrees.triplesPct.toFixed(0)}% (${topThrees.triplesMade}/${topThrees.triplesAttempts})` : '',
+      mainValue: topThrees ? `${topThrees.triplesPct.toFixed(0)}%` : '—',
+      subValue: topThrees ? `(${topThrees.triplesMade}/${topThrees.triplesAttempts})` : '',
+      contextValue: topThrees ? `${topThrees.gamesPlayed} ${topThrees.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      lowSample: topThrees ? topThrees.triplesAttempts < minTripleAttempts * 1.5 : false,
+      emptyMessage: `Sin datos suficientes — se requieren más partidos (mín. ${minTripleAttempts} triples intentados)`,
     },
     {
       title: 'Mejor % TL',
       icon: <Percent className="w-5 h-5" />,
       name: topFt?.name || null,
       number: topFt?.number ?? null,
-      mainValue: topFt ? `${topFt.ftMade}` : '—',
-      subValue: topFt ? `Efic: ${topFt.ftPct.toFixed(0)}% (${topFt.ftMade}/${topFt.ftAttempts})` : '',
+      mainValue: topFt ? `${topFt.ftPct.toFixed(0)}%` : '—',
+      subValue: topFt ? `(${topFt.ftMade}/${topFt.ftAttempts})` : '',
+      contextValue: topFt ? `${topFt.gamesPlayed} ${topFt.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      lowSample: topFt ? topFt.ftAttempts < minFtAttempts * 1.5 : false,
+      emptyMessage: `Sin datos suficientes — se requieren más partidos (mín. ${minFtAttempts} TL intentados)`,
     },
     {
       title: 'Líder Rebotes',
@@ -170,7 +185,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       name: topReb?.name || null,
       number: topReb?.number ?? null,
       mainValue: topReb ? `${topReb.rebounds}` : '—',
-      subValue: topReb && totalGames > 0 ? `${(topReb.rebounds / totalGames).toFixed(1)} reb/partido` : '',
+      subValue: topReb && topReb.gamesPlayed > 0 ? `${(topReb.rebounds / topReb.gamesPlayed).toFixed(1)} reb/partido` : '',
+      contextValue: topReb ? `${topReb.gamesPlayed} ${topReb.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      emptyMessage: 'Sin datos suficientes — se requieren más partidos',
     },
     {
       title: 'Líder Asistencias',
@@ -178,7 +195,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       name: topAst?.name || null,
       number: topAst?.number ?? null,
       mainValue: topAst ? `${topAst.assists}` : '—',
-      subValue: topAst && totalGames > 0 ? `${(topAst.assists / totalGames).toFixed(1)} ast/partido` : '',
+      subValue: topAst && topAst.gamesPlayed > 0 ? `${(topAst.assists / topAst.gamesPlayed).toFixed(1)} ast/partido` : '',
+      contextValue: topAst ? `${topAst.gamesPlayed} ${topAst.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      emptyMessage: 'Sin datos suficientes — se requieren más partidos',
     },
     {
       title: 'Líder Robos',
@@ -186,7 +205,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       name: topStl?.name || null,
       number: topStl?.number ?? null,
       mainValue: topStl ? `${topStl.steals}` : '—',
-      subValue: topStl && totalGames > 0 ? `${(topStl.steals / totalGames).toFixed(1)} rob/partido` : '',
+      subValue: topStl && topStl.gamesPlayed > 0 ? `${(topStl.steals / topStl.gamesPlayed).toFixed(1)} rob/partido` : '',
+      contextValue: topStl ? `${topStl.gamesPlayed} ${topStl.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      emptyMessage: 'Sin datos suficientes — se requieren más partidos',
     },
   ];
 
