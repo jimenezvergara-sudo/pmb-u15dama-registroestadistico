@@ -362,23 +362,36 @@ const LiveGame: React.FC = () => {
           {activeGame.roster.map(player => {
             const isOnCourt = onCourtIds.includes(player.id);
             const fouls = (activeGame.actions || []).filter(a => a.playerId === player.id && a.type === 'foul').length;
+            const isSelected = selectedPlayer === player.id;
+            const isFlashing = flash?.playerId === player.id;
             return (
               <button
                 key={player.id}
                 onClick={() => handlePlayerSelect(player.id)}
-                className={`flex flex-col items-center py-2 px-1 rounded-lg tap-feedback min-h-[52px] transition-colors relative ${
-                  selectedPlayer === player.id
-                    ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
-                    : 'bg-card text-card-foreground hover:bg-accent'
+                style={isFlashing ? { backgroundColor: flash!.color, color: '#fff' } : undefined}
+                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl tap-feedback min-h-[78px] transition-all relative border-2 ${
+                  isFlashing
+                    ? 'scale-105 border-white shadow-lg'
+                    : isSelected
+                      ? 'bg-[hsl(220_25%_15%)] text-white border-primary ring-2 ring-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.35)] scale-[1.03]'
+                      : 'bg-[hsl(220_20%_18%)] text-white border-transparent hover:border-primary/50'
                 } ${!isOnCourt ? 'opacity-40' : ''}`}
               >
-                <span className="text-lg font-extrabold leading-none">{player.number}</span>
-                <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-center">{player.name.split(' ')[0]}</span>
+                <span
+                  className={`text-[32px] font-black leading-none ${
+                    isSelected || isFlashing ? 'text-white' : 'text-[hsl(45_95%_55%)]'
+                  }`}
+                >
+                  {player.number}
+                </span>
+                <span className="text-[11px] font-semibold leading-tight mt-1 truncate w-full text-center text-white/80">
+                  {player.name.split(' ')[0]}
+                </span>
                 {isOnCourt && (
-                  <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-background" />
                 )}
                 {fouls > 0 && (
-                  <span className={`absolute top-0.5 left-0.5 min-w-[16px] h-4 rounded-full text-[9px] font-black flex items-center justify-center px-0.5 ${
+                  <span className={`absolute top-1 left-1 min-w-[18px] h-[18px] rounded-full text-[10px] font-black flex items-center justify-center px-1 ${
                     fouls >= 5 ? 'bg-destructive text-destructive-foreground animate-pulse' : fouls === 4 ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'
                   }`}>
                     {fouls}F
@@ -390,19 +403,18 @@ const LiveGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Free throw + Actions + Substitution */}
-      <div className="grid grid-cols-3 gap-1.5 px-3 pt-4 mb-1">
+      {/* Free throw + Substitution (acciones se acceden tocando jugadora) */}
+      <div className="grid grid-cols-2 gap-2 px-3 pt-4 mb-1">
         <button
           onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
-          className={`w-full px-3 py-2 rounded-lg text-xs font-bold tap-feedback border-2 flex items-center justify-center gap-1 ${
+          className={`w-full min-h-[48px] px-4 py-3 rounded-xl text-sm font-bold tap-feedback border-2 flex items-center justify-center gap-1.5 ${
             pendingShot?.points === 1
               ? 'bg-primary text-primary-foreground border-primary'
               : 'bg-card text-card-foreground border-border hover:border-primary'
           }`}
         >
-          🏀 TL
+          🏀 Tiro Libre
         </button>
-        <QuickActionFAB disabled={!selectedPlayer} onAction={handleQuickAction} />
         <SubstitutionDialog
           roster={activeGame.roster}
           onCourtIds={onCourtIds}
