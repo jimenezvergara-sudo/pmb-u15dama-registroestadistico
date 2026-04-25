@@ -53,16 +53,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     });
   });
 
-  // Team totals for 20% threshold
-  const teamTotalDoubleAttempts = allShots.filter(s => s.points === 2).length;
-  const teamTotalTripleAttempts = allShots.filter(s => s.points === 3).length;
-  const teamTotalFtAttempts = allShots.filter(s => s.points === 1).length;
-  const teamTotalFieldAttempts = allShots.filter(s => s.points >= 2).length;
+  // Mínimos estadísticamente significativos para líderes de eficiencia
+  const MIN_TRIPLE_ATT = 5;
+  const MIN_DOUBLE_ATT = 8;
+  const MIN_FT_ATT = 4;
+  const MIN_FIELD_ATT = 10;
 
-  const minDoubleAttempts = Math.max(1, Math.floor(teamTotalDoubleAttempts * 0.2));
-  const minTripleAttempts = Math.max(1, Math.floor(teamTotalTripleAttempts * 0.2));
-  const minFtAttempts = Math.max(1, Math.floor(teamTotalFtAttempts * 0.2));
-  const minFieldAttempts = Math.max(1, Math.floor(teamTotalFieldAttempts * 0.2));
+  const minDoubleAttempts = MIN_DOUBLE_ATT;
+  const minTripleAttempts = MIN_TRIPLE_ATT;
+  const minFtAttempts = MIN_FT_ATT;
+  const minFieldAttempts = MIN_FIELD_ATT;
 
   const allActions = games.flatMap(g => g.actions || []);
 
