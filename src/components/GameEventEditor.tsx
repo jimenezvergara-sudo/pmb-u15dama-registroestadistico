@@ -353,17 +353,49 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
                     <select value={shotQuarter} onChange={e => setShotQuarter(e.target.value as QuarterId)} className={selectCls}>
                       {QUARTERS.map(q => <option key={q} value={q}>{QUARTER_LABELS[q]}</option>)}
                     </select>
+                  </div>
+
+                  {/* Interactive court — tap a zone to choose location and points */}
+                  <div className="rounded-md border border-border bg-background/60 p-1">
+                    <p className="text-[10px] text-muted-foreground text-center font-bold pt-1">
+                      {shotCoords
+                        ? `📍 Zona seleccionada — ${shotPoints} PT`
+                        : 'Toca la cancha para indicar la zona del tiro'}
+                    </p>
+                    <CourtDiagram
+                      onZoneTap={({ x, y, points }) => {
+                        setShotCoords({ x, y });
+                        setShotPoints(points);
+                      }}
+                      shots={shotCoords ? [{ x: shotCoords.x, y: shotCoords.y, made: true, points: shotPoints }] : []}
+                      rotation={courtRotation}
+                      onRotate={() => setCourtRotation(r => (r + 180) % 360)}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-muted-foreground font-bold">Puntos:</span>
                     <select value={shotPoints} onChange={e => setShotPoints(Number(e.target.value) as 1 | 2 | 3)} className={selectCls}>
                       <option value={1}>1 PT</option>
                       <option value={2}>2 PT</option>
                       <option value={3}>3 PT</option>
                     </select>
+                    {shotCoords && (
+                      <button
+                        type="button"
+                        onClick={() => setShotCoords(null)}
+                        className="text-[11px] text-muted-foreground hover:text-foreground underline ml-auto"
+                      >
+                        Cambiar zona
+                      </button>
+                    )}
                   </div>
+
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 h-8 text-xs" disabled={!shotPlayerId} onClick={() => addShot(true)}>
+                    <Button size="sm" className="flex-1 h-8 text-xs" disabled={!shotPlayerId || !shotCoords} onClick={() => addShot(true)}>
                       ✅ Anotado
                     </Button>
-                    <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" disabled={!shotPlayerId} onClick={() => addShot(false)}>
+                    <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" disabled={!shotPlayerId || !shotCoords} onClick={() => addShot(false)}>
                       ❌ Fallado
                     </Button>
                   </div>
