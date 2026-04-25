@@ -197,6 +197,7 @@ const LiveGame: React.FC = () => {
     };
     toast(`#${player?.number} ${player?.name}: ${labels[action]}`, { duration: 1500 });
     triggerFlash(playerId, colors[action] || 'hsl(var(--primary))');
+    setActionsPanelOpen(false); // Cierra el panel tras registrar
     setSelectedPlayer(null);
 
     if (action === 'foul') {
