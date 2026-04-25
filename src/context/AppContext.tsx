@@ -429,48 +429,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => {
       if (!s.activeGame) return s;
       const flushed = flushCourtTime(s.activeGame);
+      const isOnline = typeof navigator === 'undefined' ? true : navigator.onLine;
 
-      // Save to cloud asynchronously
+      // Always optimistically add to local games list (with local id)
+      const localGame = { ...flushed };
+
       if (userId && clubId) {
-        supabase.from('club_games' as any).insert({
-          club_id: clubId,
-          user_id: userId,
-          opponent_name: flushed.opponentName,
-          date: flushed.date,
-          category: flushed.category || 'U15',
-          roster: flushed.roster as any,
-          shots: flushed.shots as any,
-          actions: flushed.actions as any,
-          substitutions: flushed.substitutions as any,
-          opponent_scores: flushed.opponentScores as any,
-          on_court_player_ids: flushed.onCourtPlayerIds as any,
-          court_time_ms: flushed.courtTimeMs as any,
-          current_quarter: flushed.currentQuarter,
-          tournament_id: flushed.tournamentId || null,
-          opponent_team_id: flushed.opponentTeamId || null,
-          leg: flushed.leg || null,
-          is_home: flushed.isHome ?? null,
-          game_start_timestamp: flushed.gameStartTimestamp || null,
-          last_timer_snapshot: flushed.lastTimerSnapshot || null,
-        }).select().single().then(({ data }) => {
-          if (data) {
-            const row = data as any;
-            // Update the game in state with the cloud ID
-            setState(prev => ({
-              ...prev,
-              games: [
-                {
-                  ...flushed,
-                  id: row.id,
-                },
-                ...prev.games,
-              ],
-            }));
-          }
-        });
+        if (!isOnline) {
+          // Offline: queue the insert and add locally with the local id
+          enqueueSync({
+            kind: 'insertGame',
+            game: localGame,
+            clubId,
+            userId,
+            queuedAt: Date.now(),
+          });
+        } else {
+          // Online: try to insert; on failure queue
+          supabase.from('club_games' as any).insert({
+            club_id: clubId,
+            user_id: userId,
+            opponent_name: flushed.opponentName,
+            date: flushed.date,
+            category: flushed.category || 'U15',
+            roster: flushed.roster as any,
+            shots: flushed.shots as any,
+            actions: flushed.actions as any,
+            substitutions: flushed.substitutions as any,
+            opponent_scores: flushed.opponentScores as any,
+            on_court_player_ids: flushed.onCourtPlayerIds as any,
+            court_time_ms: flushed.courtTimeMs as any,
+            current_quarter: flushed.currentQuarter,
+            tournament_id: flushed.tournamentId || null,
+            opponent_team_id: flushed.opponentTeamId || null,
+            leg: flushed.leg || null,
+            is_home: flushed.isHome ?? null,
+            game_start_timestamp: flushed.gameStartTimestamp || null,
+            last_timer_snapshot: flushed.lastTimerSnapshot || null,
+          }).select().single().then(({ data, error }) => {
+            if (error) {
+              console.warn('[endGame] insert failed, queueing', error);
+              enqueueSync({
+                kind: 'insertGame',
+                game: localGame,
+                clubId,
+                userId,
+                queuedAt: Date.now(),
+              });
+              return;
+            }
+            if (data) {
+              const row = data as any;
+              setState(prev => ({
+                ...prev,
+                games: prev.games.map(g => g.id === localGame.id ? { ...flushed, id: row.id } : g),
+              }));
+            }
+          });
+        }
       }
 
-      return { ...s, activeGame: null };
+      return {
+        ...s,
+        activeGame: null,
+        games: [localGame, ...s.games],
+      };
     });
   }, [userId, clubId]);
 
