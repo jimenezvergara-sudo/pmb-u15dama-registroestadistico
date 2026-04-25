@@ -182,14 +182,29 @@ const Dashboard: React.FC = () => {
     };
   }).sort((a, b) => {
     const key = sortKey ?? 'pts';
+    if (key === 'name') {
+      const cmp = a.player.name.localeCompare(b.player.name, 'es', { sensitivity: 'base' });
+      if (cmp !== 0) return sortDir === 'asc' ? cmp : -cmp;
+      return b.pts - a.pts;
+    }
     const av = (a as any)[key] ?? 0;
     const bv = (b as any)[key] ?? 0;
-    if (bv !== av) return bv - av;
+    if (bv !== av) return sortDir === 'asc' ? av - bv : bv - av;
     return b.pts - a.pts;
   });
 
   const handleSort = (key: string) => {
-    setSortKey(prev => (prev === key ? null : key));
+    if (sortKey === key) {
+      if (key === 'name') {
+        setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortKey(null);
+        setSortDir('desc');
+      }
+    } else {
+      setSortKey(key);
+      setSortDir(key === 'name' ? 'asc' : 'desc');
+    }
   };
 
   const totalPoints = filteredShots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
