@@ -214,14 +214,24 @@ const Dashboard: React.FC = () => {
   const ppg = numGames > 0 ? (totalPoints / numGames).toFixed(1) : '0';
   const oppPpg = numGames > 0 ? (totalOpponent / numGames).toFixed(1) : '0';
 
+  // Mínimos estadísticamente significativos para líderes de eficiencia
+  const MIN_TRIPLES = 5;
+  const MIN_DOBLES = 8;
+  const MIN_FT = 4;
+  const MIN_FGA = 10;
+
   const efficiencyLeaders = (() => {
-    const withTriples = boxScore.filter(r => r.threeA > 0).sort((a, b) => b.threePct - a.threePct || b.threeM - a.threeM);
-    const withDoubles = boxScore.filter(r => r.twoA > 0).sort((a, b) => b.twoPct - a.twoPct || b.twoM - a.twoM);
-    const withFt = boxScore.filter(r => r.ftA > 0).sort((a, b) => b.ftPct - a.ftPct || b.ftM - a.ftM);
+    const withTriples = boxScore.filter(r => r.threeA >= MIN_TRIPLES).sort((a, b) => b.threePct - a.threePct || b.threeM - a.threeM);
+    const withDoubles = boxScore.filter(r => r.twoA >= MIN_DOBLES).sort((a, b) => b.twoPct - a.twoPct || b.twoM - a.twoM);
+    const withFt = boxScore.filter(r => r.ftA >= MIN_FT).sort((a, b) => b.ftPct - a.ftPct || b.ftM - a.ftM);
+    const withEfg = boxScore.filter(r => r.fga >= MIN_FGA).sort((a, b) => b.eFG - a.eFG || b.fgm - a.fgm);
+    const withTs = boxScore.filter(r => r.fga >= MIN_FGA).sort((a, b) => b.ts - a.ts || b.pts - a.pts);
     return {
       triples: withTriples[0] || null,
       dobles: withDoubles[0] || null,
       tl: withFt[0] || null,
+      efg: withEfg[0] || null,
+      ts: withTs[0] || null,
     };
   })();
 
@@ -466,26 +476,34 @@ const Dashboard: React.FC = () => {
         <p className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Líderes de Eficiencia</p>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: 'Triples', icon: <Target className="w-4 h-4" />, data: efficiencyLeaders.triples, pct: efficiencyLeaders.triples?.threePct, made: efficiencyLeaders.triples ? `${efficiencyLeaders.triples.threeM}/${efficiencyLeaders.triples.threeA}` : '-' },
-            { label: 'Dobles', icon: <CircleDot className="w-4 h-4" />, data: efficiencyLeaders.dobles, pct: efficiencyLeaders.dobles?.twoPct, made: efficiencyLeaders.dobles ? `${efficiencyLeaders.dobles.twoM}/${efficiencyLeaders.dobles.twoA}` : '-' },
-            { label: 'Tiros Libres', icon: <Crosshair className="w-4 h-4" />, data: efficiencyLeaders.tl, pct: efficiencyLeaders.tl?.ftPct, made: efficiencyLeaders.tl ? `${efficiencyLeaders.tl.ftM}/${efficiencyLeaders.tl.ftA}` : '-' },
-          ].map(item => (
-            <Card key={item.label} className="border-border/40 bg-background">
-              <CardContent className="p-3 text-center">
-                <div className="flex justify-center mb-1.5 text-primary">{item.icon}</div>
-                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">{item.label}</p>
-                {item.data ? (
-                  <>
-                    <p className="text-xs font-bold text-foreground mt-1 truncate">{!isAggregate ? `#${item.data.player.number} ` : ''}{item.data.player.name.split(' ')[0]}</p>
-                    <p className="text-lg font-black text-primary leading-tight">{item.pct}%</p>
-                    <p className="text-[10px] text-muted-foreground">{item.made}</p>
-                  </>
-                ) : (
-                  <p className="text-xs text-muted-foreground italic mt-2">—</p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+            { label: 'Triples', icon: <Target className="w-4 h-4" />, data: efficiencyLeaders.triples, pct: efficiencyLeaders.triples?.threePct, made: efficiencyLeaders.triples ? `${efficiencyLeaders.triples.threeM}/${efficiencyLeaders.triples.threeA}` : '-', volume: efficiencyLeaders.triples?.threeA ?? 0, min: MIN_TRIPLES },
+            { label: 'Dobles', icon: <CircleDot className="w-4 h-4" />, data: efficiencyLeaders.dobles, pct: efficiencyLeaders.dobles?.twoPct, made: efficiencyLeaders.dobles ? `${efficiencyLeaders.dobles.twoM}/${efficiencyLeaders.dobles.twoA}` : '-', volume: efficiencyLeaders.dobles?.twoA ?? 0, min: MIN_DOBLES },
+            { label: 'Tiros Libres', icon: <Crosshair className="w-4 h-4" />, data: efficiencyLeaders.tl, pct: efficiencyLeaders.tl?.ftPct, made: efficiencyLeaders.tl ? `${efficiencyLeaders.tl.ftM}/${efficiencyLeaders.tl.ftA}` : '-', volume: efficiencyLeaders.tl?.ftA ?? 0, min: MIN_FT },
+            { label: 'eFG%', icon: <Target className="w-4 h-4" />, data: efficiencyLeaders.efg, pct: efficiencyLeaders.efg?.eFG, made: efficiencyLeaders.efg ? `${efficiencyLeaders.efg.fgm}/${efficiencyLeaders.efg.fga}` : '-', volume: efficiencyLeaders.efg?.fga ?? 0, min: MIN_FGA },
+            { label: 'TS%', icon: <Crosshair className="w-4 h-4" />, data: efficiencyLeaders.ts, pct: efficiencyLeaders.ts?.ts, made: efficiencyLeaders.ts ? `${efficiencyLeaders.ts.fgm}/${efficiencyLeaders.ts.fga}` : '-', volume: efficiencyLeaders.ts?.fga ?? 0, min: MIN_FGA },
+          ].map(item => {
+            const lowSample = item.data && item.volume < item.min * 1.5;
+            return (
+              <Card key={item.label} className="border-border/40 bg-background">
+                <CardContent className="p-3 text-center">
+                  <div className="flex justify-center mb-1.5 text-primary">{item.icon}</div>
+                  <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">{item.label}</p>
+                  {item.data ? (
+                    <>
+                      <p className="text-xs font-bold text-foreground mt-1 truncate">{!isAggregate ? `#${item.data.player.number} ` : ''}{item.data.player.name.split(' ')[0]}</p>
+                      <p className="text-lg font-black text-primary leading-tight">{item.pct}%</p>
+                      <p className="text-[10px] text-muted-foreground">({item.made})</p>
+                      {lowSample && (
+                        <p className="mt-1 inline-block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-500/40">⚠️ Muestra pequeña ({item.volume})</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground italic mt-2 leading-tight">Sin datos suficientes — se requieren más partidos (mín. {item.min} intentos)</p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
 

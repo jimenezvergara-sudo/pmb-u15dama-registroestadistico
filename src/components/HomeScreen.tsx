@@ -53,16 +53,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     });
   });
 
-  // Team totals for 20% threshold
-  const teamTotalDoubleAttempts = allShots.filter(s => s.points === 2).length;
-  const teamTotalTripleAttempts = allShots.filter(s => s.points === 3).length;
-  const teamTotalFtAttempts = allShots.filter(s => s.points === 1).length;
-  const teamTotalFieldAttempts = allShots.filter(s => s.points >= 2).length;
+  // Mínimos estadísticamente significativos para líderes de eficiencia
+  const MIN_TRIPLE_ATT = 5;
+  const MIN_DOUBLE_ATT = 8;
+  const MIN_FT_ATT = 4;
+  const MIN_FIELD_ATT = 10;
 
-  const minDoubleAttempts = Math.max(1, Math.floor(teamTotalDoubleAttempts * 0.2));
-  const minTripleAttempts = Math.max(1, Math.floor(teamTotalTripleAttempts * 0.2));
-  const minFtAttempts = Math.max(1, Math.floor(teamTotalFtAttempts * 0.2));
-  const minFieldAttempts = Math.max(1, Math.floor(teamTotalFieldAttempts * 0.2));
+  const minDoubleAttempts = MIN_DOUBLE_ATT;
+  const minTripleAttempts = MIN_TRIPLE_ATT;
+  const minFtAttempts = MIN_FT_ATT;
+  const minFieldAttempts = MIN_FIELD_ATT;
 
   const allActions = games.flatMap(g => g.actions || []);
 
@@ -93,31 +93,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     const assists = allActions.filter(a => a.playerId === p.id && a.type === 'assist').length;
     const steals = allActions.filter(a => a.playerId === p.id && a.type === 'steal').length;
 
+    // Partidos jugados por la jugadora (con al menos un tiro o acción)
+    const gamesPlayed = games.filter(g =>
+      (g.shots || []).some(s => s.playerId === p.id) ||
+      (g.actions || []).some(a => a.playerId === p.id)
+    ).length;
+
     return {
       ...p, totalPts,
       triplesMade, triplesAttempts, triplesPct,
       doblesMade, doblesAttempts, doblesPct,
       ftMade, ftAttempts, ftPct,
       fieldMade, fieldAttempts, fieldPct,
-      rebounds, assists, steals,
+      rebounds, assists, steals, gamesPlayed,
     };
   });
 
-  // Leader: Most total points + global FG%
-  const topScorer = [...playerStats].filter(p => p.fieldAttempts >= minFieldAttempts).sort((a, b) => b.totalPts - a.totalPts)[0]
-    || [...playerStats].sort((a, b) => b.totalPts - a.totalPts)[0];
-
-  // Leader: Most doubles made (with 20% volume threshold for %)
-  const topDoubles = [...playerStats].filter(p => p.doblesAttempts >= minDoubleAttempts).sort((a, b) => b.doblesMade - a.doblesMade || b.doblesPct - a.doblesPct)[0]
-    || [...playerStats].filter(p => p.doblesMade > 0).sort((a, b) => b.doblesMade - a.doblesMade)[0];
-
-  // Leader: Most triples made (with 20% volume threshold for %)
-  const topThrees = [...playerStats].filter(p => p.triplesAttempts >= minTripleAttempts).sort((a, b) => b.triplesMade - a.triplesMade || b.triplesPct - a.triplesPct)[0]
-    || [...playerStats].filter(p => p.triplesMade > 0).sort((a, b) => b.triplesMade - a.triplesMade)[0];
-
-  // Leader: Best FT% (with 20% volume threshold)
-  const topFt = [...playerStats].filter(p => p.ftAttempts >= minFtAttempts).sort((a, b) => b.ftPct - a.ftPct || b.ftMade - a.ftMade)[0]
-    || [...playerStats].filter(p => p.ftAttempts >= 1).sort((a, b) => b.ftPct - a.ftPct)[0];
+  // Líderes: aplicar mínimos estrictos. Si nadie cumple, devolver null (mostrar "Sin datos suficientes").
+  const topScorer = [...playerStats].filter(p => p.fieldAttempts >= minFieldAttempts).sort((a, b) => b.totalPts - a.totalPts)[0] || null;
+  const topDoubles = [...playerStats].filter(p => p.doblesAttempts >= minDoubleAttempts).sort((a, b) => b.doblesPct - a.doblesPct || b.doblesMade - a.doblesMade)[0] || null;
+  const topThrees = [...playerStats].filter(p => p.triplesAttempts >= minTripleAttempts).sort((a, b) => b.triplesPct - a.triplesPct || b.triplesMade - a.triplesMade)[0] || null;
+  const topFt = [...playerStats].filter(p => p.ftAttempts >= minFtAttempts).sort((a, b) => b.ftPct - a.ftPct || b.ftMade - a.ftMade)[0] || null;
 
   // Leader: Most rebounds
   const topReb = [...playerStats].filter(p => p.rebounds > 0).sort((a, b) => b.rebounds - a.rebounds)[0];
@@ -133,6 +129,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     number: number | null;
     mainValue: string;
     subValue: string;
+    contextValue?: string;
+    lowSample?: boolean;
+    emptyMessage?: string;
   }
 
   const leaders: LeaderCard[] = [
@@ -142,31 +141,43 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       name: topScorer?.name || null,
       number: topScorer?.number ?? null,
       mainValue: topScorer ? `${topScorer.totalPts}` : '—',
-      subValue: topScorer ? `Efic: ${topScorer.fieldPct.toFixed(0)}% TC` : '',
+      subValue: topScorer ? `${topScorer.fieldPct.toFixed(0)}% TC (${topScorer.fieldMade}/${topScorer.fieldAttempts})` : '',
+      contextValue: topScorer ? `${topScorer.gamesPlayed} ${topScorer.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      lowSample: topScorer ? topScorer.fieldAttempts < minFieldAttempts * 1.5 : false,
+      emptyMessage: `Sin datos suficientes — se requieren más partidos (mín. ${minFieldAttempts} TC intentados)`,
     },
     {
       title: 'Líder Dobles',
       icon: <CircleDot className="w-5 h-5" />,
       name: topDoubles?.name || null,
       number: topDoubles?.number ?? null,
-      mainValue: topDoubles ? `${topDoubles.doblesMade}` : '—',
-      subValue: topDoubles ? `Efic: ${topDoubles.doblesPct.toFixed(0)}% (${topDoubles.doblesMade}/${topDoubles.doblesAttempts})` : '',
+      mainValue: topDoubles ? `${topDoubles.doblesPct.toFixed(0)}%` : '—',
+      subValue: topDoubles ? `(${topDoubles.doblesMade}/${topDoubles.doblesAttempts})` : '',
+      contextValue: topDoubles ? `${topDoubles.gamesPlayed} ${topDoubles.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      lowSample: topDoubles ? topDoubles.doblesAttempts < minDoubleAttempts * 1.5 : false,
+      emptyMessage: `Sin datos suficientes — se requieren más partidos (mín. ${minDoubleAttempts} dobles intentados)`,
     },
     {
       title: 'Líder Triples',
       icon: <Target className="w-5 h-5" />,
       name: topThrees?.name || null,
       number: topThrees?.number ?? null,
-      mainValue: topThrees ? `${topThrees.triplesMade}` : '—',
-      subValue: topThrees ? `Efic: ${topThrees.triplesPct.toFixed(0)}% (${topThrees.triplesMade}/${topThrees.triplesAttempts})` : '',
+      mainValue: topThrees ? `${topThrees.triplesPct.toFixed(0)}%` : '—',
+      subValue: topThrees ? `(${topThrees.triplesMade}/${topThrees.triplesAttempts})` : '',
+      contextValue: topThrees ? `${topThrees.gamesPlayed} ${topThrees.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      lowSample: topThrees ? topThrees.triplesAttempts < minTripleAttempts * 1.5 : false,
+      emptyMessage: `Sin datos suficientes — se requieren más partidos (mín. ${minTripleAttempts} triples intentados)`,
     },
     {
       title: 'Mejor % TL',
       icon: <Percent className="w-5 h-5" />,
       name: topFt?.name || null,
       number: topFt?.number ?? null,
-      mainValue: topFt ? `${topFt.ftMade}` : '—',
-      subValue: topFt ? `Efic: ${topFt.ftPct.toFixed(0)}% (${topFt.ftMade}/${topFt.ftAttempts})` : '',
+      mainValue: topFt ? `${topFt.ftPct.toFixed(0)}%` : '—',
+      subValue: topFt ? `(${topFt.ftMade}/${topFt.ftAttempts})` : '',
+      contextValue: topFt ? `${topFt.gamesPlayed} ${topFt.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      lowSample: topFt ? topFt.ftAttempts < minFtAttempts * 1.5 : false,
+      emptyMessage: `Sin datos suficientes — se requieren más partidos (mín. ${minFtAttempts} TL intentados)`,
     },
     {
       title: 'Líder Rebotes',
@@ -174,7 +185,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       name: topReb?.name || null,
       number: topReb?.number ?? null,
       mainValue: topReb ? `${topReb.rebounds}` : '—',
-      subValue: topReb && totalGames > 0 ? `${(topReb.rebounds / totalGames).toFixed(1)} reb/partido` : '',
+      subValue: topReb && topReb.gamesPlayed > 0 ? `${(topReb.rebounds / topReb.gamesPlayed).toFixed(1)} reb/partido` : '',
+      contextValue: topReb ? `${topReb.gamesPlayed} ${topReb.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      emptyMessage: 'Sin datos suficientes — se requieren más partidos',
     },
     {
       title: 'Líder Asistencias',
@@ -182,7 +195,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       name: topAst?.name || null,
       number: topAst?.number ?? null,
       mainValue: topAst ? `${topAst.assists}` : '—',
-      subValue: topAst && totalGames > 0 ? `${(topAst.assists / totalGames).toFixed(1)} ast/partido` : '',
+      subValue: topAst && topAst.gamesPlayed > 0 ? `${(topAst.assists / topAst.gamesPlayed).toFixed(1)} ast/partido` : '',
+      contextValue: topAst ? `${topAst.gamesPlayed} ${topAst.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      emptyMessage: 'Sin datos suficientes — se requieren más partidos',
     },
     {
       title: 'Líder Robos',
@@ -190,7 +205,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
       name: topStl?.name || null,
       number: topStl?.number ?? null,
       mainValue: topStl ? `${topStl.steals}` : '—',
-      subValue: topStl && totalGames > 0 ? `${(topStl.steals / totalGames).toFixed(1)} rob/partido` : '',
+      subValue: topStl && topStl.gamesPlayed > 0 ? `${(topStl.steals / topStl.gamesPlayed).toFixed(1)} rob/partido` : '',
+      contextValue: topStl ? `${topStl.gamesPlayed} ${topStl.gamesPlayed === 1 ? 'partido' : 'partidos'}` : '',
+      emptyMessage: 'Sin datos suficientes — se requieren más partidos',
     },
   ];
 
@@ -361,10 +378,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
                   <>
                     <p className="text-xs font-bold text-foreground leading-tight">#{leader.number} {leader.name}</p>
                     <p className="text-2xl font-black text-primary leading-tight mt-1">{leader.mainValue}</p>
-                    <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">{leader.subValue}</p>
+                    {leader.subValue && (
+                      <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">{leader.subValue}</p>
+                    )}
+                    {leader.contextValue && (
+                      <p className="text-[9px] text-muted-foreground/80 mt-0.5">({leader.contextValue})</p>
+                    )}
+                    {leader.lowSample && (
+                      <p className="mt-1 inline-block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-500/40">⚠️ Muestra pequeña</p>
+                    )}
                   </>
                 ) : (
-                  <p className="text-xs text-muted-foreground italic mt-2">Sin datos</p>
+                  <p className="text-[10px] text-muted-foreground italic mt-2 leading-tight">{leader.emptyMessage || 'Sin datos suficientes — se requieren más partidos'}</p>
                 )}
               </CardContent>
             </Card>
