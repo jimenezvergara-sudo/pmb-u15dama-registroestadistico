@@ -427,7 +427,7 @@ const LiveGame: React.FC = () => {
       </div>
 
       {/* Court */}
-      <div className="px-2 flex-1 overflow-hidden">
+      <div className="px-2 flex-1 overflow-hidden min-h-[200px]">
         <CourtDiagram
           onZoneTap={handleZoneTap}
           shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
@@ -436,8 +436,36 @@ const LiveGame: React.FC = () => {
         />
       </div>
 
-      {/* Made / Missed + Actions */}
-      <div className="relative z-10 bg-background pt-4 mt-4">
+      {/* Panel de acciones secundarias — siempre visible, no tapa la cancha */}
+      <div className="px-3 pt-2">
+        <div className="grid grid-cols-3 gap-1.5" style={{ maxHeight: 120 }}>
+          {([
+            { key: 'offensive_rebound', label: 'Reb OF', emoji: '⬛', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
+            { key: 'defensive_rebound', label: 'Reb DEF', emoji: '⬛', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
+            { key: 'assist', label: 'Asistencia', emoji: '💛', cls: 'bg-accent text-accent-foreground hover:bg-accent/90' },
+            { key: 'steal', label: 'Robo', emoji: '🖐️', cls: 'bg-primary text-primary-foreground hover:bg-primary/90' },
+            { key: 'turnover', label: 'Pérdida', emoji: '❌', cls: 'bg-secondary text-secondary-foreground hover:bg-secondary/80' },
+            { key: 'foul', label: 'Falta', emoji: '🟡', cls: 'bg-accent text-accent-foreground hover:bg-accent/90' },
+          ] as const).map(a => (
+            <button
+              key={a.key}
+              onClick={() => handleQuickAction(a.key as ActionType)}
+              disabled={!selectedPlayer}
+              className={`min-h-[52px] rounded-xl text-sm font-bold tap-feedback flex flex-col items-center justify-center gap-0.5 border-2 transition-all active:scale-95 ${
+                !selectedPlayer
+                  ? 'bg-muted text-muted-foreground border-border opacity-50 cursor-not-allowed'
+                  : `${a.cls} border-transparent`
+              }`}
+            >
+              <span className="text-base leading-none">{a.emoji}</span>
+              <span className="text-xs leading-none">{a.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Made / Missed + Acciones inferiores */}
+      <div className="relative z-10 bg-background pt-2 mt-2">
         {pendingShot && selectedPlayer && (
           <div className="px-3 pb-2">
             <div className="grid grid-cols-2 gap-3">
