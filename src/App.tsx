@@ -9,6 +9,8 @@ import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import PublicStats from "./pages/PublicStats.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ConnectionStatus from "./components/ConnectionStatus";
+import PwaInstallPrompt from "./components/PwaInstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,8 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ConnectionStatus />
+          <PwaInstallPrompt />
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
