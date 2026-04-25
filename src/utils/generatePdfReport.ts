@@ -347,7 +347,7 @@ export async function generatePdfReport(
       doc.setFontSize(8);
       doc.setTextColor(...NEAR_BLACK);
       doc.setFont('helvetica', 'bold');
-      doc.text(`#${item.player.number} ${item.player.name}`, lx + 6, ly + 12.5);
+      doc.text(filteredGames.length === 1 ? `#${item.player.number} ${item.player.name}` : item.player.name, lx + 6, ly + 12.5);
       const valStr = `${item.value}`;
       const valW = Math.max(doc.getTextWidth(valStr) + 5, 10);
       doc.setFillColor(...item.accent);
