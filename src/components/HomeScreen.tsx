@@ -93,31 +93,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
     const assists = allActions.filter(a => a.playerId === p.id && a.type === 'assist').length;
     const steals = allActions.filter(a => a.playerId === p.id && a.type === 'steal').length;
 
+    // Partidos jugados por la jugadora (con al menos un tiro o acción)
+    const gamesPlayed = games.filter(g =>
+      (g.shots || []).some(s => s.playerId === p.id) ||
+      (g.actions || []).some(a => a.playerId === p.id)
+    ).length;
+
     return {
       ...p, totalPts,
       triplesMade, triplesAttempts, triplesPct,
       doblesMade, doblesAttempts, doblesPct,
       ftMade, ftAttempts, ftPct,
       fieldMade, fieldAttempts, fieldPct,
-      rebounds, assists, steals,
+      rebounds, assists, steals, gamesPlayed,
     };
   });
 
-  // Leader: Most total points + global FG%
-  const topScorer = [...playerStats].filter(p => p.fieldAttempts >= minFieldAttempts).sort((a, b) => b.totalPts - a.totalPts)[0]
-    || [...playerStats].sort((a, b) => b.totalPts - a.totalPts)[0];
-
-  // Leader: Most doubles made (with 20% volume threshold for %)
-  const topDoubles = [...playerStats].filter(p => p.doblesAttempts >= minDoubleAttempts).sort((a, b) => b.doblesMade - a.doblesMade || b.doblesPct - a.doblesPct)[0]
-    || [...playerStats].filter(p => p.doblesMade > 0).sort((a, b) => b.doblesMade - a.doblesMade)[0];
-
-  // Leader: Most triples made (with 20% volume threshold for %)
-  const topThrees = [...playerStats].filter(p => p.triplesAttempts >= minTripleAttempts).sort((a, b) => b.triplesMade - a.triplesMade || b.triplesPct - a.triplesPct)[0]
-    || [...playerStats].filter(p => p.triplesMade > 0).sort((a, b) => b.triplesMade - a.triplesMade)[0];
-
-  // Leader: Best FT% (with 20% volume threshold)
-  const topFt = [...playerStats].filter(p => p.ftAttempts >= minFtAttempts).sort((a, b) => b.ftPct - a.ftPct || b.ftMade - a.ftMade)[0]
-    || [...playerStats].filter(p => p.ftAttempts >= 1).sort((a, b) => b.ftPct - a.ftPct)[0];
+  // Líderes: aplicar mínimos estrictos. Si nadie cumple, devolver null (mostrar "Sin datos suficientes").
+  const topScorer = [...playerStats].filter(p => p.fieldAttempts >= minFieldAttempts).sort((a, b) => b.totalPts - a.totalPts)[0] || null;
+  const topDoubles = [...playerStats].filter(p => p.doblesAttempts >= minDoubleAttempts).sort((a, b) => b.doblesPct - a.doblesPct || b.doblesMade - a.doblesMade)[0] || null;
+  const topThrees = [...playerStats].filter(p => p.triplesAttempts >= minTripleAttempts).sort((a, b) => b.triplesPct - a.triplesPct || b.triplesMade - a.triplesMade)[0] || null;
+  const topFt = [...playerStats].filter(p => p.ftAttempts >= minFtAttempts).sort((a, b) => b.ftPct - a.ftPct || b.ftMade - a.ftMade)[0] || null;
 
   // Leader: Most rebounds
   const topReb = [...playerStats].filter(p => p.rebounds > 0).sort((a, b) => b.rebounds - a.rebounds)[0];
