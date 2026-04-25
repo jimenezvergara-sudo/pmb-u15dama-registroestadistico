@@ -378,10 +378,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
                   <>
                     <p className="text-xs font-bold text-foreground leading-tight">#{leader.number} {leader.name}</p>
                     <p className="text-2xl font-black text-primary leading-tight mt-1">{leader.mainValue}</p>
-                    <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">{leader.subValue}</p>
+                    {leader.subValue && (
+                      <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">{leader.subValue}</p>
+                    )}
+                    {leader.contextValue && (
+                      <p className="text-[9px] text-muted-foreground/80 mt-0.5">({leader.contextValue})</p>
+                    )}
+                    {leader.lowSample && (
+                      <p className="mt-1 inline-block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-500/40">⚠️ Muestra pequeña</p>
+                    )}
                   </>
                 ) : (
-                  <p className="text-xs text-muted-foreground italic mt-2">Sin datos</p>
+                  <p className="text-[10px] text-muted-foreground italic mt-2 leading-tight">{leader.emptyMessage || 'Sin datos suficientes — se requieren más partidos'}</p>
                 )}
               </CardContent>
             </Card>
