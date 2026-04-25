@@ -247,16 +247,46 @@ const RosterManager: React.FC = () => {
           </p>
         ) : (
           <>
-            {/* Table header */}
+            {/* Table header (clickeable para ordenar) */}
             <div className="grid grid-cols-[3rem_1fr_1fr_auto] gap-2 items-center px-3 py-2 bg-muted/40 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-              <span className="text-center">Nº</span>
-              <span>Nombre</span>
-              <span>Apellido</span>
+              <button
+                onClick={() => toggleSort('number')}
+                className="flex items-center justify-center gap-1 tap-feedback hover:text-foreground"
+                aria-label="Ordenar por número"
+              >
+                Nº <SortIcon k="number" />
+              </button>
+              <button
+                onClick={() => toggleSort('firstName')}
+                className="flex items-center gap-1 tap-feedback hover:text-foreground"
+                aria-label="Ordenar por nombre"
+              >
+                Nombre <SortIcon k="firstName" />
+              </button>
+              <button
+                onClick={() => toggleSort('lastName')}
+                className="flex items-center gap-1 tap-feedback hover:text-foreground"
+                aria-label="Ordenar por apellido"
+              >
+                Apellido <SortIcon k="lastName" />
+              </button>
               <span className="w-[88px] text-right">Acciones</span>
             </div>
 
             <ul className="divide-y divide-border/60">
-              {[...players].sort((a, b) => a.number - b.number).map((p: Player) => {
+              {[...players].sort((a, b) => {
+                const partsA = a.name.trim().split(/\s+/);
+                const partsB = b.name.trim().split(/\s+/);
+                const lastA = (partsA.length > 1 ? partsA.slice(-1)[0] : '').toLocaleLowerCase('es');
+                const lastB = (partsB.length > 1 ? partsB.slice(-1)[0] : '').toLocaleLowerCase('es');
+                const firstA = (partsA.length > 1 ? partsA.slice(0, -1).join(' ') : partsA[0] ?? '').toLocaleLowerCase('es');
+                const firstB = (partsB.length > 1 ? partsB.slice(0, -1).join(' ') : partsB[0] ?? '').toLocaleLowerCase('es');
+                let cmp = 0;
+                if (sortKey === 'number') cmp = a.number - b.number;
+                else if (sortKey === 'firstName') cmp = firstA.localeCompare(firstB, 'es');
+                else cmp = lastA.localeCompare(lastB, 'es');
+                return sortDir === 'asc' ? cmp : -cmp;
+              }).map((p: Player) => {
                 const parts = p.name.trim().split(/\s+/);
                 const lastName = parts.length > 1 ? parts.slice(-1)[0] : '';
                 const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0] ?? '';
