@@ -1013,7 +1013,38 @@ export async function generatePdfReport(
     },
     theme: 'grid',
   });
-  y = (doc as any).lastAutoTable.finalY + 8;
+  y = (doc as any).lastAutoTable.finalY + 10;
+
+  // ── About BASQUEST+ (only if there's room left on the glossary page) ──
+  if (y + 36 < H - 16) {
+    // Card background
+    doc.setFillColor(...WHITE);
+    doc.roundedRect(M, y, W - M * 2, 32, 4, 4, 'F');
+    doc.setFillColor(...PURPLE);
+    doc.roundedRect(M, y, 3, 32, 1.5, 1.5, 'F');
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...PURPLE);
+    doc.text('Acerca de BASQUEST+', M + 7, y + 8);
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...NEAR_BLACK);
+    const aboutLines = [
+      'BASQUEST+ es una plataforma de inteligencia deportiva diseñada para clubes de básquetbol formativo y',
+      'competitivo. Permite registrar estadísticas en vivo, generar reportes avanzados, analizar el rendimiento',
+      'individual y colectivo, y compartir resultados con la comunidad.',
+    ];
+    aboutLines.forEach((line, i) => {
+      doc.text(line, M + 7, y + 14 + i * 4.5);
+    });
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...CYAN);
+    doc.text('basquestplus.cl', M + 7, y + 29);
+  }
 
   drawFooter(pageNum);
 
