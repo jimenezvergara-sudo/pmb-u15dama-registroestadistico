@@ -337,16 +337,16 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
     });
 
     // ── Signature ──
-    ensureSpace(20);
-    y += 6;
+    ensureSpace(22);
+    y += 8;
     doc.setFillColor(...WHITE);
-    doc.roundedRect(M, y, contentW, 14, 4, 4, 'F');
+    doc.roundedRect(M, y, contentW, 16, 4, 4, 'F');
     doc.setFillColor(...GOLD);
     doc.roundedRect(M + 4, y, contentW - 8, 1.5, 0.7, 0.7, 'F');
-    doc.setFontSize(7.5);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...PURPLE);
-    doc.text('Generado por BASQUEST+ - Inteligencia Deportiva con IA', W / 2, y + 9, { align: 'center' });
+    doc.text('Generado por BASQUEST+ - Inteligencia Deportiva con IA', W / 2, y + 10.5, { align: 'center' });
 
     drawFooter();
 
