@@ -58,6 +58,43 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<string | null>(null);
 
+  // ============================================================
+  // PDF text sanitizer - removes emojis, non-ASCII corrupt chars,
+  // and any sequences jsPDF's Helvetica (WinAnsi) can't render.
+  // Preserves Spanish accents/ñ which ARE supported by WinAnsi.
+  // ============================================================
+  const stripForPdf = (raw: string): string => {
+    if (!raw) return '';
+    let s = raw;
+    // Remove all emoji & symbol blocks (BMP + supplementary)
+    s = s.replace(/[\u{1F000}-\u{1FFFF}]/gu, '');
+    s = s.replace(/[\u{2600}-\u{27BF}]/gu, '');   // misc symbols & dingbats
+    s = s.replace(/[\u{2300}-\u{23FF}]/gu, '');   // misc technical
+    s = s.replace(/[\u{2B00}-\u{2BFF}]/gu, '');   // arrows etc
+    s = s.replace(/[\u{FE00}-\u{FE0F}]/gu, '');   // variation selectors
+    s = s.replace(/[\u{200D}\u{200B}\u{200C}]/gu, ''); // ZWJ/ZWSP
+    // Replace fancy punctuation with ASCII equivalents
+    s = s.replace(/[\u2018\u2019\u201A\u2032]/g, "'");
+    s = s.replace(/[\u201C\u201D\u201E\u2033]/g, '"');
+    s = s.replace(/[\u2013\u2014]/g, '-');
+    s = s.replace(/\u2026/g, '...');
+    s = s.replace(/\u00B7|\u2022/g, '-');
+    // Remove known corrupt sequences from prior bad encodings
+    s = s.replace(/Ø[=<>][\u00A0-\uFFFF]?/g, '');
+    s = s.replace(/&¡/g, '');
+    s = s.replace(/[ØÞßÝÜàáâ]=[A-Za-z]?/g, '');
+    // Drop any remaining char outside WinAnsi-safe range
+    // Keep: ASCII printable + common Latin-1 (accents, ñ, ¿, ¡)
+    s = s.replace(/[^\x09\x0A\x0D\x20-\x7E\u00A1-\u00FF]/g, '');
+    return s;
+  };
+
+  // Final safety net: detect and remove any leftover corruption markers
+  const finalScrub = (s: string): string =>
+    s.replace(/Ø[^\s]{0,3}/g, '').replace(/&¡/g, '').trim();
+
+  const safeText = (s: string) => finalScrub(stripForPdf(s));
+
   const handleDownload = () => {
     if (!analysis) return;
 
@@ -69,8 +106,12 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
     const NEAR_BLACK: [number, number, number] = [25, 15, 45];
     const BODY_BG: [number, number, number] = [245, 243, 250];
     const MUTED: [number, number, number] = [140, 130, 160];
+    const LIGHT_PURPLE: [number, number, number] = [235, 225, 250];
+
+    const cleanAnalysis = stripForPdf(analysis);
 
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+    doc.setFont('helvetica', 'normal');
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
     const M = 16;
@@ -91,14 +132,6 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
       doc.setFillColor(...GOLD);
       doc.rect(0, 32, W, 1.5, 'F');
 
-      // Decorative
-      doc.setFillColor(255, 255, 255);
-      // @ts-ignore
-      doc.setGState(new doc.GState({ opacity: 0.06 }));
-      doc.circle(W - 25, 8, 30, 'F');
-      // @ts-ignore
-      doc.setGState(new doc.GState({ opacity: 1 }));
-
       doc.setTextColor(...WHITE);
       doc.setFontSize(20);
       doc.setFont('helvetica', 'bold');
@@ -109,13 +142,12 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
       doc.setTextColor(...CYAN);
       doc.text('Inteligencia Deportiva', M, 20);
 
-      // Analysis badge
       doc.setFillColor(...GOLD);
       doc.roundedRect(M, 23, 42, 6, 3, 3, 'F');
       doc.setFontSize(7);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...NEAR_BLACK);
-      doc.text('⚡ ANALISIS IA', M + 21, 27, { align: 'center' });
+      doc.text('ANALISIS IA', M + 21, 27, { align: 'center' });
 
       y = 42;
     };
@@ -131,8 +163,8 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
       doc.text('BASQUEST+', M, H - 3.5);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(180, 175, 200);
-      doc.text(`${new Date().toLocaleDateString()} · ${gameLabel}`, M + 22, H - 3.5);
-      doc.text(`Pág ${pageNum}`, W - M, H - 3.5, { align: 'right' });
+      doc.text(safeText(`${new Date().toLocaleDateString()} - ${gameLabel}`), M + 22, H - 3.5);
+      doc.text(`Pag ${pageNum}`, W - M, H - 3.5, { align: 'right' });
     };
 
     const ensureSpace = (needed: number) => {
@@ -149,148 +181,169 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
     drawPageBg();
     drawHeader();
 
-    // Context card
-    doc.setFillColor(...WHITE);
-    doc.roundedRect(M, y, contentW, 16, 4, 4, 'F');
-    doc.setFillColor(...PURPLE);
-    doc.roundedRect(M, y, 3, 16, 1.5, 1.5, 'F');
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...NEAR_BLACK);
-    doc.text(`📊 ${gameLabel}`, M + 7, y + 6.5);
+    // ── Score Hero Card ──
+    const heroH = 28;
+    doc.setFillColor(...PURPLE_DARK);
+    doc.roundedRect(M, y, contentW, heroH, 5, 5, 'F');
+    doc.setFillColor(...GOLD);
+    doc.roundedRect(M, y, contentW, 2, 1, 1, 'F');
+
     doc.setFontSize(7);
-    doc.setTextColor(...MUTED);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...CYAN);
+    doc.text(safeText(gameLabel).toUpperCase(), W / 2, y + 7, { align: 'center' });
+
+    // Big score
+    doc.setFontSize(26);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...WHITE);
+    const scoreText = `${totalPoints}  -  ${totalOpponent}`;
+    doc.text(scoreText, W / 2, y + 18, { align: 'center' });
+
+    doc.setFontSize(7);
     doc.setFont('helvetica', 'normal');
-    doc.text(`${numGames} partido(s) · Equipo ${totalPoints} pts · Rival ${totalOpponent} pts`, M + 7, y + 12.5);
-    y += 22;
+    doc.setTextColor(180, 175, 220);
+    doc.text(`EQUIPO        RIVAL    -    ${numGames} partido(s)`, W / 2, y + 24, { align: 'center' });
 
-    // ── Render analysis ──
-    const lines = analysis.split('\n');
+    y += heroH + 6;
 
-    lines.forEach((line) => {
+    // ============================================================
+    // Render markdown-like content from cleaned analysis
+    // ============================================================
+    const renderInlineBold = (
+      text: string,
+      x: number,
+      yPos: number,
+      maxW: number,
+      normalColor: [number, number, number],
+      boldColor: [number, number, number],
+      fontSize: number
+    ): number => {
+      doc.setFontSize(fontSize);
+      const cleaned = safeText(text);
+      const parts = cleaned.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
+      // Build segments
+      type Seg = { text: string; bold: boolean };
+      const segs: Seg[] = parts.map(p =>
+        p.startsWith('**') && p.endsWith('**')
+          ? { text: p.slice(2, -2), bold: true }
+          : { text: p, bold: false }
+      );
+
+      // Word-wrap across segments
+      const lineH = fontSize * 0.42;
+      let cx = x;
+      let cy = yPos;
+      const startX = x;
+
+      segs.forEach(seg => {
+        doc.setFont('helvetica', seg.bold ? 'bold' : 'normal');
+        doc.setTextColor(...(seg.bold ? boldColor : normalColor));
+        const words = seg.text.split(/(\s+)/);
+        words.forEach(word => {
+          if (!word) return;
+          const w = doc.getTextWidth(word);
+          if (cx + w > startX + maxW && word.trim() !== '') {
+            cy += lineH;
+            cx = startX;
+            if (word.match(/^\s+$/)) return;
+          }
+          doc.text(word, cx, cy);
+          cx += w;
+        });
+      });
+      return cy + lineH;
+    };
+
+    const lines = cleanAnalysis.split('\n');
+
+    lines.forEach((rawLine) => {
+      const line = safeText(rawLine);
       const trimmed = line.trim();
-      if (trimmed === '') {
+
+      if (trimmed === '' || trimmed === '---') {
         y += 3;
         return;
       }
 
-      // Heading ##
-      if (trimmed.startsWith('## ')) {
+      // ### Section heading -> purple bg box
+      if (/^#{1,3}\s+/.test(trimmed)) {
+        const headingText = trimmed.replace(/^#{1,3}\s+/, '');
         ensureSpace(14);
-        y += 4;
-        // Section divider
+        y += 2;
         doc.setFillColor(...PURPLE);
-        doc.roundedRect(M, y, 3, 7, 1.5, 1.5, 'F');
-        doc.setFontSize(11);
+        doc.roundedRect(M, y, contentW, 9, 2.5, 2.5, 'F');
+        doc.setFontSize(10);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...NEAR_BLACK);
-        doc.text(trimmed.slice(3), M + 6, y + 5.5);
-        y += 11;
+        doc.setTextColor(...WHITE);
+        doc.text(safeText(headingText), M + 4, y + 6.2);
+        y += 12;
         return;
       }
 
-      // Bold line **...**
-      if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
+      // Whole-line bold **...**
+      if (/^\*\*[^*]+\*\*:?\s*$/.test(trimmed)) {
+        const txt = trimmed.replace(/\*\*/g, '').replace(/:$/, '');
         ensureSpace(8);
-        doc.setFontSize(9);
+        doc.setFontSize(9.5);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...PURPLE);
-        const wrapped = doc.splitTextToSize(trimmed.slice(2, -2), contentW - 4);
-        doc.text(wrapped, M + 2, y + 4);
-        y += wrapped.length * 4.5 + 3;
+        const wrapped = doc.splitTextToSize(safeText(txt), contentW);
+        doc.text(wrapped, M, y + 4);
+        y += wrapped.length * 4.6 + 2;
         return;
       }
 
-      // Bullet point
-      if (trimmed.startsWith('- ')) {
-        ensureSpace(8);
-        const text = trimmed.slice(2);
-        // Parse inline bold
-        const parts = text.split(/(\*\*[^*]+\*\*)/g);
-        let xPos = M + 7;
+      // Numbered list (tactical recs)
+      const numMatch = trimmed.match(/^(\d+)[.)]\s*(.*)$/);
+      if (numMatch) {
+        const num = numMatch[1];
+        const text = numMatch[2];
+        ensureSpace(10);
 
-        // Bullet dot
-        doc.setFillColor(...GOLD);
-        doc.circle(M + 4, y + 3, 1, 'F');
-
-        // Wrap the full text first for spacing
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'normal');
-        const plainText = text.replace(/\*\*/g, '');
-        const wrapped = doc.splitTextToSize(plainText, contentW - 10);
-
-        if (wrapped.length === 1) {
-          // Single line - render with inline bold
-          parts.forEach(part => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-              doc.setFont('helvetica', 'bold');
-              doc.setTextColor(...NEAR_BLACK);
-              doc.text(part.slice(2, -2), xPos, y + 4);
-              xPos += doc.getTextWidth(part.slice(2, -2));
-            } else {
-              doc.setFont('helvetica', 'normal');
-              doc.setTextColor(...MUTED);
-              doc.text(part, xPos, y + 4);
-              xPos += doc.getTextWidth(part);
-            }
-          });
-          y += 6;
-        } else {
-          // Multi-line - render plain
-          doc.setTextColor(...MUTED);
-          doc.text(wrapped, M + 7, y + 4);
-          y += wrapped.length * 4 + 2;
-        }
-        return;
-      }
-
-      // Numbered list
-      if (/^\d+\./.test(trimmed)) {
-        ensureSpace(8);
-        const num = trimmed.match(/^(\d+)\./)?.[1] || '';
-        const text = trimmed.replace(/^\d+\.\s*/, '');
-        doc.setFontSize(8);
-
-        // Number badge
         doc.setFillColor(...PURPLE);
-        doc.circle(M + 4, y + 3, 2.5, 'F');
+        doc.circle(M + 3.5, y + 3.2, 2.8, 'F');
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...WHITE);
-        doc.text(num, M + 4, y + 4, { align: 'center' });
+        doc.text(num, M + 3.5, y + 4.2, { align: 'center' });
 
-        // Text
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...MUTED);
-        const wrapped = doc.splitTextToSize(text.replace(/\*\*/g, ''), contentW - 12);
-        doc.text(wrapped, M + 9, y + 4);
-        y += wrapped.length * 4 + 3;
+        const endY = renderInlineBold(text, M + 9, y + 4, contentW - 10, NEAR_BLACK, PURPLE, 8.5);
+        y = Math.max(y + 8, endY + 1);
+        return;
+      }
+
+      // Bullet list ( * or - )
+      if (/^[*\-]\s+/.test(trimmed)) {
+        const text = trimmed.replace(/^[*\-]\s+/, '');
+        ensureSpace(8);
+
+        // Square purple bullet
+        doc.setFillColor(...PURPLE);
+        doc.rect(M + 1.5, y + 2, 1.8, 1.8, 'F');
+
+        const endY = renderInlineBold(text, M + 6, y + 4, contentW - 7, NEAR_BLACK, PURPLE, 8.5);
+        y = Math.max(y + 6, endY + 0.5);
         return;
       }
 
       // Normal paragraph
       ensureSpace(8);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...NEAR_BLACK);
-      const plainText = trimmed.replace(/\*\*/g, '');
-      const wrapped = doc.splitTextToSize(plainText, contentW - 4);
-      doc.text(wrapped, M + 2, y + 4);
-      y += wrapped.length * 4 + 2;
+      const endY = renderInlineBold(trimmed, M, y + 4, contentW, NEAR_BLACK, PURPLE, 8.5);
+      y = endY + 1;
     });
 
-    // Signature
+    // ── Signature ──
     ensureSpace(20);
     y += 6;
     doc.setFillColor(...WHITE);
     doc.roundedRect(M, y, contentW, 14, 4, 4, 'F');
     doc.setFillColor(...GOLD);
     doc.roundedRect(M + 4, y, contentW - 8, 1.5, 0.7, 0.7, 'F');
-    doc.setFontSize(7);
+    doc.setFontSize(7.5);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...MUTED);
-    doc.text('⚡ Generado por BASQUEST+ — Inteligencia Deportiva con IA', W / 2, y + 9, { align: 'center' });
+    doc.setTextColor(...PURPLE);
+    doc.text('Generado por BASQUEST+ - Inteligencia Deportiva con IA', W / 2, y + 9, { align: 'center' });
 
     drawFooter();
 
