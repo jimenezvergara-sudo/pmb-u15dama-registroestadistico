@@ -230,8 +230,8 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
           : { text: p, bold: false }
       );
 
-      // Word-wrap across segments
-      const lineH = fontSize * 0.42;
+      // Word-wrap across segments. Line-height 1.6 (pt -> mm: pt*0.3528*1.6)
+      const lineH = fontSize * 0.3528 * 1.6;
       let cx = x;
       let cy = yPos;
       const startX = x;
