@@ -50,7 +50,7 @@ export async function generatePdfReport(
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
-  const M = 14;
+  const M = 20; // Match AI Analysis PDF margins
   let y = 0;
 
   // ═══════════════ HELPERS ═══════════════
@@ -129,14 +129,23 @@ export async function generatePdfReport(
     doc.text(`Página ${pageNum}`, W - M, H - 4, { align: 'right' });
   };
 
+  // Section title — purple bg box with white text (matches AI Analysis PDF)
   const sectionTitle = (title: string) => {
+    if (y + 16 > H - 16) {
+      drawFooter(pageNum);
+      doc.addPage();
+      drawPageBg();
+      pageNum++;
+      drawHeader();
+    }
+    y += 4;
     doc.setFillColor(...PURPLE);
-    doc.roundedRect(M, y, 3.5, 8, 1.7, 1.7, 'F');
+    doc.roundedRect(M, y, W - M * 2, 11, 2.5, 2.5, 'F');
     doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...NEAR_BLACK);
-    doc.text(title, M + 7, y + 6);
-    y += 12;
+    doc.setTextColor(...WHITE);
+    doc.text(title, M + 5, y + 7.6);
+    y += 15;
   };
 
   // ═══════════════ PAGE 1: Overview ═══════════════
@@ -323,71 +332,68 @@ export async function generatePdfReport(
     { label: 'TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: SUCCESS },
   ];
 
-  // Larger leader cards: bigger names + prominent stat number
+  // Larger leader cards — AI-Analysis style: category label (purple), name (bold), big stat
   const lColGap = 5;
-  const lRowGap = 5;
-  const lCardH = 26;
-  const lColW = (W - M * 2 - lColGap * 2) / 3;
+  const lRowGap = 6;
+  const lCardH = 28;
+  const lColW = (W - M * 2 - lColGap) / 2; // 2 columns
   leaderItems.forEach((item, i) => {
-    const col = i % 3;
-    const row = Math.floor(i / 3);
+    const col = i % 2;
+    const row = Math.floor(i / 2);
     const lx = M + col * (lColW + lColGap);
     const ly = y + row * (lCardH + lRowGap);
 
     if (ly + lCardH > H - 16) return;
 
-    // Card background with subtle shadow simulation
+    // Card background with subtle shadow
     doc.setFillColor(220, 215, 235);
-    doc.roundedRect(lx + 0.6, ly + 0.6, lColW, lCardH, 3.5, 3.5, 'F');
+    doc.roundedRect(lx + 0.6, ly + 0.6, lColW, lCardH, 4, 4, 'F');
     doc.setFillColor(...WHITE);
-    doc.roundedRect(lx, ly, lColW, lCardH, 3.5, 3.5, 'F');
-
-    // Accent bar (left)
+    doc.roundedRect(lx, ly, lColW, lCardH, 4, 4, 'F');
+    // Accent left bar
     doc.setFillColor(...item.accent);
-    doc.roundedRect(lx, ly + 3, 3, lCardH - 6, 1.5, 1.5, 'F');
+    doc.roundedRect(lx, ly + 4, 3, lCardH - 8, 1.5, 1.5, 'F');
 
-    // Section label (top)
-    doc.setFontSize(6.5);
-    doc.setTextColor(...MUTED);
+    // Category label (small purple, top)
+    doc.setFontSize(7);
+    doc.setTextColor(...PURPLE);
     doc.setFont('helvetica', 'bold');
-    doc.text(item.label, lx + 7, ly + 6);
+    doc.text(item.label, lx + 8, ly + 7);
 
     if (item.player) {
-      // Big stat value (right side, prominent)
+      // Big stat value (right side)
       const valStr = `${item.value}`;
-      doc.setFontSize(20);
+      doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...item.accent);
       const vw = doc.getTextWidth(valStr);
-      doc.text(valStr, lx + lColW - 5, ly + 18, { align: 'right' });
+      doc.text(valStr, lx + lColW - 6, ly + 21, { align: 'right' });
 
-      // Player name (left, bigger and bolder)
+      // Player name (bold, larger)
       const nameStr = filteredGames.length === 1 ? `#${item.player.number} ${item.player.name}` : item.player.name;
-      const maxNameW = lColW - 12 - vw - 4;
-      doc.setFontSize(10);
+      const maxNameW = lColW - 14 - vw - 6;
+      doc.setFontSize(11);
       doc.setTextColor(...NEAR_BLACK);
       doc.setFont('helvetica', 'bold');
-      // Truncate if too long
       let displayName = nameStr;
       while (doc.getTextWidth(displayName) > maxNameW && displayName.length > 4) {
         displayName = displayName.slice(0, -1);
       }
-      if (displayName.length < nameStr.length) displayName = displayName.slice(0, -1) + '…';
-      doc.text(displayName, lx + 7, ly + 15);
+      if (displayName.length < nameStr.length) displayName = displayName.slice(0, -1) + '...';
+      doc.text(displayName, lx + 8, ly + 16);
 
-      // Subtle "líder" hint
-      doc.setFontSize(6);
+      doc.setFontSize(7);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...MUTED);
-      doc.text('Líder', lx + 7, ly + 21);
+      doc.text('Lider de la temporada', lx + 8, ly + 23);
     } else {
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'italic');
       doc.setTextColor(...MUTED);
-      doc.text('Sin datos suficientes', lx + 7, ly + 17);
+      doc.text('Sin datos suficientes', lx + 8, ly + 18);
     }
   });
-  y += Math.ceil(leaderItems.length / 3) * (lCardH + lRowGap) + 4;
+  y += Math.ceil(leaderItems.length / 2) * (lCardH + lRowGap) + 4;
 
   drawFooter(pageNum);
 
@@ -520,8 +526,8 @@ export async function generatePdfReport(
       head: [['Jugadora', 'TC', '2PT', '3PT', 'TL', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG%', 'TS%']],
       body: tableBody,
       margin: { left: M, right: M },
-      styles: { fontSize: 8, cellPadding: 2.2, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2, valign: 'middle' },
-      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 8, halign: 'center' },
+      styles: { fontSize: 9, cellPadding: 2.4, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2, valign: 'middle' },
+      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 9, halign: 'center' },
       bodyStyles: { fillColor: WHITE },
       alternateRowStyles: { fillColor: TABLE_ALT },
       columnStyles: {
@@ -1082,17 +1088,23 @@ export async function generatePdfReport(
       const blockH = 6 /*tag*/ + 6 /*tag→banner gap*/ + bannerH + 8 /*banner→caption*/ + 6 /*caption*/ + 6 /*caption2*/ + 5 /*spacer*/ + 5 /*footer caption*/;
       const blockTop = Math.max(50, (H - blockH) / 2);
 
-      // PREMIUM tag (centered, above banner)
+      // Header label above banner — purple "Espacio Premium BASQUEST+"
       const tagY = blockTop;
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...PURPLE);
+      doc.text('Espacio Premium BASQUEST+', W / 2, tagY + 5, { align: 'center' });
+
+      // PREMIUM mini badge
       doc.setFillColor(...GOLD);
-      doc.roundedRect(W / 2 - 16, tagY, 32, 6, 1.5, 1.5, 'F');
+      doc.roundedRect(W / 2 - 16, tagY + 8, 32, 6, 1.5, 1.5, 'F');
       doc.setFontSize(7);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...NEAR_BLACK);
-      doc.text('PREMIUM', W / 2, tagY + 4.2, { align: 'center' });
+      doc.text('PREMIUM', W / 2, tagY + 12.2, { align: 'center' });
 
       // Centered banner
-      const bannerY = tagY + 12;
+      const bannerY = tagY + 20;
       doc.addImage(dataUrl, 'JPEG', M, bannerY, bannerW, bannerH);
       doc.setDrawColor(...GOLD);
       doc.setLineWidth(0.6);
@@ -1102,17 +1114,12 @@ export async function generatePdfReport(
       doc.setFontSize(9);
       doc.setFont('helvetica', 'italic');
       doc.setTextColor(...MUTED);
-      doc.text('Espacio publicitario BASQUEST+', W / 2, bannerY + bannerH + 8, { align: 'center' });
+      doc.text('Generado por BASQUEST+ - Inteligencia Deportiva', W / 2, bannerY + bannerH + 10, { align: 'center' });
 
-      // "Powered by BASQUEST+" caption
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...PURPLE);
-      doc.text('Powered by BASQUEST+', W / 2, bannerY + bannerH + 18, { align: 'center' });
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...MUTED);
-      doc.text('Inteligencia Deportiva · basquestplus.cl', W / 2, bannerY + bannerH + 24, { align: 'center' });
+      doc.setTextColor(...PURPLE);
+      doc.text('basquestplus.cl', W / 2, bannerY + bannerH + 16, { align: 'center' });
 
       drawFooter(pageNum);
     } catch {
