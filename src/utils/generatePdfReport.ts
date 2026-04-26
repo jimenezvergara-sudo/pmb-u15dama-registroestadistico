@@ -50,7 +50,7 @@ export async function generatePdfReport(
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
-  const M = 14;
+  const M = 20; // Match AI Analysis PDF margins
   let y = 0;
 
   // ═══════════════ HELPERS ═══════════════
