@@ -114,7 +114,7 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
     doc.setFont('helvetica', 'normal');
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
-    const M = 16;
+    const M = 20; // 20mm side margin for comfortable reading
     const contentW = W - M * 2;
     let y = 0;
     let pageNum = 1;
@@ -230,8 +230,8 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
           : { text: p, bold: false }
       );
 
-      // Word-wrap across segments
-      const lineH = fontSize * 0.42;
+      // Word-wrap across segments. Line-height 1.6 (pt -> mm: pt*0.3528*1.6)
+      const lineH = fontSize * 0.3528 * 1.6;
       let cx = x;
       let cy = yPos;
       const startX = x;
@@ -266,84 +266,87 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
         return;
       }
 
-      // ### Section heading -> purple bg box
+      // ### Section heading -> purple bg box (13pt)
       if (/^#{1,3}\s+/.test(trimmed)) {
         const headingText = trimmed.replace(/^#{1,3}\s+/, '');
-        ensureSpace(14);
-        y += 2;
+        ensureSpace(20);
+        y += 6; // 16px gap before each section (~5.6mm)
         doc.setFillColor(...PURPLE);
-        doc.roundedRect(M, y, contentW, 9, 2.5, 2.5, 'F');
-        doc.setFontSize(10);
+        doc.roundedRect(M, y, contentW, 11, 2.5, 2.5, 'F');
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...WHITE);
-        doc.text(safeText(headingText), M + 4, y + 6.2);
-        y += 12;
+        doc.text(safeText(headingText), M + 5, y + 7.6);
+        y += 15;
         return;
       }
 
-      // Whole-line bold **...**
+      // Whole-line bold **...** -> sub-heading (12pt)
       if (/^\*\*[^*]+\*\*:?\s*$/.test(trimmed)) {
         const txt = trimmed.replace(/\*\*/g, '').replace(/:$/, '');
-        ensureSpace(8);
-        doc.setFontSize(9.5);
+        ensureSpace(10);
+        y += 2;
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...PURPLE);
         const wrapped = doc.splitTextToSize(safeText(txt), contentW);
-        doc.text(wrapped, M, y + 4);
-        y += wrapped.length * 4.6 + 2;
+        doc.text(wrapped, M, y + 5);
+        y += wrapped.length * 6 + 3;
         return;
       }
 
-      // Numbered list (tactical recs)
+      // Numbered list (tactical recs) - 11pt body
       const numMatch = trimmed.match(/^(\d+)[.)]\s*(.*)$/);
       if (numMatch) {
         const num = numMatch[1];
         const text = numMatch[2];
-        ensureSpace(10);
+        ensureSpace(14);
+        y += 3.5; // ~10px separation between items
 
         doc.setFillColor(...PURPLE);
-        doc.circle(M + 3.5, y + 3.2, 2.8, 'F');
-        doc.setFontSize(7);
+        doc.circle(M + 4, y + 4, 3.5, 'F');
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...WHITE);
-        doc.text(num, M + 3.5, y + 4.2, { align: 'center' });
+        doc.text(num, M + 4, y + 5.3, { align: 'center' });
 
-        const endY = renderInlineBold(text, M + 9, y + 4, contentW - 10, NEAR_BLACK, PURPLE, 8.5);
-        y = Math.max(y + 8, endY + 1);
+        const endY = renderInlineBold(text, M + 11, y + 5, contentW - 12, NEAR_BLACK, PURPLE, 11);
+        y = Math.max(y + 9, endY + 1);
         return;
       }
 
-      // Bullet list ( * or - )
+      // Bullet list ( * or - ) - 11pt body, square purple bullet ~4px (1.4mm)
       if (/^[*\-]\s+/.test(trimmed)) {
         const text = trimmed.replace(/^[*\-]\s+/, '');
-        ensureSpace(8);
+        ensureSpace(10);
+        y += 3.5; // 10px separation between bullets
 
-        // Square purple bullet
         doc.setFillColor(...PURPLE);
-        doc.rect(M + 1.5, y + 2, 1.8, 1.8, 'F');
+        doc.rect(M + 1, y + 2.5, 1.4, 1.4, 'F');
 
-        const endY = renderInlineBold(text, M + 6, y + 4, contentW - 7, NEAR_BLACK, PURPLE, 8.5);
-        y = Math.max(y + 6, endY + 0.5);
+        const endY = renderInlineBold(text, M + 6, y + 5, contentW - 7, NEAR_BLACK, PURPLE, 11);
+        y = Math.max(y + 7, endY + 1);
         return;
       }
 
-      // Normal paragraph
-      ensureSpace(8);
-      const endY = renderInlineBold(trimmed, M, y + 4, contentW, NEAR_BLACK, PURPLE, 8.5);
-      y = endY + 1;
+      // Normal paragraph - 11pt
+      ensureSpace(10);
+      y += 1.5;
+      const endY = renderInlineBold(trimmed, M, y + 5, contentW, NEAR_BLACK, PURPLE, 11);
+      y = endY + 2;
     });
 
     // ── Signature ──
-    ensureSpace(20);
-    y += 6;
+    ensureSpace(22);
+    y += 8;
     doc.setFillColor(...WHITE);
-    doc.roundedRect(M, y, contentW, 14, 4, 4, 'F');
+    doc.roundedRect(M, y, contentW, 16, 4, 4, 'F');
     doc.setFillColor(...GOLD);
     doc.roundedRect(M + 4, y, contentW - 8, 1.5, 0.7, 0.7, 'F');
-    doc.setFontSize(7.5);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...PURPLE);
-    doc.text('Generado por BASQUEST+ - Inteligencia Deportiva con IA', W / 2, y + 9, { align: 'center' });
+    doc.text('Generado por BASQUEST+ - Inteligencia Deportiva con IA', W / 2, y + 10.5, { align: 'center' });
 
     drawFooter();
 
