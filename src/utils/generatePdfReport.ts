@@ -1088,17 +1088,23 @@ export async function generatePdfReport(
       const blockH = 6 /*tag*/ + 6 /*tag→banner gap*/ + bannerH + 8 /*banner→caption*/ + 6 /*caption*/ + 6 /*caption2*/ + 5 /*spacer*/ + 5 /*footer caption*/;
       const blockTop = Math.max(50, (H - blockH) / 2);
 
-      // PREMIUM tag (centered, above banner)
+      // Header label above banner — purple "Espacio Premium BASQUEST+"
       const tagY = blockTop;
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...PURPLE);
+      doc.text('Espacio Premium BASQUEST+', W / 2, tagY + 5, { align: 'center' });
+
+      // PREMIUM mini badge
       doc.setFillColor(...GOLD);
-      doc.roundedRect(W / 2 - 16, tagY, 32, 6, 1.5, 1.5, 'F');
+      doc.roundedRect(W / 2 - 16, tagY + 8, 32, 6, 1.5, 1.5, 'F');
       doc.setFontSize(7);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...NEAR_BLACK);
-      doc.text('PREMIUM', W / 2, tagY + 4.2, { align: 'center' });
+      doc.text('PREMIUM', W / 2, tagY + 12.2, { align: 'center' });
 
       // Centered banner
-      const bannerY = tagY + 12;
+      const bannerY = tagY + 20;
       doc.addImage(dataUrl, 'JPEG', M, bannerY, bannerW, bannerH);
       doc.setDrawColor(...GOLD);
       doc.setLineWidth(0.6);
@@ -1108,17 +1114,12 @@ export async function generatePdfReport(
       doc.setFontSize(9);
       doc.setFont('helvetica', 'italic');
       doc.setTextColor(...MUTED);
-      doc.text('Espacio publicitario BASQUEST+', W / 2, bannerY + bannerH + 8, { align: 'center' });
+      doc.text('Generado por BASQUEST+ - Inteligencia Deportiva', W / 2, bannerY + bannerH + 10, { align: 'center' });
 
-      // "Powered by BASQUEST+" caption
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...PURPLE);
-      doc.text('Powered by BASQUEST+', W / 2, bannerY + bannerH + 18, { align: 'center' });
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...MUTED);
-      doc.text('Inteligencia Deportiva · basquestplus.cl', W / 2, bannerY + bannerH + 24, { align: 'center' });
+      doc.setTextColor(...PURPLE);
+      doc.text('basquestplus.cl', W / 2, bannerY + bannerH + 16, { align: 'center' });
 
       drawFooter(pageNum);
     } catch {
