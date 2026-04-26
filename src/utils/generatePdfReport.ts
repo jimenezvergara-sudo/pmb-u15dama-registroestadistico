@@ -129,14 +129,23 @@ export async function generatePdfReport(
     doc.text(`Página ${pageNum}`, W - M, H - 4, { align: 'right' });
   };
 
+  // Section title — purple bg box with white text (matches AI Analysis PDF)
   const sectionTitle = (title: string) => {
+    if (y + 16 > H - 16) {
+      drawFooter(pageNum);
+      doc.addPage();
+      drawPageBg();
+      pageNum++;
+      drawHeader();
+    }
+    y += 4;
     doc.setFillColor(...PURPLE);
-    doc.roundedRect(M, y, 3.5, 8, 1.7, 1.7, 'F');
+    doc.roundedRect(M, y, W - M * 2, 11, 2.5, 2.5, 'F');
     doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...NEAR_BLACK);
-    doc.text(title, M + 7, y + 6);
-    y += 12;
+    doc.setTextColor(...WHITE);
+    doc.text(title, M + 5, y + 7.6);
+    y += 15;
   };
 
   // ═══════════════ PAGE 1: Overview ═══════════════
