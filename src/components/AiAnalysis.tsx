@@ -114,7 +114,7 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
     doc.setFont('helvetica', 'normal');
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
-    const M = 16;
+    const M = 20; // 20mm side margin for comfortable reading
     const contentW = W - M * 2;
     let y = 0;
     let pageNum = 1;
