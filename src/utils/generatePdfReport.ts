@@ -332,71 +332,68 @@ export async function generatePdfReport(
     { label: 'TS%', player: topTs, value: topTs ? `${topTs.ts}%` : undefined, accent: SUCCESS },
   ];
 
-  // Larger leader cards: bigger names + prominent stat number
+  // Larger leader cards — AI-Analysis style: category label (purple), name (bold), big stat
   const lColGap = 5;
-  const lRowGap = 5;
-  const lCardH = 26;
-  const lColW = (W - M * 2 - lColGap * 2) / 3;
+  const lRowGap = 6;
+  const lCardH = 28;
+  const lColW = (W - M * 2 - lColGap) / 2; // 2 columns
   leaderItems.forEach((item, i) => {
-    const col = i % 3;
-    const row = Math.floor(i / 3);
+    const col = i % 2;
+    const row = Math.floor(i / 2);
     const lx = M + col * (lColW + lColGap);
     const ly = y + row * (lCardH + lRowGap);
 
     if (ly + lCardH > H - 16) return;
 
-    // Card background with subtle shadow simulation
+    // Card background with subtle shadow
     doc.setFillColor(220, 215, 235);
-    doc.roundedRect(lx + 0.6, ly + 0.6, lColW, lCardH, 3.5, 3.5, 'F');
+    doc.roundedRect(lx + 0.6, ly + 0.6, lColW, lCardH, 4, 4, 'F');
     doc.setFillColor(...WHITE);
-    doc.roundedRect(lx, ly, lColW, lCardH, 3.5, 3.5, 'F');
-
-    // Accent bar (left)
+    doc.roundedRect(lx, ly, lColW, lCardH, 4, 4, 'F');
+    // Accent left bar
     doc.setFillColor(...item.accent);
-    doc.roundedRect(lx, ly + 3, 3, lCardH - 6, 1.5, 1.5, 'F');
+    doc.roundedRect(lx, ly + 4, 3, lCardH - 8, 1.5, 1.5, 'F');
 
-    // Section label (top)
-    doc.setFontSize(6.5);
-    doc.setTextColor(...MUTED);
+    // Category label (small purple, top)
+    doc.setFontSize(7);
+    doc.setTextColor(...PURPLE);
     doc.setFont('helvetica', 'bold');
-    doc.text(item.label, lx + 7, ly + 6);
+    doc.text(item.label, lx + 8, ly + 7);
 
     if (item.player) {
-      // Big stat value (right side, prominent)
+      // Big stat value (right side)
       const valStr = `${item.value}`;
-      doc.setFontSize(20);
+      doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...item.accent);
       const vw = doc.getTextWidth(valStr);
-      doc.text(valStr, lx + lColW - 5, ly + 18, { align: 'right' });
+      doc.text(valStr, lx + lColW - 6, ly + 21, { align: 'right' });
 
-      // Player name (left, bigger and bolder)
+      // Player name (bold, larger)
       const nameStr = filteredGames.length === 1 ? `#${item.player.number} ${item.player.name}` : item.player.name;
-      const maxNameW = lColW - 12 - vw - 4;
-      doc.setFontSize(10);
+      const maxNameW = lColW - 14 - vw - 6;
+      doc.setFontSize(11);
       doc.setTextColor(...NEAR_BLACK);
       doc.setFont('helvetica', 'bold');
-      // Truncate if too long
       let displayName = nameStr;
       while (doc.getTextWidth(displayName) > maxNameW && displayName.length > 4) {
         displayName = displayName.slice(0, -1);
       }
-      if (displayName.length < nameStr.length) displayName = displayName.slice(0, -1) + '…';
-      doc.text(displayName, lx + 7, ly + 15);
+      if (displayName.length < nameStr.length) displayName = displayName.slice(0, -1) + '...';
+      doc.text(displayName, lx + 8, ly + 16);
 
-      // Subtle "líder" hint
-      doc.setFontSize(6);
+      doc.setFontSize(7);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...MUTED);
-      doc.text('Líder', lx + 7, ly + 21);
+      doc.text('Lider de la temporada', lx + 8, ly + 23);
     } else {
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'italic');
       doc.setTextColor(...MUTED);
-      doc.text('Sin datos suficientes', lx + 7, ly + 17);
+      doc.text('Sin datos suficientes', lx + 8, ly + 18);
     }
   });
-  y += Math.ceil(leaderItems.length / 3) * (lCardH + lRowGap) + 4;
+  y += Math.ceil(leaderItems.length / 2) * (lCardH + lRowGap) + 4;
 
   drawFooter(pageNum);
 
