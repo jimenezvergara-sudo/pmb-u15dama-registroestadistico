@@ -526,8 +526,8 @@ export async function generatePdfReport(
       head: [['Jugadora', 'TC', '2PT', '3PT', 'TL', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG%', 'TS%']],
       body: tableBody,
       margin: { left: M, right: M },
-      styles: { fontSize: 8, cellPadding: 2.2, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2, valign: 'middle' },
-      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 8, halign: 'center' },
+      styles: { fontSize: 9, cellPadding: 2.4, font: 'helvetica', lineColor: TABLE_BORDER, lineWidth: 0.2, valign: 'middle' },
+      headStyles: { fillColor: PURPLE, textColor: WHITE, fontStyle: 'bold', fontSize: 9, halign: 'center' },
       bodyStyles: { fillColor: WHITE },
       alternateRowStyles: { fillColor: TABLE_ALT },
       columnStyles: {
