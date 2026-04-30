@@ -15,10 +15,18 @@ interface AppState {
   myTeamName: string;
   myTeamLogo: string;
   loading: boolean;
+  /** All raw rows from cloud, keyed by category, for cross-category viewing */
+  _rawPlayers: (Player & { category: Category })[];
+  _rawTeams: (Team & { category: Category })[];
+  _rawTournaments: (Tournament & { category: Category })[];
 }
 
-interface AppContextValue extends Omit<AppState, 'loading'> {
+interface AppContextValue extends Omit<AppState, 'loading' | '_rawPlayers' | '_rawTeams' | '_rawTournaments'> {
   loading: boolean;
+  /** True when the user is restricted and is currently viewing a category they cannot edit. */
+  isReadOnlyView: boolean;
+  /** The category the user is allowed to modify (null when admin / unrestricted). */
+  assignedCategory: string | null;
   addPlayer: (p: Omit<Player, 'id'>) => void;
   removePlayer: (id: string) => void;
   removeGame: (id: string) => void;
