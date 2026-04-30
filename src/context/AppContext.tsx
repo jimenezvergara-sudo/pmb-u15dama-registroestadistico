@@ -731,7 +731,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...state,
       addPlayer, removePlayer, removeGame, updateGame, addTournament, removeTournament,
       addTeam, removeTeam,
-      startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
+      startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame, cancelActiveGame,
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
       deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
       setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer, setMyTeamName, setMyTeamLogo,
