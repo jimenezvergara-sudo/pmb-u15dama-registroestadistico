@@ -785,13 +785,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => ({
       ...s,
       games: updatedGames,
-      players: s.players.filter(p => p.id !== removeId).map(p => p.id === keepId ? { ...p, number: keepNumber, name: keepName } : p),
+      _rawPlayers: s._rawPlayers.filter(p => p.id !== removeId).map(p => p.id === keepId ? { ...p, number: keepNumber, name: keepName } : p),
     }));
   }, [state.games]);
 
+  // Strip internal _raw* fields from the value exposed to consumers
+  const { _rawPlayers, _rawTeams, _rawTournaments, ...publicState } = state;
+
   return (
     <AppContext.Provider value={{
-      ...state,
+      ...publicState,
+      players: visiblePlayers,
+      teams: visibleTeams,
+      tournaments: visibleTournaments,
+      isReadOnlyView,
+      assignedCategory,
       addPlayer, removePlayer, removeGame, updateGame, addTournament, removeTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame, cancelActiveGame,
