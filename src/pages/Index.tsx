@@ -11,6 +11,7 @@ import HomeScreen from '@/components/HomeScreen';
 import AdminPanel from '@/components/AdminPanel';
 import ClubStaffManager from '@/components/ClubStaffManager';
 import { CATEGORIES, Category } from '@/types/basketball';
+import { consumeRosterReturnRequest, LINEUP_RETURN_EVENT } from '@/utils/activeGameExpiry';
 import logoBasqest from '@/assets/logo-basqest-new.png';
 
 const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSelect }) => (
@@ -41,6 +42,15 @@ const AppContent: React.FC = () => {
   React.useEffect(() => {
     if (activeGame) setTab('live');
   }, [activeGame?.id]);
+
+  React.useEffect(() => {
+    const returnToRoster = () => {
+      if (consumeRosterReturnRequest()) setTab('roster');
+    };
+    returnToRoster();
+    window.addEventListener(LINEUP_RETURN_EVENT, returnToRoster);
+    return () => window.removeEventListener(LINEUP_RETURN_EVENT, returnToRoster);
+  }, []);
 
   if (loading) {
     return (
