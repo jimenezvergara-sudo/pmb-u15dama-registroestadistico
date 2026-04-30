@@ -194,9 +194,16 @@ const migrateLocalData = async (userId: string, clubId: string) => {
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, profile } = useAuth();
+  const { user, profile, assignedCategory, canModifyCategory } = useAuth();
   const userId = user?.id;
   const clubId = profile?.club_id;
+
+  // If the user has an assigned category, force it as the active one on first load.
+  const initialCategory: Category = (
+    (assignedCategory as Category | null) ||
+    (localStorage.getItem(CATEGORY_KEY) as Category) ||
+    'U15'
+  );
 
   const [state, setState] = useState<AppState>({
     players: [],
@@ -204,10 +211,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     teams: [],
     games: [],
     activeGame: loadActiveGame(),
-    activeCategory: (localStorage.getItem(CATEGORY_KEY) as Category) || 'U15',
+    activeCategory: initialCategory,
     myTeamName: '',
     myTeamLogo: '',
     loading: true,
+    _rawPlayers: [],
+    _rawTeams: [],
+    _rawTournaments: [],
   });
 
   const hasMigrated = useRef(false);
@@ -234,23 +244,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('profiles').select('*').eq('user_id', userId).single(),
       ]);
 
-      const players: Player[] = ((playersRes.data as any[]) || []).map(p => ({
+      const rawPlayers = ((playersRes.data as any[]) || []).map(p => ({
         id: p.id,
         name: p.name,
         number: p.number,
+        category: (p.category || 'U15') as Category,
       }));
 
-      const teams: Team[] = ((teamsRes.data as any[]) || []).map(t => ({
+      const rawTeams = ((teamsRes.data as any[]) || []).map(t => ({
         id: t.id,
         clubName: t.club_name,
         city: t.city,
         region: t.region,
+        category: (t.category || 'U15') as Category,
       }));
 
-      const tournaments: Tournament[] = ((tournamentsRes.data as any[]) || []).map(t => ({
+      const rawTournaments = ((tournamentsRes.data as any[]) || []).map(t => ({
         id: t.id,
         name: t.name,
         date: t.date,
+        category: (t.category || 'U15') as Category,
       }));
 
       const games: Game[] = ((gamesRes.data as any[]) || []).map(g => ({
@@ -278,9 +291,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       setState(prev => ({
         ...prev,
-        players,
-        teams,
-        tournaments,
+        _rawPlayers: rawPlayers,
+        _rawTeams: rawTeams,
+        _rawTournaments: rawTournaments,
         games,
         myTeamName: prof?.my_team_name || '',
         myTeamLogo: prof?.my_team_logo || '',
@@ -290,6 +303,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     fetchAll();
   }, [userId, clubId]);
+
+  // Derive category-filtered visible lists
+  const visiblePlayers = React.useMemo(
+    () => state._rawPlayers.filter(p => p.category === state.activeCategory).map(({ category, ...p }) => p),
+    [state._rawPlayers, state.activeCategory]
+  );
+  const visibleTeams = React.useMemo(
+    () => state._rawTeams.filter(t => t.category === state.activeCategory).map(({ category, ...t }) => t),
+    [state._rawTeams, state.activeCategory]
+  );
+  const visibleTournaments = React.useMemo(
+    () => state._rawTournaments.filter(t => t.category === state.activeCategory).map(({ category, ...t }) => t),
+    [state._rawTournaments, state.activeCategory]
+  );
+
+  const isReadOnlyView = !canModifyCategory(state.activeCategory);
 
   // Persist active game to localStorage on change
   useEffect(() => {
