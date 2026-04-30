@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Shield, Users, ClipboardList, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Shield, Users, ClipboardList, Eye, EyeOff, ArrowLeft, ArrowRight } from 'lucide-react';
 import logoBasqest from '@/assets/logo-basqest-new.png';
 
 type RoleKey = 'admin' | 'staff' | 'coach' | 'fan';
@@ -25,6 +25,7 @@ const Auth: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const role = ROLE_INFO.find(r => r.key === selectedRole);
 
@@ -251,15 +252,25 @@ const Auth: React.FC = () => {
                   <label className="text-xs font-bold text-[hsl(250,20%,70%)] uppercase tracking-wider mb-1.5 block">
                     Contraseña
                   </label>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    minLength={6}
-                    className="bg-[hsl(268,40%,16%)] border-[hsl(268,30%,28%)] text-white placeholder:text-[hsl(250,15%,40%)] focus-visible:ring-[hsl(45,100%,50%)]"
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      minLength={6}
+                      className="bg-[hsl(268,40%,16%)] border-[hsl(268,30%,28%)] text-white placeholder:text-[hsl(250,15%,40%)] focus-visible:ring-[hsl(45,100%,50%)] pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(s => !s)}
+                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(250,20%,65%)] hover:text-[hsl(45,100%,65%)] transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 {isLogin && (
