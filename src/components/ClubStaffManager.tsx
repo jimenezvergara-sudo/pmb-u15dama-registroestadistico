@@ -33,7 +33,7 @@ const ASSIGNABLE_ROLES = [
   { value: 'fan', label: 'Fan' },
 ] as const;
 
-const CATEGORY_OPTIONS = ['U13', 'U15', 'U17', 'U19', 'Adulto'] as const;
+const CATEGORY_OPTIONS = ['U13', 'U15', 'U18', 'Adulta'] as const;
 
 type AssignableRole = typeof ASSIGNABLE_ROLES[number]['value'];
 
