@@ -498,7 +498,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       courtTimeMs: {},
     };
     setState(s => ({ ...s, activeGame: game }));
-  }, [state.activeCategory]);
+  }, [state.activeCategory, canModifyCategory]);
 
   const endGame = useCallback(async () => {
     setState(s => {
