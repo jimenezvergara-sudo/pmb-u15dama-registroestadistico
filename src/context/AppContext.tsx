@@ -806,6 +806,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       players: visiblePlayers,
       teams: visibleTeams,
       tournaments: visibleTournaments,
+      games: visibleGames,
       isReadOnlyView,
       assignedCategory,
       addPlayer, removePlayer, removeGame, updateGame, addTournament, removeTournament,
