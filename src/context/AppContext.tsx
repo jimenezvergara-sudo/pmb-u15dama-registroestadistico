@@ -334,17 +334,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addPlayer = useCallback(async (p: Omit<Player, 'id'>) => {
     if (!userId || !clubId) return;
+    if (!canModifyCategory(state.activeCategory)) {
+      console.warn('[addPlayer] read-only category, blocked');
+      return;
+    }
     const { data, error } = await supabase.from('club_players' as any).insert({
       club_id: clubId, user_id: userId, name: p.name, number: p.number,
+      category: state.activeCategory,
     }).select().single();
     if (error || !data) { console.error(error); return; }
     const row = data as any;
-    setState(s => ({ ...s, players: [...s.players, { id: row.id, name: row.name, number: row.number }] }));
-  }, [userId, clubId]);
+    setState(s => ({
+      ...s,
+      _rawPlayers: [...s._rawPlayers, { id: row.id, name: row.name, number: row.number, category: (row.category || s.activeCategory) as Category }],
+    }));
+  }, [userId, clubId, state.activeCategory, canModifyCategory]);
 
   const removePlayer = useCallback(async (id: string) => {
     await supabase.from('club_players' as any).delete().eq('id', id);
-    setState(s => ({ ...s, players: s.players.filter(p => p.id !== id) }));
+    setState(s => ({ ...s, _rawPlayers: s._rawPlayers.filter(p => p.id !== id) }));
   }, []);
 
   const updatePlayer = useCallback(async (id: string, name: string, number: number, propagateToHistory: boolean) => {
