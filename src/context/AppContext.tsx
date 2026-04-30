@@ -15,10 +15,18 @@ interface AppState {
   myTeamName: string;
   myTeamLogo: string;
   loading: boolean;
+  /** All raw rows from cloud, keyed by category, for cross-category viewing */
+  _rawPlayers: (Player & { category: Category })[];
+  _rawTeams: (Team & { category: Category })[];
+  _rawTournaments: (Tournament & { category: Category })[];
 }
 
-interface AppContextValue extends Omit<AppState, 'loading'> {
+interface AppContextValue extends Omit<AppState, 'loading' | '_rawPlayers' | '_rawTeams' | '_rawTournaments'> {
   loading: boolean;
+  /** True when the user is restricted and is currently viewing a category they cannot edit. */
+  isReadOnlyView: boolean;
+  /** The category the user is allowed to modify (null when admin / unrestricted). */
+  assignedCategory: string | null;
   addPlayer: (p: Omit<Player, 'id'>) => void;
   removePlayer: (id: string) => void;
   removeGame: (id: string) => void;
@@ -186,9 +194,16 @@ const migrateLocalData = async (userId: string, clubId: string) => {
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, profile } = useAuth();
+  const { user, profile, assignedCategory, canModifyCategory } = useAuth();
   const userId = user?.id;
   const clubId = profile?.club_id;
+
+  // If the user has an assigned category, force it as the active one on first load.
+  const initialCategory: Category = (
+    (assignedCategory as Category | null) ||
+    (localStorage.getItem(CATEGORY_KEY) as Category) ||
+    'U15'
+  );
 
   const [state, setState] = useState<AppState>({
     players: [],
@@ -196,10 +211,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     teams: [],
     games: [],
     activeGame: loadActiveGame(),
-    activeCategory: (localStorage.getItem(CATEGORY_KEY) as Category) || 'U15',
+    activeCategory: initialCategory,
     myTeamName: '',
     myTeamLogo: '',
     loading: true,
+    _rawPlayers: [],
+    _rawTeams: [],
+    _rawTournaments: [],
   });
 
   const hasMigrated = useRef(false);
@@ -226,23 +244,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('profiles').select('*').eq('user_id', userId).single(),
       ]);
 
-      const players: Player[] = ((playersRes.data as any[]) || []).map(p => ({
+      const rawPlayers = ((playersRes.data as any[]) || []).map(p => ({
         id: p.id,
         name: p.name,
         number: p.number,
+        category: (p.category || 'U15') as Category,
       }));
 
-      const teams: Team[] = ((teamsRes.data as any[]) || []).map(t => ({
+      const rawTeams = ((teamsRes.data as any[]) || []).map(t => ({
         id: t.id,
         clubName: t.club_name,
         city: t.city,
         region: t.region,
+        category: (t.category || 'U15') as Category,
       }));
 
-      const tournaments: Tournament[] = ((tournamentsRes.data as any[]) || []).map(t => ({
+      const rawTournaments = ((tournamentsRes.data as any[]) || []).map(t => ({
         id: t.id,
         name: t.name,
         date: t.date,
+        category: (t.category || 'U15') as Category,
       }));
 
       const games: Game[] = ((gamesRes.data as any[]) || []).map(g => ({
@@ -270,9 +291,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       setState(prev => ({
         ...prev,
-        players,
-        teams,
-        tournaments,
+        _rawPlayers: rawPlayers,
+        _rawTeams: rawTeams,
+        _rawTournaments: rawTournaments,
         games,
         myTeamName: prof?.my_team_name || '',
         myTeamLogo: prof?.my_team_logo || '',
@@ -282,6 +303,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     fetchAll();
   }, [userId, clubId]);
+
+  // Derive category-filtered visible lists
+  const visiblePlayers = React.useMemo(
+    () => state._rawPlayers.filter(p => p.category === state.activeCategory).map(({ category, ...p }) => p),
+    [state._rawPlayers, state.activeCategory]
+  );
+  const visibleTeams = React.useMemo(
+    () => state._rawTeams.filter(t => t.category === state.activeCategory).map(({ category, ...t }) => t),
+    [state._rawTeams, state.activeCategory]
+  );
+  const visibleTournaments = React.useMemo(
+    () => state._rawTournaments.filter(t => t.category === state.activeCategory).map(({ category, ...t }) => t),
+    [state._rawTournaments, state.activeCategory]
+  );
+
+  const isReadOnlyView = !canModifyCategory(state.activeCategory);
 
   // Persist active game to localStorage on change
   useEffect(() => {
@@ -297,17 +334,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addPlayer = useCallback(async (p: Omit<Player, 'id'>) => {
     if (!userId || !clubId) return;
+    if (!canModifyCategory(state.activeCategory)) {
+      console.warn('[addPlayer] read-only category, blocked');
+      return;
+    }
     const { data, error } = await supabase.from('club_players' as any).insert({
       club_id: clubId, user_id: userId, name: p.name, number: p.number,
+      category: state.activeCategory,
     }).select().single();
     if (error || !data) { console.error(error); return; }
     const row = data as any;
-    setState(s => ({ ...s, players: [...s.players, { id: row.id, name: row.name, number: row.number }] }));
-  }, [userId, clubId]);
+    setState(s => ({
+      ...s,
+      _rawPlayers: [...s._rawPlayers, { id: row.id, name: row.name, number: row.number, category: (row.category || s.activeCategory) as Category }],
+    }));
+  }, [userId, clubId, state.activeCategory, canModifyCategory]);
 
   const removePlayer = useCallback(async (id: string) => {
     await supabase.from('club_players' as any).delete().eq('id', id);
-    setState(s => ({ ...s, players: s.players.filter(p => p.id !== id) }));
+    setState(s => ({ ...s, _rawPlayers: s._rawPlayers.filter(p => p.id !== id) }));
   }, []);
 
   const updatePlayer = useCallback(async (id: string, name: string, number: number, propagateToHistory: boolean) => {
@@ -343,7 +388,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setState(s => ({
       ...s,
-      players: s.players.map(p => p.id === id ? { ...p, name: cleanName, number } : p),
+      _rawPlayers: s._rawPlayers.map(p => p.id === id ? { ...p, name: cleanName, number } : p),
       games: propagateToHistory ? updatedGames : s.games,
     }));
   }, [state.games]);
@@ -390,36 +435,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addTournament = useCallback(async (t: Omit<Tournament, 'id'>) => {
     if (!userId || !clubId) return;
+    if (!canModifyCategory(state.activeCategory)) { console.warn('[addTournament] blocked'); return; }
     const { data, error } = await supabase.from('club_tournaments' as any).insert({
       club_id: clubId, user_id: userId, name: t.name, date: t.date,
+      category: state.activeCategory,
     }).select().single();
     if (error || !data) { console.error(error); return; }
     const row = data as any;
-    setState(s => ({ ...s, tournaments: [...s.tournaments, { id: row.id, name: row.name, date: row.date }] }));
-  }, [userId, clubId]);
+    setState(s => ({
+      ...s,
+      _rawTournaments: [...s._rawTournaments, { id: row.id, name: row.name, date: row.date, category: (row.category || s.activeCategory) as Category }],
+    }));
+  }, [userId, clubId, state.activeCategory, canModifyCategory]);
 
   const removeTournament = useCallback(async (id: string) => {
     await supabase.from('club_tournaments' as any).delete().eq('id', id);
-    setState(s => ({ ...s, tournaments: s.tournaments.filter(t => t.id !== id) }));
+    setState(s => ({ ...s, _rawTournaments: s._rawTournaments.filter(t => t.id !== id) }));
   }, []);
 
   const addTeam = useCallback(async (t: Omit<Team, 'id'>) => {
     if (!userId || !clubId) return;
+    if (!canModifyCategory(state.activeCategory)) { console.warn('[addTeam] blocked'); return; }
     const { data, error } = await supabase.from('club_rival_teams' as any).insert({
       club_id: clubId, user_id: userId, club_name: t.clubName, city: t.city, region: t.region,
+      category: state.activeCategory,
     }).select().single();
     if (error || !data) { console.error(error); return; }
     const row = data as any;
-    setState(s => ({ ...s, teams: [...s.teams, { id: row.id, clubName: row.club_name, city: row.city, region: row.region }] }));
-  }, [userId, clubId]);
+    setState(s => ({
+      ...s,
+      _rawTeams: [...s._rawTeams, { id: row.id, clubName: row.club_name, city: row.city, region: row.region, category: (row.category || s.activeCategory) as Category }],
+    }));
+  }, [userId, clubId, state.activeCategory, canModifyCategory]);
 
   const removeTeam = useCallback(async (id: string) => {
     await supabase.from('club_rival_teams' as any).delete().eq('id', id);
-    setState(s => ({ ...s, teams: s.teams.filter(t => t.id !== id) }));
+    setState(s => ({ ...s, _rawTeams: s._rawTeams.filter(t => t.id !== id) }));
   }, []);
 
   // Active game operations (local only, saved to cloud on endGame)
   const startGame = useCallback((opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg, isHome?: boolean) => {
+    if (!canModifyCategory(state.activeCategory)) {
+      console.warn('[startGame] read-only category, blocked');
+      return;
+    }
     const game: Game = {
       id: genId(),
       opponentName,
@@ -439,7 +498,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       courtTimeMs: {},
     };
     setState(s => ({ ...s, activeGame: game }));
-  }, [state.activeCategory]);
+  }, [state.activeCategory, canModifyCategory]);
 
   const endGame = useCallback(async () => {
     setState(s => {
@@ -730,13 +789,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => ({
       ...s,
       games: updatedGames,
-      players: s.players.filter(p => p.id !== removeId).map(p => p.id === keepId ? { ...p, number: keepNumber, name: keepName } : p),
+      _rawPlayers: s._rawPlayers.filter(p => p.id !== removeId).map(p => p.id === keepId ? { ...p, number: keepNumber, name: keepName } : p),
     }));
   }, [state.games]);
 
+  // Strip internal _raw* fields from the value exposed to consumers
+  const { _rawPlayers, _rawTeams, _rawTournaments, ...publicState } = state;
+
   return (
     <AppContext.Provider value={{
-      ...state,
+      ...publicState,
+      players: visiblePlayers,
+      teams: visibleTeams,
+      tournaments: visibleTournaments,
+      isReadOnlyView,
+      assignedCategory,
       addPlayer, removePlayer, removeGame, updateGame, addTournament, removeTournament,
       addTeam, removeTeam,
       startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame, cancelActiveGame,

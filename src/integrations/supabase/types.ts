@@ -88,6 +88,7 @@ export type Database = {
       }
       club_players: {
         Row: {
+          category: string | null
           club_id: string
           created_at: string
           id: string
@@ -96,6 +97,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string | null
           club_id: string
           created_at?: string
           id?: string
@@ -104,6 +106,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string | null
           club_id?: string
           created_at?: string
           id?: string
@@ -115,6 +118,7 @@ export type Database = {
       }
       club_rival_teams: {
         Row: {
+          category: string | null
           city: string
           club_id: string
           club_name: string
@@ -124,6 +128,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string | null
           city?: string
           club_id: string
           club_name: string
@@ -133,6 +138,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string | null
           city?: string
           club_id?: string
           club_name?: string
@@ -145,6 +151,7 @@ export type Database = {
       }
       club_tournaments: {
         Row: {
+          category: string | null
           club_id: string
           created_at: string
           date: string
@@ -153,6 +160,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string | null
           club_id: string
           created_at?: string
           date?: string
@@ -161,6 +169,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string | null
           club_id?: string
           created_at?: string
           date?: string
@@ -276,6 +285,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          assigned_category: string | null
           avatar_url: string | null
           club_id: string
           created_at: string
@@ -287,6 +297,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assigned_category?: string | null
           avatar_url?: string | null
           club_id?: string
           created_at?: string
@@ -298,6 +309,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assigned_category?: string | null
           avatar_url?: string | null
           club_id?: string
           created_at?: string
@@ -448,13 +460,22 @@ export type Database = {
           user_id: string
         }[]
       }
+      can_modify_category: {
+        Args: { _category: string; _user_id: string }
+        Returns: boolean
+      }
       club_assign_user: {
-        Args: { _email: string; _role: Database["public"]["Enums"]["app_role"] }
+        Args: {
+          _category?: string
+          _email: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
         Returns: Json
       }
       club_list_users: {
         Args: never
         Returns: {
+          assigned_category: string
           club_id: string
           created_at: string
           email: string
@@ -466,6 +487,10 @@ export type Database = {
         }[]
       }
       club_remove_user: { Args: { _target_user_id: string }; Returns: Json }
+      get_user_assigned_category: {
+        Args: { _user_id: string }
+        Returns: string
+      }
       get_user_club_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {

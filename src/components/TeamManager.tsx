@@ -7,7 +7,7 @@ import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
 
 const TeamManager: React.FC = () => {
-  const { teams, addTeam, removeTeam, myTeamName, setMyTeamName, myTeamLogo, setMyTeamLogo } = useApp();
+  const { teams, addTeam, removeTeam, myTeamName, setMyTeamName, myTeamLogo, setMyTeamLogo, isReadOnlyView } = useApp();
   const [editingMyTeam, setEditingMyTeam] = useState(false);
   const [myTeamInput, setMyTeamInput] = useState(myTeamName);
 
@@ -101,12 +101,12 @@ const TeamManager: React.FC = () => {
       <h3 className="text-sm font-bold text-muted-foreground mt-4 mb-2">Equipos Rivales</h3>
 
       <div className="space-y-2">
-        <Input placeholder="Nombre del Club" value={clubName} onChange={e => setClubName(e.target.value)} />
+        <Input placeholder="Nombre del Club" value={clubName} onChange={e => setClubName(e.target.value)} disabled={isReadOnlyView} />
         <div className="grid grid-cols-2 gap-2">
-          <Input placeholder="Ciudad" value={city} onChange={e => setCity(e.target.value)} />
-          <Input placeholder="Región" value={region} onChange={e => setRegion(e.target.value)} />
+          <Input placeholder="Ciudad" value={city} onChange={e => setCity(e.target.value)} disabled={isReadOnlyView} />
+          <Input placeholder="Región" value={region} onChange={e => setRegion(e.target.value)} disabled={isReadOnlyView} />
         </div>
-        <Button onClick={handleAdd} disabled={!clubName.trim()} className="w-full tap-feedback gap-2">
+        <Button onClick={handleAdd} disabled={!clubName.trim() || isReadOnlyView} className="w-full tap-feedback gap-2">
           <Plus className="w-4 h-4" /> Añadir Equipo
         </Button>
       </div>
@@ -129,7 +129,8 @@ const TeamManager: React.FC = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-destructive shrink-0"
+              className="text-destructive shrink-0 disabled:opacity-30"
+              disabled={isReadOnlyView}
               onClick={() => {
                 if (confirm(`¿Eliminar ${t.clubName}?`)) removeTeam(t.id);
               }}
