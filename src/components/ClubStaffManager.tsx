@@ -21,6 +21,7 @@ interface ClubUser {
   full_name: string | null;
   club_id: string | null;
   role: string;
+  assigned_category: string | null;
   created_at: string;
   last_sign_in_at: string | null;
   email_confirmed_at: string | null;
@@ -31,6 +32,8 @@ const ASSIGNABLE_ROLES = [
   { value: 'club_staff', label: 'Staff Club' },
   { value: 'fan', label: 'Fan' },
 ] as const;
+
+const CATEGORY_OPTIONS = ['U13', 'U15', 'U17', 'U19', 'Adulto'] as const;
 
 type AssignableRole = typeof ASSIGNABLE_ROLES[number]['value'];
 
@@ -54,6 +57,7 @@ const roleBadgeVariant = (role: string) => {
 const inviteSchema = z.object({
   email: z.string().trim().email({ message: 'Email inválido' }).max(255),
   role: z.enum(['coach', 'club_staff', 'fan']),
+  category: z.string().optional(),
 });
 
 const ClubStaffManager: React.FC = () => {
@@ -62,6 +66,7 @@ const ClubStaffManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<AssignableRole>('coach');
+  const [category, setCategory] = useState<string>('U15');
   const [submitting, setSubmitting] = useState(false);
 
   const isClubAdmin = roles.some(r =>
@@ -96,7 +101,7 @@ const ClubStaffManager: React.FC = () => {
   }
 
   const handleAssign = async () => {
-    const parsed = inviteSchema.safeParse({ email, role });
+    const parsed = inviteSchema.safeParse({ email, role, category });
     if (!parsed.success) {
       toast({
         title: 'Datos inválidos',
@@ -109,13 +114,14 @@ const ClubStaffManager: React.FC = () => {
     const { error } = await supabase.rpc('club_assign_user', {
       _email: parsed.data.email,
       _role: parsed.data.role,
-    });
+      _category: parsed.data.category || null,
+    } as any);
     setSubmitting(false);
     if (error) {
       toast({ title: 'No se pudo asignar', description: error.message, variant: 'destructive' });
       return;
     }
-    toast({ title: 'Usuario asignado', description: `${parsed.data.email} ahora es ${roleLabels[parsed.data.role]}` });
+    toast({ title: 'Usuario asignado', description: `${parsed.data.email} → ${roleLabels[parsed.data.role]} (${parsed.data.category || 'sin categoría'})` });
     setEmail('');
     fetchUsers();
   };
@@ -171,14 +177,24 @@ const ClubStaffManager: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              onClick={handleAssign}
-              disabled={submitting || !email.trim()}
-              className="h-10"
-            >
-              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Asignar'}
-            </Button>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="flex-1 h-10 text-sm">
+                <SelectValue placeholder="Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORY_OPTIONS.map(c => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+          <Button
+            onClick={handleAssign}
+            disabled={submitting || !email.trim()}
+            className="h-10 w-full"
+          >
+            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Asignar'}
+          </Button>
         </div>
       </div>
 
@@ -221,6 +237,9 @@ const ClubStaffManager: React.FC = () => {
                         <Badge variant={roleBadgeVariant(u.role)} className="text-[10px]">
                           {roleLabels[u.role] || u.role}
                         </Badge>
+                        {u.assigned_category && (
+                          <span className="ml-1 text-[10px] font-bold text-primary">{u.assigned_category}</span>
+                        )}
                       </TableCell>
                       <TableCell className="p-2 text-right">
                         {!isSelf && !u.role.startsWith('club_admin') && u.role !== 'super_admin' && u.role !== 'system_operator' && (
