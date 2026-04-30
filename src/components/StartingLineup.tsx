@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Player } from '@/types/basketball';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Circle, ArrowLeft, AlertTriangle } from 'lucide-react';
 
 interface Props {
   roster: Player[];
@@ -15,6 +15,7 @@ interface Props {
 
 const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, subtitle, buttonLabel, preSelected }) => {
   const [selected, setSelected] = useState<Set<string>>(new Set(preSelected || []));
+  const rosterTooSmall = roster.length < 5;
 
   const toggle = (id: string) => {
     setSelected(prev => {
@@ -44,6 +45,20 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, sub
         {subtitle || `Selecciona las 5 jugadoras que inician (${selected.size}/5)`}
       </p>
 
+      {rosterTooSmall && (
+        <div className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <div className="space-y-1">
+              <p className="font-extrabold text-destructive">Faltan jugadoras para iniciar</p>
+              <p className="text-xs font-semibold text-muted-foreground">
+                El quinteto necesita 5 jugadoras y este partido tiene {roster.length}. Vuelve para corregir el roster.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto space-y-2">
         {roster.map(player => {
           const isSelected = selected.has(player.id);
@@ -69,13 +84,23 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, sub
         })}
       </div>
 
-      <Button
-        onClick={() => onConfirm(Array.from(selected))}
-        disabled={selected.size !== 5}
-        className="mt-4 h-12 text-base font-bold"
-      >
-        {buttonLabel || 'Iniciar Registro'}
-      </Button>
+      {rosterTooSmall && onBack ? (
+        <Button
+          onClick={onBack}
+          variant="outline"
+          className="mt-4 h-12 text-base font-bold gap-2"
+        >
+          <ArrowLeft className="w-5 h-5" /> Volver y corregir roster
+        </Button>
+      ) : (
+        <Button
+          onClick={() => onConfirm(Array.from(selected))}
+          disabled={selected.size !== 5}
+          className="mt-4 h-12 text-base font-bold"
+        >
+          {buttonLabel || 'Iniciar Registro'}
+        </Button>
+      )}
     </div>
   );
 };
