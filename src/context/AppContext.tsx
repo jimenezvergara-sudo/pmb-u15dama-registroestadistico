@@ -317,6 +317,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     () => state._rawTournaments.filter(t => t.category === state.activeCategory).map(({ category, ...t }) => t),
     [state._rawTournaments, state.activeCategory]
   );
+  const visibleGames = React.useMemo(
+    () => state.games.filter(g => !g.category || g.category === state.activeCategory),
+    [state.games, state.activeCategory]
+  );
 
   const isReadOnlyView = !canModifyCategory(state.activeCategory);
 
