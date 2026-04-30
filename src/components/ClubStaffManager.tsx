@@ -157,18 +157,22 @@ const ClubStaffManager: React.FC = () => {
         <p className="text-[11px] text-muted-foreground mb-3">
           Ingresá el email de un usuario ya registrado. Será movido a tu club con el rol elegido.
         </p>
-        <div className="flex flex-col gap-2">
-          <Input
-            type="email"
-            placeholder="email@ejemplo.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            maxLength={255}
-            className="h-10 text-sm"
-          />
-          <div className="flex gap-2">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Email</label>
+            <Input
+              type="email"
+              placeholder="email@ejemplo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              maxLength={255}
+              className="h-10 text-sm"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Rol</label>
             <Select value={role} onValueChange={(v) => setRole(v as AssignableRole)}>
-              <SelectTrigger className="flex-1 h-10 text-sm">
+              <SelectTrigger className="h-10 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -177,9 +181,14 @@ const ClubStaffManager: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Categoría asignada <span className="text-primary">*</span>
+            </label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="flex-1 h-10 text-sm">
-                <SelectValue placeholder="Categoría" />
+              <SelectTrigger className="h-10 text-sm border-2 border-primary/30">
+                <SelectValue placeholder="Seleccionar categoría" />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORY_OPTIONS.map(c => (
@@ -187,13 +196,16 @@ const ClubStaffManager: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              El usuario solo podrá editar datos de esta categoría.
+            </p>
           </div>
           <Button
             onClick={handleAssign}
             disabled={submitting || !email.trim()}
-            className="h-10 w-full"
+            className="h-11 w-full font-bold"
           >
-            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Asignar'}
+            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Asignar al club'}
           </Button>
         </div>
       </div>
