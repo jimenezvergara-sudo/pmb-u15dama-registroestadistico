@@ -110,6 +110,7 @@ const LiveGame: React.FC = () => {
         title={`Quinteto para ${QUARTER_LABELS[pendingQuarter]}`}
         subtitle={`Selecciona las 5 jugadoras que inician el ${QUARTER_LABELS[pendingQuarter]} (seleccionadas/5)`}
         buttonLabel={`Iniciar ${QUARTER_LABELS[pendingQuarter]}`}
+        onBack={() => setPendingQuarter(null)}
         onConfirm={(starterIds) => {
           snapshotCourtTime();
           setOnCourtPlayers(starterIds);
