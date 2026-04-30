@@ -475,6 +475,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Active game operations (local only, saved to cloud on endGame)
   const startGame = useCallback((opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg, isHome?: boolean) => {
+    if (!canModifyCategory(state.activeCategory)) {
+      console.warn('[startGame] read-only category, blocked');
+      return;
+    }
     const game: Game = {
       id: genId(),
       opponentName,
