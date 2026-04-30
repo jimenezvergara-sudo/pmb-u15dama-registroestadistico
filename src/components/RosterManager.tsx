@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dialog';
 
 const RosterManager: React.FC = () => {
-  const { players, games, addPlayer, removePlayer, mergePlayers, updatePlayer } = useApp();
+  const { players, games, addPlayer, removePlayer, mergePlayers, updatePlayer, isReadOnlyView } = useApp();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [number, setNumber] = useState('');
@@ -121,6 +121,10 @@ const RosterManager: React.FC = () => {
   const canAdd = firstOk && lastOk && numberOk;
 
   const handleAdd = () => {
+    if (isReadOnlyView) {
+      toast.error('Solo lectura: no podés agregar jugadoras en esta categoría');
+      return;
+    }
     if (!canAdd) {
       if (!firstOk || !lastOk) toast.error('Ingresa nombre y apellido (mín. 2 caracteres cada uno)');
       else if (numberDuplicate) toast.error(`El número #${parsedNumber} ya está en uso`);
@@ -187,7 +191,7 @@ const RosterManager: React.FC = () => {
             onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
             className={`flex-1 text-center font-bold ${numberDuplicate ? 'border-destructive ring-2 ring-destructive/40' : ''}`}
           />
-          <Button onClick={handleAdd} disabled={!canAdd} className="tap-feedback shrink-0 gap-1">
+          <Button onClick={handleAdd} disabled={!canAdd || isReadOnlyView} className="tap-feedback shrink-0 gap-1">
             <Plus className="w-4 h-4" /> Añadir
           </Button>
         </div>
@@ -319,15 +323,17 @@ const RosterManager: React.FC = () => {
                         </DropdownMenu>
                       )}
                       <button
-                        onClick={() => openEdit(p)}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 tap-feedback"
+                        onClick={() => !isReadOnlyView && openEdit(p)}
+                        disabled={isReadOnlyView}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 tap-feedback disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                         aria-label="Editar"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => removePlayer(p.id)}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 tap-feedback"
+                        onClick={() => !isReadOnlyView && removePlayer(p.id)}
+                        disabled={isReadOnlyView}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 tap-feedback disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                         aria-label="Eliminar"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
