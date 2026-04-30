@@ -30,6 +30,15 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, sub
 
   return (
     <div className="flex flex-col h-full p-4">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground tap-feedback mb-3 -ml-1 self-start"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Volver
+        </button>
+      )}
       <h2 className="text-lg font-extrabold text-foreground mb-1">{title || 'Quinteto Inicial'}</h2>
       <p className="text-xs text-muted-foreground mb-4">
         {subtitle || `Selecciona las 5 jugadoras que inician (${selected.size}/5)`}
