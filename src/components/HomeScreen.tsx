@@ -361,9 +361,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCategoryPress }) => {
           </div>
           <button
             onClick={onCategoryPress}
-            className="text-[10px] font-bold text-accent-foreground bg-accent px-3 py-1 rounded-full"
+            className="text-sm font-extrabold text-accent-foreground bg-accent px-5 py-2.5 rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-1.5 border-2 border-accent-foreground/10"
           >
-            📂 {activeCategory}
+            <span className="text-base">📂</span>
+            <span>{activeCategory}</span>
+            <span className="text-xs opacity-70">▼</span>
           </button>
         </div>
         <div className="grid grid-cols-2 gap-3">
