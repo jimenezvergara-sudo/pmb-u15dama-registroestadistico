@@ -9,7 +9,7 @@ import AdBannerCarousel from '@/components/AdBannerCarousel';
 import { toast } from 'sonner';
 
 const TournamentManager: React.FC = () => {
-  const { tournaments, addTournament, removeTournament } = useApp();
+  const { tournaments, addTournament, removeTournament, isReadOnlyView } = useApp();
   const [name, setName] = useState('');
   const [selectedTournament, setSelectedTournament] = useState<{ id: string; name: string } | null>(null);
 
@@ -41,8 +41,9 @@ const TournamentManager: React.FC = () => {
           placeholder="Nombre del torneo"
           value={name}
           onChange={e => setName(e.target.value)}
+          disabled={isReadOnlyView}
         />
-        <Button onClick={handleAdd} size="icon" className="tap-feedback shrink-0">
+        <Button onClick={handleAdd} size="icon" className="tap-feedback shrink-0" disabled={isReadOnlyView || !name.trim()}>
           <Plus className="w-5 h-5" />
         </Button>
       </div>
@@ -73,7 +74,8 @@ const TournamentManager: React.FC = () => {
             <Button
               variant="outline"
               size="icon"
-              className="shrink-0 h-9 w-9 text-destructive hover:bg-destructive/10"
+              className="shrink-0 h-9 w-9 text-destructive hover:bg-destructive/10 disabled:opacity-30"
+              disabled={isReadOnlyView}
               onClick={() => {
                 if (confirm(`¿Eliminar el torneo "${t.name}"?`)) {
                   removeTournament(t.id);
