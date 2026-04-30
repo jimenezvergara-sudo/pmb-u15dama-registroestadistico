@@ -3,6 +3,7 @@ import { Player, ShotEvent, Game, QuarterId, Tournament, OpponentScore, Team, Ga
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { enqueue as enqueueSync, flushQueue } from '@/utils/syncQueue';
+import { requestRosterReturn, shouldExpirePendingLineup } from '@/utils/activeGameExpiry';
 
 interface AppState {
   players: Player[];
@@ -76,7 +77,14 @@ const flushCourtTime = (game: Game): Game => {
 const loadActiveGame = (): Game | null => {
   try {
     const raw = localStorage.getItem(ACTIVE_GAME_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const game = JSON.parse(raw) as Game;
+    if (shouldExpirePendingLineup(game)) {
+      localStorage.removeItem(ACTIVE_GAME_KEY);
+      requestRosterReturn();
+      return null;
+    }
+    return game;
   } catch { return null; }
 };
 
