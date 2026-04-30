@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Shield, Users, ClipboardList, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Shield, Users, ClipboardList, Eye, EyeOff, ArrowLeft, ArrowRight } from 'lucide-react';
 import logoBasqest from '@/assets/logo-basqest-new.png';
 
 type RoleKey = 'admin' | 'staff' | 'coach' | 'fan';
