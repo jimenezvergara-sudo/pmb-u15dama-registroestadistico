@@ -32,6 +32,7 @@ interface AppContextValue extends Omit<AppState, 'loading'> {
   recordShot: (shot: Omit<ShotEvent, 'id' | 'timestamp' | 'quarterId'>) => void;
   undoLastShot: () => void;
   setActiveGame: (game: Game) => void;
+  cancelActiveGame: () => void;
   recordOpponentScore: (points: 1 | 2 | 3) => void;
   undoLastOpponentScore: () => void;
   setActiveCategory: (c: Category) => void;
@@ -536,6 +537,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => ({ ...s, activeGame: game }));
   }, []);
 
+  const cancelActiveGame = useCallback(() => {
+    setState(s => ({ ...s, activeGame: null }));
+  }, []);
+
   const recordOpponentScore = useCallback((points: 1 | 2 | 3) => {
     setState(s => {
       if (!s.activeGame) return s;
@@ -726,7 +731,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...state,
       addPlayer, removePlayer, removeGame, updateGame, addTournament, removeTournament,
       addTeam, removeTeam,
-      startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame,
+      startGame, endGame, setQuarter, recordShot, undoLastShot, setActiveGame, cancelActiveGame,
       recordOpponentScore, undoLastOpponentScore, setActiveCategory, recordAction,
       deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
       setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer, setMyTeamName, setMyTeamLogo,

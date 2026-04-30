@@ -32,7 +32,7 @@ const LiveGame: React.FC = () => {
     activeGame, setQuarter, recordShot, undoLastShot, endGame,
     recordOpponentScore, undoLastOpponentScore, recordAction,
     setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer,
-    myTeamName, myTeamLogo,
+    myTeamName, myTeamLogo, cancelActiveGame,
     deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
   } = useApp();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
@@ -87,6 +87,11 @@ const LiveGame: React.FC = () => {
     return (
       <StartingLineup
         roster={activeGame.roster}
+        onBack={() => {
+          if (confirm('¿Cancelar este partido y volver?')) {
+            cancelActiveGame();
+          }
+        }}
         onConfirm={(starterIds) => {
           setOnCourtPlayers(starterIds);
           startGameTimer();
@@ -105,6 +110,7 @@ const LiveGame: React.FC = () => {
         title={`Quinteto para ${QUARTER_LABELS[pendingQuarter]}`}
         subtitle={`Selecciona las 5 jugadoras que inician el ${QUARTER_LABELS[pendingQuarter]} (seleccionadas/5)`}
         buttonLabel={`Iniciar ${QUARTER_LABELS[pendingQuarter]}`}
+        onBack={() => setPendingQuarter(null)}
         onConfirm={(starterIds) => {
           snapshotCourtTime();
           setOnCourtPlayers(starterIds);

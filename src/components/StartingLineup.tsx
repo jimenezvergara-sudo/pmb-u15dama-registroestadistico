@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { Player } from '@/types/basketball';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2, Circle, ArrowLeft } from 'lucide-react';
 
 interface Props {
   roster: Player[];
   onConfirm: (starterIds: string[]) => void;
+  onBack?: () => void;
   title?: string;
   subtitle?: string;
   buttonLabel?: string;
   preSelected?: string[];
 }
 
-const StartingLineup: React.FC<Props> = ({ roster, onConfirm, title, subtitle, buttonLabel, preSelected }) => {
+const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, subtitle, buttonLabel, preSelected }) => {
   const [selected, setSelected] = useState<Set<string>>(new Set(preSelected || []));
 
   const toggle = (id: string) => {
@@ -29,6 +30,15 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, title, subtitle, b
 
   return (
     <div className="flex flex-col h-full p-4">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground tap-feedback mb-3 -ml-1 self-start"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Volver
+        </button>
+      )}
       <h2 className="text-lg font-extrabold text-foreground mb-1">{title || 'Quinteto Inicial'}</h2>
       <p className="text-xs text-muted-foreground mb-4">
         {subtitle || `Selecciona las 5 jugadoras que inician (${selected.size}/5)`}
