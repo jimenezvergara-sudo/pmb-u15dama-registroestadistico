@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { Player } from '@/types/basketball';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2, Circle, ArrowLeft } from 'lucide-react';
 
 interface Props {
   roster: Player[];
   onConfirm: (starterIds: string[]) => void;
+  onBack?: () => void;
   title?: string;
   subtitle?: string;
   buttonLabel?: string;
   preSelected?: string[];
 }
 
-const StartingLineup: React.FC<Props> = ({ roster, onConfirm, title, subtitle, buttonLabel, preSelected }) => {
+const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, subtitle, buttonLabel, preSelected }) => {
   const [selected, setSelected] = useState<Set<string>>(new Set(preSelected || []));
 
   const toggle = (id: string) => {
