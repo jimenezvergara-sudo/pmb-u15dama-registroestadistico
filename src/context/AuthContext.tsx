@@ -11,6 +11,7 @@ interface Profile {
   avatar_url: string | null;
   my_team_name?: string;
   my_team_logo?: string;
+  assigned_category?: string | null;
 }
 
 interface AuthContextValue {
@@ -24,6 +25,12 @@ interface AuthContextValue {
   impersonatedRole: Enums<'app_role'> | null;
   /** Set a role to impersonate (super_admin only). Pass null to stop. */
   setImpersonatedRole: (role: Enums<'app_role'> | null) => void;
+  /** Category the user is restricted to (null/undefined = no restriction). */
+  assignedCategory: string | null;
+  /** True if user has no category restriction (admins / global / no assigned_category). */
+  canModifyAnyCategory: boolean;
+  /** True if the user is allowed to create/edit/delete data of the given category. */
+  canModifyCategory: (category?: string | null) => boolean;
   loading: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -44,6 +51,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const effectiveRoles: Enums<'app_role'>[] = impersonatedRole && isSuperAdmin
     ? [impersonatedRole]
     : roles;
+
+  const assignedCategory = profile?.assigned_category ?? null;
+  const ADMIN_OR_GLOBAL: Enums<'app_role'>[] = [
+    'super_admin', 'system_operator',
+    'club_admin', 'club_admin_pro', 'club_admin_elite',
+  ];
+  const isAdminOrGlobal = effectiveRoles.some(r => ADMIN_OR_GLOBAL.includes(r));
+  const canModifyAnyCategory = isAdminOrGlobal || !assignedCategory;
+  const canModifyCategory = (category?: string | null) => {
+    if (canModifyAnyCategory) return true;
+    if (!category) return false;
+    return category === assignedCategory;
+  };
 
   const fetchProfile = useCallback(async (userId: string) => {
     const { data } = await supabase
@@ -115,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, roles, effectiveRoles, impersonatedRole, setImpersonatedRole, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, roles, effectiveRoles, impersonatedRole, setImpersonatedRole, assignedCategory, canModifyAnyCategory, canModifyCategory, loading, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
