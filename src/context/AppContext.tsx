@@ -388,7 +388,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setState(s => ({
       ...s,
-      players: s.players.map(p => p.id === id ? { ...p, name: cleanName, number } : p),
+      _rawPlayers: s._rawPlayers.map(p => p.id === id ? { ...p, name: cleanName, number } : p),
       games: propagateToHistory ? updatedGames : s.games,
     }));
   }, [state.games]);
