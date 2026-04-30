@@ -536,6 +536,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(s => ({ ...s, activeGame: game }));
   }, []);
 
+  const cancelActiveGame = useCallback(() => {
+    setState(s => ({ ...s, activeGame: null }));
+  }, []);
+
   const recordOpponentScore = useCallback((points: 1 | 2 | 3) => {
     setState(s => {
       if (!s.activeGame) return s;
