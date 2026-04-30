@@ -10,6 +10,7 @@ import TeamManager from '@/components/TeamManager';
 import HomeScreen from '@/components/HomeScreen';
 import AdminPanel from '@/components/AdminPanel';
 import ClubStaffManager from '@/components/ClubStaffManager';
+import ReadOnlyBanner from '@/components/ReadOnlyBanner';
 import { CATEGORIES, Category } from '@/types/basketball';
 import { consumeRosterReturnRequest, LINEUP_RETURN_EVENT } from '@/utils/activeGameExpiry';
 import logoBasqest from '@/assets/logo-basqest-new.png';
@@ -71,6 +72,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16 relative">
+      <ReadOnlyBanner />
       
       {tab === 'home' && <HomeScreen onCategoryPress={() => setShowCategoryPicker(true)} />}
       {tab === 'live' && (activeGame ? <LiveGame /> : <NewGame />)}
