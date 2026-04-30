@@ -87,6 +87,11 @@ const LiveGame: React.FC = () => {
     return (
       <StartingLineup
         roster={activeGame.roster}
+        onBack={() => {
+          if (confirm('¿Cancelar este partido y volver?')) {
+            cancelActiveGame();
+          }
+        }}
         onConfirm={(starterIds) => {
           setOnCourtPlayers(starterIds);
           startGameTimer();
