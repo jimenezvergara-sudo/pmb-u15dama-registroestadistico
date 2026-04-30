@@ -25,6 +25,7 @@ const Auth: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const role = ROLE_INFO.find(r => r.key === selectedRole);
 
