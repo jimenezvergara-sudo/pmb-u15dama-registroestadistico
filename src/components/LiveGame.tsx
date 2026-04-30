@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Undo2, BarChart3, Pause, Play } from 'lucide-react';
 import { shareHalftimeWhatsApp } from '@/utils/halftimeShare';
+import { getPendingLineupAge, LINEUP_IDLE_TIMEOUT_MS, requestRosterReturn } from '@/utils/activeGameExpiry';
 import logoBasqest from '@/assets/logo-basqest-new.png';
 import {
   AlertDialog,
@@ -46,6 +47,22 @@ const LiveGame: React.FC = () => {
 
   // Flash visual de confirmación tras registrar una acción
   const [flash, setFlash] = useState<{ playerId: string; color: string } | null>(null);
+
+  useEffect(() => {
+    if (!activeGame || gameStarted || (activeGame.onCourtPlayerIds || []).length > 0) return;
+    const remaining = LINEUP_IDLE_TIMEOUT_MS - getPendingLineupAge(activeGame);
+    if (remaining <= 0) {
+      requestRosterReturn();
+      cancelActiveGame();
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      requestRosterReturn();
+      cancelActiveGame();
+      toast.warning('Se cerró el inicio pendiente. Vuelve a Plantilla para corregir el roster.', { duration: 4000 });
+    }, remaining);
+    return () => window.clearTimeout(timeout);
+  }, [activeGame, cancelActiveGame, gameStarted]);
 
   const triggerFlash = (playerId: string, color: string) => {
     setFlash({ playerId, color });
@@ -89,6 +106,7 @@ const LiveGame: React.FC = () => {
         roster={activeGame.roster}
         onBack={() => {
           if (confirm('¿Cancelar este partido y volver?')) {
+            requestRosterReturn();
             cancelActiveGame();
           }
         }}
