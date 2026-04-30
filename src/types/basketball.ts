@@ -18,9 +18,9 @@ export interface Tournament {
   date: string;
 }
 
-export type Category = 'U13' | 'U15' | 'U17' | 'U19' | 'Adulto';
+export type Category = 'U13' | 'U15' | 'U18' | 'Adulta';
 
-export const CATEGORIES: Category[] = ['U13', 'U15', 'U17', 'U19', 'Adulto'];
+export const CATEGORIES: Category[] = ['U13', 'U15', 'U18', 'Adulta'];
 
 export interface ShotEvent {
   id: string;
