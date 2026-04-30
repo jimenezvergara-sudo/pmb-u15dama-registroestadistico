@@ -435,32 +435,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addTournament = useCallback(async (t: Omit<Tournament, 'id'>) => {
     if (!userId || !clubId) return;
+    if (!canModifyCategory(state.activeCategory)) { console.warn('[addTournament] blocked'); return; }
     const { data, error } = await supabase.from('club_tournaments' as any).insert({
       club_id: clubId, user_id: userId, name: t.name, date: t.date,
+      category: state.activeCategory,
     }).select().single();
     if (error || !data) { console.error(error); return; }
     const row = data as any;
-    setState(s => ({ ...s, tournaments: [...s.tournaments, { id: row.id, name: row.name, date: row.date }] }));
-  }, [userId, clubId]);
+    setState(s => ({
+      ...s,
+      _rawTournaments: [...s._rawTournaments, { id: row.id, name: row.name, date: row.date, category: (row.category || s.activeCategory) as Category }],
+    }));
+  }, [userId, clubId, state.activeCategory, canModifyCategory]);
 
   const removeTournament = useCallback(async (id: string) => {
     await supabase.from('club_tournaments' as any).delete().eq('id', id);
-    setState(s => ({ ...s, tournaments: s.tournaments.filter(t => t.id !== id) }));
+    setState(s => ({ ...s, _rawTournaments: s._rawTournaments.filter(t => t.id !== id) }));
   }, []);
 
   const addTeam = useCallback(async (t: Omit<Team, 'id'>) => {
     if (!userId || !clubId) return;
+    if (!canModifyCategory(state.activeCategory)) { console.warn('[addTeam] blocked'); return; }
     const { data, error } = await supabase.from('club_rival_teams' as any).insert({
       club_id: clubId, user_id: userId, club_name: t.clubName, city: t.city, region: t.region,
+      category: state.activeCategory,
     }).select().single();
     if (error || !data) { console.error(error); return; }
     const row = data as any;
-    setState(s => ({ ...s, teams: [...s.teams, { id: row.id, clubName: row.club_name, city: row.city, region: row.region }] }));
-  }, [userId, clubId]);
+    setState(s => ({
+      ...s,
+      _rawTeams: [...s._rawTeams, { id: row.id, clubName: row.club_name, city: row.city, region: row.region, category: (row.category || s.activeCategory) as Category }],
+    }));
+  }, [userId, clubId, state.activeCategory, canModifyCategory]);
 
   const removeTeam = useCallback(async (id: string) => {
     await supabase.from('club_rival_teams' as any).delete().eq('id', id);
-    setState(s => ({ ...s, teams: s.teams.filter(t => t.id !== id) }));
+    setState(s => ({ ...s, _rawTeams: s._rawTeams.filter(t => t.id !== id) }));
   }, []);
 
   // Active game operations (local only, saved to cloud on endGame)
