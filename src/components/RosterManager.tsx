@@ -182,18 +182,30 @@ const RosterManager: React.FC = () => {
       <div className="space-y-2 rounded-lg border border-border/60 bg-card p-3">
         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Agregar jugadora</p>
         <div className="grid grid-cols-2 gap-2">
-          <Input
-            placeholder="Nombre"
-            value={firstName}
-            onChange={e => setFirstName(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
-          />
-          <Input
-            placeholder="Apellido"
-            value={lastName}
-            onChange={e => setLastName(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
-          />
+          <div className="space-y-1">
+            <Input
+              placeholder="Nombre"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+              className={validation.errors.firstName && firstName.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+            />
+            {validation.errors.firstName && firstName.length > 0 && (
+              <p className="text-[10px] text-destructive font-semibold leading-tight">{validation.errors.firstName}</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Input
+              placeholder="Apellido"
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+              className={validation.errors.lastName && lastName.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+            />
+            {validation.errors.lastName && lastName.length > 0 && (
+              <p className="text-[10px] text-destructive font-semibold leading-tight">{validation.errors.lastName}</p>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
           <Input
@@ -203,7 +215,7 @@ const RosterManager: React.FC = () => {
             value={number}
             onChange={e => setNumber(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
-            className={`flex-1 text-center font-bold ${numberDuplicate ? 'border-destructive ring-2 ring-destructive/40' : ''}`}
+            className={`flex-1 text-center font-bold ${(numberDuplicate || (validation.errors.number && number.length > 0)) ? 'border-destructive ring-2 ring-destructive/40' : ''}`}
           />
           <Button onClick={handleAdd} disabled={!canAdd || isReadOnlyView} className="tap-feedback shrink-0 gap-1">
             <Plus className="w-4 h-4" /> Añadir
@@ -212,6 +224,11 @@ const RosterManager: React.FC = () => {
         {numberDuplicate && (
           <p className="text-xs text-destructive flex items-center gap-1">
             <AlertTriangle className="w-3 h-3" /> El número #{parsedNumber} ya está asignado
+          </p>
+        )}
+        {!numberDuplicate && validation.errors.number && number.length > 0 && (
+          <p className="text-xs text-destructive flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> {validation.errors.number}
           </p>
         )}
       </div>
