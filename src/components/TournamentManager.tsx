@@ -48,16 +48,24 @@ const TournamentManager: React.FC = () => {
         <img src={logoHorizontal} alt="BASQUEST+" className="h-8 object-contain" />
       </div>
 
-      <div className="flex gap-2">
-        <Input
-          placeholder="Nombre del torneo"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          disabled={isReadOnlyView}
-        />
-        <Button onClick={handleAdd} size="icon" className="tap-feedback shrink-0" disabled={isReadOnlyView || !name.trim()}>
-          <Plus className="w-5 h-5" />
-        </Button>
+      <div className="space-y-1">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Nombre del torneo"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            disabled={isReadOnlyView}
+            className={validation.errors.name && name.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+          />
+          <Button onClick={handleAdd} size="icon" className="tap-feedback shrink-0" disabled={isReadOnlyView || !validation.ok}>
+            <Plus className="w-5 h-5" />
+          </Button>
+        </div>
+        {validation.errors.name && name.length > 0 && (
+          <p className="text-xs text-destructive font-semibold flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> {validation.errors.name}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
