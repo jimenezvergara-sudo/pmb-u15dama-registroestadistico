@@ -10,6 +10,9 @@
     </linearGradient>
   </defs>
 
+  <!-- White background -->
+  <rect width="360" height="100" fill="#FFFFFF"/>
+
   <!-- Icon: gradient ring + basketball -->
   <g transform="translate(8 8)">
     <circle cx="42" cy="42" r="40" fill="none" stroke="url(#bqRing)" stroke-width="6"/>

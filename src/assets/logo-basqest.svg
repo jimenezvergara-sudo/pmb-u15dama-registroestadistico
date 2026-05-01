@@ -10,6 +10,9 @@
     </linearGradient>
   </defs>
 
+  <!-- White background -->
+  <rect width="400" height="400" fill="#FFFFFF"/>
+
   <!-- Basketball icon centered -->
   <g transform="translate(200 140)">
     <circle r="100" fill="none" stroke="url(#ring)" stroke-width="10"/>
