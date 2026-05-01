@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, X, Smartphone } from 'lucide-react';
-import logoBasqest from '@/assets/logo-basqest.svg';
+import logoBasqest from '@/assets/logo-basqest.png';
 
 const VISIT_KEY = 'basqest_visit_count';
 const DISMISS_KEY = 'basqest_install_dismissed_at';
