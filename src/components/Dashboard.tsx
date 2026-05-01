@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useApp } from '@/context/AppContext';
+import { useDashboard, useRoster } from '@/context/contexts';
 import { Game, QuarterId, QUARTER_LABELS } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,7 +19,8 @@ import { supabase } from '@/integrations/supabase/client';
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const Dashboard: React.FC = () => {
-  const { games, tournaments, removeGame, updateGame, teams, activeCategory, myTeamName, myTeamLogo, players } = useApp();
+  const { games, removeGame, updateGame } = useDashboard();
+  const { tournaments, teams, activeCategory, myTeamName, myTeamLogo, players } = useRoster();
   const { canRunAI, canEditGames } = usePermissions();
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [filterTournamentId, setFilterTournamentId] = useState<string>('ALL');
@@ -149,8 +150,8 @@ const Dashboard: React.FC = () => {
     // Calculate court time percentage
     let courtTimePct = 0;
     if (!isAggregate && selectedGame) {
-      const totalGameTime = Object.values(selectedGame.courtTimeMs || {}).reduce((max, t) => Math.max(max, t), 0);
-      const playerTime = (selectedGame.courtTimeMs || {})[player.id] || 0;
+      const totalGameTime = Object.values(selectedGame.courtTimeMs || {}).reduce((max: number, t: unknown) => Math.max(max, t as number), 0);
+      const playerTime = ((selectedGame.courtTimeMs || {}) as Record<string, number>)[player.id] || 0;
       if (totalGameTime > 0) {
         courtTimePct = Math.round((playerTime / totalGameTime) * 100);
       }
@@ -161,8 +162,8 @@ const Dashboard: React.FC = () => {
       tournamentGames.forEach(g => {
         const ct = g.courtTimeMs || {};
         const maxTime = Object.values(ct).reduce((max: number, t: unknown) => Math.max(max, t as number), 0);
-        if (maxTime > 0 && ct[player.id] !== undefined) {
-          totalPct += ((ct[player.id] || 0) / maxTime) * 100;
+        if (maxTime > 0 && (ct as Record<string, number>)[player.id] !== undefined) {
+          totalPct += (((ct as Record<string, number>)[player.id] || 0) / maxTime) * 100;
           gamesWithData++;
         }
       });
