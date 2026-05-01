@@ -319,6 +319,7 @@ const Dashboard: React.FC = () => {
                 playerFilter: filterPlayer,
                 premiumBannerUrl: premiumBanner?.url,
                 premiumBannerLink: premiumBanner?.link,
+                rama,
               });
               toast.success('PDF descargado');
             }}
