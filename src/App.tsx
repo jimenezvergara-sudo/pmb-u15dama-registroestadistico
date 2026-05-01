@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
+import AcceptInvite from "./pages/AcceptInvite.tsx";
 import PublicStats from "./pages/PublicStats.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ConnectionStatus from "./components/ConnectionStatus";
