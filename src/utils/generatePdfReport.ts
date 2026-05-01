@@ -527,7 +527,7 @@ export async function generatePdfReport(
 
     autoTable(doc, {
       startY,
-      head: [['Jugadora', 'TC', '2PT', '3PT', 'TL', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG', 'TS']],
+      head: [[ramaTerms.playerCap, 'TC', '2PT', '3PT', 'TL', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG', 'TS']],
       body: tableBody,
       margin: { left: M, right: M },
       tableWidth: 'auto',
