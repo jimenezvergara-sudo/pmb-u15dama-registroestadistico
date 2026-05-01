@@ -1002,7 +1002,7 @@ export async function generatePdfReport(
   sectionTitle('Glosario de Abreviaturas');
 
   const glossary: [string, string, string][] = [
-    ['PTS', 'Puntos', 'Total de puntos anotados por la jugadora.'],
+    ['PTS', 'Puntos', `Total de puntos anotados por ${ramaTerms.the} ${ramaTerms.player}.`],
     ['2PT', 'Tiros de 2 puntos', 'Lanzamientos realizados dentro del arco de tres puntos (valen 2 puntos cada uno).'],
     ['3PT', 'Tiros de 3 puntos', 'Lanzamientos realizados fuera del arco de tres puntos (valen 3 puntos cada uno).'],
     ['TL', 'Tiros Libres', 'Lanzamientos desde la linea de tiro libre tras una falta (valen 1 punto cada uno).'],
