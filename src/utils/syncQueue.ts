@@ -1,5 +1,6 @@
 import { Game } from '@/types/basketball';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database, Json } from '@/integrations/supabase/types';
 
 const QUEUE_KEY = 'basqest_sync_queue_v1';
 const STATUS_KEY = 'basqest_sync_status';
@@ -12,6 +13,17 @@ export type SyncStatus = 'idle' | 'syncing' | 'pending' | 'error';
 
 type Listener = (status: SyncStatus, pending: number) => void;
 const listeners = new Set<Listener>();
+
+type ClubGameInsert = Database['public']['Tables']['club_games']['Insert'];
+type ClubGameUpdate = Database['public']['Tables']['club_games']['Update'];
+
+/**
+ * Marca un objeto del dominio como `Json` para Supabase.
+ * Único punto de conversión: las shapes (ShotEvent, GameAction, etc.) son
+ * JSON-serializables por construcción — no contienen funciones, símbolos,
+ * Date, Map o Set. Validado por los tipos en `types/basketball.ts`.
+ */
+const toJson = <T>(value: T): Json => value as unknown as Json;
 
 function readQueue(): SyncOp[] {
   try {
@@ -70,42 +82,43 @@ export function enqueue(op: SyncOp) {
 async function applyOp(op: SyncOp): Promise<void> {
   if (op.kind === 'updateGame') {
     const g = op.game;
+    const update: ClubGameUpdate = {
+      opponent_name: g.opponentName,
+      date: g.date,
+      category: g.category,
+      roster: toJson(g.roster),
+      shots: toJson(g.shots),
+      actions: toJson(g.actions),
+      substitutions: toJson(g.substitutions),
+      opponent_scores: toJson(g.opponentScores),
+      on_court_player_ids: toJson(g.onCourtPlayerIds),
+      court_time_ms: toJson(g.courtTimeMs),
+      current_quarter: g.currentQuarter,
+      tournament_id: g.tournamentId || null,
+      opponent_team_id: g.opponentTeamId || null,
+      leg: g.leg || null,
+      is_home: g.isHome ?? null,
+    };
     const { error } = await supabase
-      .from('club_games' as any)
-      .update({
-        opponent_name: g.opponentName,
-        date: g.date,
-        category: g.category,
-        roster: g.roster as any,
-        shots: g.shots as any,
-        actions: g.actions as any,
-        substitutions: g.substitutions as any,
-        opponent_scores: g.opponentScores as any,
-        on_court_player_ids: g.onCourtPlayerIds as any,
-        court_time_ms: g.courtTimeMs as any,
-        current_quarter: g.currentQuarter,
-        tournament_id: g.tournamentId || null,
-        opponent_team_id: g.opponentTeamId || null,
-        leg: g.leg || null,
-        is_home: g.isHome ?? null,
-      })
+      .from('club_games')
+      .update(update)
       .eq('id', g.id);
     if (error) throw error;
   } else if (op.kind === 'insertGame') {
     const g = op.game;
-    const { error } = await supabase.from('club_games' as any).insert({
+    const insert: ClubGameInsert = {
       club_id: op.clubId,
       user_id: op.userId,
       opponent_name: g.opponentName,
       date: g.date,
       category: g.category || 'U15',
-      roster: g.roster as any,
-      shots: g.shots as any,
-      actions: g.actions as any,
-      substitutions: g.substitutions as any,
-      opponent_scores: g.opponentScores as any,
-      on_court_player_ids: g.onCourtPlayerIds as any,
-      court_time_ms: g.courtTimeMs as any,
+      roster: toJson(g.roster),
+      shots: toJson(g.shots),
+      actions: toJson(g.actions),
+      substitutions: toJson(g.substitutions),
+      opponent_scores: toJson(g.opponentScores),
+      on_court_player_ids: toJson(g.onCourtPlayerIds),
+      court_time_ms: toJson(g.courtTimeMs),
       current_quarter: g.currentQuarter,
       tournament_id: g.tournamentId || null,
       opponent_team_id: g.opponentTeamId || null,
@@ -113,7 +126,8 @@ async function applyOp(op: SyncOp): Promise<void> {
       is_home: g.isHome ?? null,
       game_start_timestamp: g.gameStartTimestamp || null,
       last_timer_snapshot: g.lastTimerSnapshot || null,
-    });
+    };
+    const { error } = await supabase.from('club_games').insert(insert);
     if (error) throw error;
   }
 }
