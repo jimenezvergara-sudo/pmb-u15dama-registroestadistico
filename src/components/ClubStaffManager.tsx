@@ -492,6 +492,10 @@ const ClubStaffManager: React.FC = () => {
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="branches" className="mt-4">
+            <CategoryBranchManager />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
