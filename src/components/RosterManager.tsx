@@ -115,20 +115,32 @@ const RosterManager: React.FC = () => {
   const usedNumbers = useMemo(() => new Set(players.map(p => p.number)), [players]);
   const parsedNumber = number.trim() === '' ? NaN : parseInt(number, 10);
   const numberDuplicate = !isNaN(parsedNumber) && usedNumbers.has(parsedNumber);
-  const firstOk = firstName.trim().length >= 2;
-  const lastOk = lastName.trim().length >= 2;
-  const numberOk = !isNaN(parsedNumber) && parsedNumber >= 0 && !numberDuplicate;
-  const canAdd = firstOk && lastOk && numberOk;
+
+  // Validación con Zod
+  const validation = useMemo(() => {
+    const result = playerSchema.safeParse({
+      firstName,
+      lastName,
+      number: isNaN(parsedNumber) ? undefined : parsedNumber,
+    });
+    if (result.success) return { ok: true as const, errors: {} as Record<string, string> };
+    return { ok: false as const, errors: zodErrorsToMap(result.error) };
+  }, [firstName, lastName, parsedNumber]);
+
+  const canAdd = validation.ok && !numberDuplicate;
 
   const handleAdd = () => {
     if (isReadOnlyView) {
       toast.error('Solo lectura: no podés agregar jugadoras en esta categoría');
       return;
     }
-    if (!canAdd) {
-      if (!firstOk || !lastOk) toast.error('Ingresa nombre y apellido (mín. 2 caracteres cada uno)');
-      else if (numberDuplicate) toast.error(`El número #${parsedNumber} ya está en uso`);
-      else toast.error('Número inválido');
+    if (numberDuplicate) {
+      toast.error(`El número #${parsedNumber} ya está en uso`);
+      return;
+    }
+    if (!validation.ok) {
+      const firstError = Object.values(validation.errors)[0];
+      if (firstError) toast.error(firstError);
       return;
     }
     const fullName = `${firstName.trim()} ${lastName.trim()}`.replace(/\s+/g, ' ');
@@ -137,6 +149,7 @@ const RosterManager: React.FC = () => {
     setLastName('');
     setNumber('');
   };
+
 
   const openMergeDialog = (keepId: string, removeId: string) => {
     const keep = players.find(p => p.id === keepId);
