@@ -384,7 +384,7 @@ const LiveGame: React.FC = () => {
       {/* Player grid - show on-court indicator */}
       <div className="px-3 pt-3">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-          {!selectedPlayer ? '1. Selecciona jugadora' : pendingShot ? '3. ¿Canasta o Fallo?' : '2. Toca zona en cancha'}
+          {!selectedPlayer ? `1. Selecciona ${t.player}` : pendingShot ? '3. ¿Canasta o Fallo?' : '2. Toca zona en cancha'}
         </p>
         <div className="grid grid-cols-4 gap-2">
           {activeGame.roster.map(player => {
