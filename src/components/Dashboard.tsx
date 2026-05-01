@@ -665,6 +665,8 @@ const Dashboard: React.FC = () => {
           onSave={updateGame}
         />
       )}
+
+      {canRunAI && <NikitaChat floating />}
     </div>
   );
 };
