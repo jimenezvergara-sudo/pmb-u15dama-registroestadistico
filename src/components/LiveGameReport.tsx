@@ -109,6 +109,7 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
           gameLabel: `vs ${game.opponentName}`,
           quarterFilter: 'ALL',
           playerFilter: 'ALL',
+          rama,
         },
       );
     } catch (e) {
