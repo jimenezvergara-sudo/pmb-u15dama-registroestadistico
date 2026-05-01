@@ -6,6 +6,7 @@ import { Player } from '@/types/basketball';
 import { Plus, Trash2, Merge, Check, X, AlertTriangle, Pencil, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.webp';
 import { toast } from 'sonner';
+import { playerSchema, zodErrorsToMap } from '@/lib/validation';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
