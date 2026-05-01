@@ -86,7 +86,8 @@ const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload, floating = false 
           <Button
             size="icon"
             aria-label="Abrir Nikita"
-            className="fixed bottom-5 right-5 z-50 h-14 w-14 rounded-full shadow-2xl bg-gradient-to-br from-primary to-primary/80 hover:scale-105 transition-transform"
+            className="fixed right-4 z-[60] h-14 w-14 rounded-full shadow-2xl bg-gradient-to-br from-primary to-primary/80 hover:scale-105 transition-transform"
+            style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 5rem)' }}
           >
             <Sparkles className="w-6 h-6" />
           </Button>

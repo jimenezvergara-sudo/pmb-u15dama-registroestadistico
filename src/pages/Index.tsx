@@ -12,6 +12,7 @@ import TeamManager from '@/components/TeamManager';
 import HomeScreen from '@/components/HomeScreen';
 import AdminPanel from '@/components/AdminPanel';
 import ClubStaffManager from '@/components/ClubStaffManager';
+import NikitaChat from '@/components/NikitaChat';
 import ReadOnlyBanner from '@/components/ReadOnlyBanner';
 import { CATEGORIES, Category } from '@/types/basketball';
 import { consumeRosterReturnRequest, LINEUP_RETURN_EVENT } from '@/utils/activeGameExpiry';
@@ -101,6 +102,7 @@ const AppContent: React.FC = () => {
       {allowedTab === 'tournaments' && <TournamentManager />}
       {allowedTab === 'admin' && <AdminPanel />}
       {allowedTab === 'staff' && <ClubStaffManager />}
+      {perms.canRunAI && (allowedTab === 'home' || allowedTab === 'dashboard') && <NikitaChat floating />}
       <BottomNav activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
     </div>
   );
