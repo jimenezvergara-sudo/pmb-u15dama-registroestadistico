@@ -20,6 +20,7 @@ interface Props {
 
 const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
   const { myTeamName, myTeamLogo, activeCategory } = useApp();
+  const { rama } = useRama(activeCategory);
 
   const teamScore = game.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
   const oppScore = (game.opponentScores || []).reduce((sum, s) => sum + s.points, 0);
