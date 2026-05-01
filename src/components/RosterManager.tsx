@@ -238,7 +238,7 @@ const RosterManager: React.FC = () => {
       {/* Merge confirmation dialog */}
       {mergeDialog && (
         <div className="rounded-lg border-2 border-[hsl(45,100%,50%)] bg-primary/5 p-3 space-y-3">
-          <p className="text-sm font-bold text-foreground">Fusionar jugadoras</p>
+          <p className="text-sm font-bold text-foreground">Fusionar {t.players}</p>
           <p className="text-xs text-muted-foreground">
             Los datos de <strong>{mergeDialog.removeName}</strong> se fusionarán con <strong>{mergeDialog.keepName}</strong>.
           </p>
