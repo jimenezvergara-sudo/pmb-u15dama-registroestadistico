@@ -90,7 +90,7 @@ const RosterManager: React.FC = () => {
       return;
     }
     if (!editNumberValid) {
-      if (editNumberDuplicate) toast.error(`El número #${editParsedNumber} ya está en uso por otra jugadora`);
+      if (editNumberDuplicate) toast.error(`El número #${editParsedNumber} ya está en uso por ${t.another} ${t.player}`);
       else toast.error('Número de camiseta inválido');
       return;
     }
