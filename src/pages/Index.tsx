@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from '@/context/AppContext';
+import { RosterProvider, DashboardProvider, ActiveGameProvider } from '@/context/contexts';
 import BottomNav, { TabId } from '@/components/BottomNav';
 import LiveGame from '@/components/LiveGame';
 import LiveGameErrorBoundary from '@/components/LiveGameErrorBoundary';
@@ -106,8 +107,16 @@ const AppContent: React.FC = () => {
 };
 
 const Index = () => (
+  // Order: Auth (already provided by App.tsx) → AppProvider (single store)
+  // → Roster → Dashboard → ActiveGame (innermost = most frequent updates).
   <AppProvider>
-    <AppContent />
+    <RosterProvider>
+      <DashboardProvider>
+        <ActiveGameProvider>
+          <AppContent />
+        </ActiveGameProvider>
+      </DashboardProvider>
+    </RosterProvider>
   </AppProvider>
 );
 
