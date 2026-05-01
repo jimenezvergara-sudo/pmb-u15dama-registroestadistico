@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
         .maybeSingle();
       // existing puede no estar (raro) — lo creamos abajo si hace falta
       // Ya existe → asignar directo
-      if (existing.user_id === user.id) {
+      if (existingUserId === user.id) {
         return json({ error: 'No podés modificarte a vos mismo' }, 400);
       }
 
