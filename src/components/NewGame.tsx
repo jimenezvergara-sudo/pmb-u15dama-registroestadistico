@@ -94,8 +94,20 @@ const NewGame: React.FC = () => {
   const hasDuplicates = Object.values(numberUsage).some(arr => arr.length > 1);
   const hasPending = Object.keys(pendingNumber).length > 0;
 
+  // Validación con Zod
+  const validation = useMemo(() => {
+    const result = newGameSchema.safeParse({
+      opponentName,
+      leg: leg || undefined,
+      isHome,
+      rosterSize: Object.keys(rosterNumbers).length,
+    });
+    if (result.success) return { ok: true as const, errors: {} as Record<string, string> };
+    return { ok: false as const, errors: zodErrorsToMap(result.error) };
+  }, [opponentName, leg, isHome, rosterNumbers]);
+
   const handleStart = () => {
-    if (!opponentName || Object.keys(rosterNumbers).length === 0) return;
+    if (!validation.ok) return;
     if (hasDuplicates || hasPending) return;
     const roster = players
       .filter(p => p.id in rosterNumbers)
