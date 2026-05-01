@@ -27,12 +27,12 @@ interface UseRamaResult {
  */
 export const useRama = (overrideCategory?: string | null): UseRamaResult => {
   const { profile } = useAuth();
-  const { state } = useApp();
+  const app = useApp() as { activeCategory?: string };
   const [rows, setRows] = useState<CategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const clubId = profile?.club_id ?? null;
-  const category = overrideCategory ?? state.activeCategory;
+  const category = overrideCategory ?? app.activeCategory ?? '';
 
   const load = async () => {
     if (!clubId) {
