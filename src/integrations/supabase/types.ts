@@ -86,6 +86,48 @@ export type Database = {
         }
         Relationships: []
       }
+      club_invitations: {
+        Row: {
+          accepted_at: string | null
+          assigned_category: string | null
+          club_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          invited_by_name: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status: Database["public"]["Enums"]["invitation_status"]
+        }
+        Insert: {
+          accepted_at?: string | null
+          assigned_category?: string | null
+          club_id: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          invited_by_name?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+        }
+        Update: {
+          accepted_at?: string | null
+          assigned_category?: string | null
+          club_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          invited_by_name?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+        }
+        Relationships: []
+      }
       club_players: {
         Row: {
           category: string | null
@@ -512,6 +554,7 @@ export type Database = {
         | "club_admin_elite"
         | "club_admin_pro"
         | "club_staff"
+      invitation_status: "pending" | "accepted" | "expired" | "cancelled"
       org_plan: "free" | "pro" | "elite"
     }
     CompositeTypes: {
@@ -650,6 +693,7 @@ export const Constants = {
         "club_admin_pro",
         "club_staff",
       ],
+      invitation_status: ["pending", "accepted", "expired", "cancelled"],
       org_plan: ["free", "pro", "elite"],
     },
   },
