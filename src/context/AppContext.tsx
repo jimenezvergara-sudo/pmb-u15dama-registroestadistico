@@ -188,7 +188,7 @@ const migrateLocalData = async (userId: string, clubId: string) => {
     // Clear old localStorage
     localStorage.removeItem(OLD_STORAGE_KEY);
     localStorage.removeItem(OLDER_STORAGE_KEY);
-    console.log('[BASQEST] Migrated localStorage data to cloud');
+    logger.log('[BASQEST] Migrated localStorage data to cloud');
   } catch (err) {
     console.error('[BASQEST] Migration error:', err);
   }
@@ -340,7 +340,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addPlayer = useCallback(async (p: Omit<Player, 'id'>) => {
     if (!userId || !clubId) return;
     if (!canModifyCategory(state.activeCategory)) {
-      console.warn('[addPlayer] read-only category, blocked');
+      logger.warn('[addPlayer] read-only category, blocked');
       return;
     }
     const { data, error } = await supabase.from('club_players' as any).insert({
@@ -433,14 +433,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }).eq('id', game.id);
       if (error) throw error;
     } catch (err) {
-      console.warn('[updateGame] failed, queueing for retry', err);
+      logger.warn('[updateGame] failed, queueing for retry', err);
       enqueueSync({ kind: 'updateGame', game, queuedAt: Date.now() });
     }
   }, []);
 
   const addTournament = useCallback(async (t: Omit<Tournament, 'id'>) => {
     if (!userId || !clubId) return;
-    if (!canModifyCategory(state.activeCategory)) { console.warn('[addTournament] blocked'); return; }
+    if (!canModifyCategory(state.activeCategory)) { logger.warn('[addTournament] blocked'); return; }
     const { data, error } = await supabase.from('club_tournaments' as any).insert({
       club_id: clubId, user_id: userId, name: t.name, date: t.date,
       category: state.activeCategory,
@@ -460,7 +460,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addTeam = useCallback(async (t: Omit<Team, 'id'>) => {
     if (!userId || !clubId) return;
-    if (!canModifyCategory(state.activeCategory)) { console.warn('[addTeam] blocked'); return; }
+    if (!canModifyCategory(state.activeCategory)) { logger.warn('[addTeam] blocked'); return; }
     const { data, error } = await supabase.from('club_rival_teams' as any).insert({
       club_id: clubId, user_id: userId, club_name: t.clubName, city: t.city, region: t.region,
       category: state.activeCategory,
@@ -481,7 +481,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Active game operations (local only, saved to cloud on endGame)
   const startGame = useCallback((opponentName: string, roster: Player[], tournamentId?: string, opponentTeamId?: string, leg?: GameLeg, isHome?: boolean) => {
     if (!canModifyCategory(state.activeCategory)) {
-      console.warn('[startGame] read-only category, blocked');
+      logger.warn('[startGame] read-only category, blocked');
       return;
     }
     const game: Game = {
@@ -548,7 +548,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             last_timer_snapshot: flushed.lastTimerSnapshot || null,
           }).select().single().then(({ data, error }) => {
             if (error) {
-              console.warn('[endGame] insert failed, queueing', error);
+              logger.warn('[endGame] insert failed, queueing', error);
               enqueueSync({
                 kind: 'insertGame',
                 game: localGame,
