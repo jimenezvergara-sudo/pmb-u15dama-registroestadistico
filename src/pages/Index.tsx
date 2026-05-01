@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AppProvider, useApp } from '@/context/AppContext';
 import BottomNav, { TabId } from '@/components/BottomNav';
 import LiveGame from '@/components/LiveGame';
+import LiveGameErrorBoundary from '@/components/LiveGameErrorBoundary';
 import NewGame from '@/components/NewGame';
 import RosterManager from '@/components/RosterManager';
 import Dashboard from '@/components/Dashboard';
@@ -75,7 +76,11 @@ const AppContent: React.FC = () => {
       <ReadOnlyBanner />
       
       {tab === 'home' && <HomeScreen onCategoryPress={() => setShowCategoryPicker(true)} />}
-      {tab === 'live' && (activeGame ? <LiveGame /> : <NewGame />)}
+      {tab === 'live' && (activeGame ? (
+        <LiveGameErrorBoundary>
+          <LiveGame />
+        </LiveGameErrorBoundary>
+      ) : <NewGame />)}
       {tab === 'roster' && <RosterManager />}
       {tab === 'teams' && <TeamManager />}
       {tab === 'dashboard' && <Dashboard />}
