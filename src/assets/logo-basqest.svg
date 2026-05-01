@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="BASQUEST+">
+  <defs>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="ball" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Basketball icon centered -->
+  <g transform="translate(200 140)">
+    <circle r="100" fill="none" stroke="url(#ring)" stroke-width="10"/>
+    <circle r="78" fill="url(#ball)"/>
+    <g stroke="#1A1A1A" stroke-width="5" fill="none" stroke-linecap="round">
+      <line x1="-78" y1="0" x2="78" y2="0"/>
+      <line x1="0" y1="-78" x2="0" y2="78"/>
+      <path d="M-58 -54 Q0 0 -58 54"/>
+      <path d="M58 -54 Q0 0 58 54"/>
+    </g>
+    <g transform="translate(72 -72)">
+      <circle r="22" fill="#F59E0B"/>
+      <path d="M-10 0 H10 M0 -10 V10" stroke="#1A1A1A" stroke-width="6" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- Wordmark BASQUEST+ -->
+  <g font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-weight="900" font-size="58" letter-spacing="-1" text-anchor="middle">
+    <text x="200" y="305">
+      <tspan fill="#1A1A1A">BASQU</tspan><tspan fill="#7C3AED">EST</tspan><tspan fill="#F59E0B">+</tspan>
+    </text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="200" y="345" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="600"
+        font-size="16" fill="#6B7280" letter-spacing="4">INTELIGENCIA DEPORTIVA</text>
+</svg>
