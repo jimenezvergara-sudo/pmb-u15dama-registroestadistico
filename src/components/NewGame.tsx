@@ -7,9 +7,11 @@ import { Play, ClipboardList, AlertTriangle, Check } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import GameEventEditor from '@/components/GameEventEditor';
 import { newGameSchema, zodErrorsToMap } from '@/lib/validation';
+import { useRama } from '@/hooks/useRama';
 
 const NewGame: React.FC = () => {
   const { players, startGame, tournaments, teams, games, updateGame, isReadOnlyView } = useApp();
+  const { t } = useRama();
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [customOpponent, setCustomOpponent] = useState('');
