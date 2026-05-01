@@ -232,7 +232,7 @@ const NewGame: React.FC = () => {
         </div>
         {players.length === 0 && (
           <p className="text-muted-foreground text-sm text-center py-6">
-            Primero añade jugadoras en Plantilla
+            Primero añade {t.players} en Plantilla
           </p>
         )}
         <div className="space-y-1.5">
