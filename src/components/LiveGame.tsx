@@ -203,7 +203,7 @@ const LiveGame: React.FC = () => {
 
   const handleQuickAction = (action: ActionType) => {
     if (!selectedPlayer) {
-      toast('Selecciona una jugadora primero', { duration: 1500 });
+      toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
       return;
     }
     const playerId = selectedPlayer;
