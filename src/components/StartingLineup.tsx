@@ -15,6 +15,7 @@ interface Props {
 }
 
 const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, subtitle, buttonLabel, preSelected }) => {
+  const { t } = useRama();
   const [selected, setSelected] = useState<Set<string>>(new Set(preSelected || []));
   const rosterTooSmall = roster.length < 5;
 
