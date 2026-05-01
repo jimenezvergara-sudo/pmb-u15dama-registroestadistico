@@ -52,7 +52,7 @@ const SubstitutionDialog: React.FC<Props> = ({ roster, onCourtIds, onSubstitute 
       </DialogTrigger>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-base font-extrabold">Cambio de Jugadora</DialogTitle>
+          <DialogTitle className="text-base font-extrabold">Cambio de {t.playerCap}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
