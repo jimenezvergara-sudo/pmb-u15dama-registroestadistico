@@ -132,7 +132,7 @@ const NewGame: React.FC = () => {
       <div className="space-y-3">
         {/* Team selector */}
         {teams.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1">
             <select
               value={selectedTeamId}
               onChange={e => {
@@ -151,15 +151,29 @@ const NewGame: React.FC = () => {
                 placeholder="O escribe el nombre del rival"
                 value={customOpponent}
                 onChange={e => setCustomOpponent(e.target.value)}
+                className={validation.errors.opponentName && customOpponent.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
               />
+            )}
+            {validation.errors.opponentName && (customOpponent.length > 0 || !selectedTeamId) && customOpponent.length > 0 && (
+              <p className="text-xs text-destructive font-semibold flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> {validation.errors.opponentName}
+              </p>
             )}
           </div>
         ) : (
-          <Input
-            placeholder="Equipo rival"
-            value={customOpponent}
-            onChange={e => setCustomOpponent(e.target.value)}
-          />
+          <div className="space-y-1">
+            <Input
+              placeholder="Equipo rival"
+              value={customOpponent}
+              onChange={e => setCustomOpponent(e.target.value)}
+              className={validation.errors.opponentName && customOpponent.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+            />
+            {validation.errors.opponentName && customOpponent.length > 0 && (
+              <p className="text-xs text-destructive font-semibold flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> {validation.errors.opponentName}
+              </p>
+            )}
+          </div>
         )}
 
         {/* Home/Away selector */}
