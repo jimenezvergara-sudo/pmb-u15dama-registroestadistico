@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2, Target, CircleDot, Crosshair, FileDown, Pencil, HelpCircle, Grab, Handshake, ShieldCheck } from 'lucide-react';
 import AiAnalysis from '@/components/AiAnalysis';
 import { toast } from 'sonner';
-import logoBasqest from '@/assets/logo-basqest-full.png';
+import logoBasqest from '@/assets/logo-basqest-full.webp';
 import { generatePdfReport } from '@/utils/generatePdfReport';
 import GameEventEditor from '@/components/GameEventEditor';
 import AdBannerCarousel from '@/components/AdBannerCarousel';

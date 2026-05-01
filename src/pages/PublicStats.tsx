@@ -6,7 +6,7 @@ import AdBannerCarousel from '@/components/AdBannerCarousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Target, CircleDot, Percent, Grab, Handshake, ShieldCheck, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import logoBasqest from '@/assets/logo-basqest-new.png';
+import logoBasqest from '@/assets/logo-basqest-new.webp';
 
 interface SharedSnapshot {
   teamName: string;

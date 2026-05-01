@@ -3,7 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Trash2, Shield, Camera } from 'lucide-react';
-import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
+import logoHorizontal from '@/assets/logo-basqest-horizontal.webp';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
 
 const TeamManager: React.FC = () => {
