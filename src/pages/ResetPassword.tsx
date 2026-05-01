@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import logoBasqest from '@/assets/logo-basqest-new.png';
+import logoBasqest from '@/assets/logo-basqest-new.webp';
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();

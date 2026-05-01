@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { Undo2, BarChart3, Pause, Play } from 'lucide-react';
 import { shareHalftimeWhatsApp } from '@/utils/halftimeShare';
 import { getPendingLineupAge, LINEUP_IDLE_TIMEOUT_MS, requestRosterReturn } from '@/utils/activeGameExpiry';
-import logoBasqest from '@/assets/logo-basqest-new.png';
+import logoBasqest from '@/assets/logo-basqest-new.webp';
 import {
   AlertDialog,
   AlertDialogAction,
