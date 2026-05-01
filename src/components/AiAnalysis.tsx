@@ -45,6 +45,7 @@ interface AiAnalysisProps {
   totalOpponent: number;
   numGames: number;
   gameLabel: string;
+  rama?: Rama;
 }
 
 const AiAnalysis: React.FC<AiAnalysisProps> = ({
@@ -54,6 +55,7 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
   totalOpponent,
   numGames,
   gameLabel,
+  rama,
 }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
