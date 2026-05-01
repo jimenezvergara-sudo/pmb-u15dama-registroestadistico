@@ -123,10 +123,10 @@ Deno.serve(async (req) => {
       await admin
         .from('profiles')
         .update({ club_id: profile.club_id, assigned_category: category, updated_at: new Date().toISOString() })
-        .eq('user_id', existing.user_id);
+        .eq('user_id', existingUserId);
 
-      await admin.from('user_roles').delete().eq('user_id', existing.user_id);
-      await admin.from('user_roles').insert({ user_id: existing.user_id, role });
+      await admin.from('user_roles').delete().eq('user_id', existingUserId);
+      await admin.from('user_roles').insert({ user_id: existingUserId, role });
 
       // Registrar en invitaciones como "accepted" para tracking
       await admin.from('club_invitations').insert({
