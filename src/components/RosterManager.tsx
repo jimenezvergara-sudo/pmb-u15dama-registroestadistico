@@ -140,7 +140,7 @@ const RosterManager: React.FC = () => {
       return;
     }
     if (!validation.ok) {
-      const firstError = Object.values(validation.errors)[0];
+      const firstError: string | undefined = Object.values(validation.errors)[0];
       if (firstError) toast.error(firstError);
       return;
     }
