@@ -421,7 +421,7 @@ const RosterManager: React.FC = () => {
             {historyCount > 0 && (
               <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-2">
                 <p className="text-xs font-bold text-foreground">
-                  Esta jugadora aparece en {historyCount} partido(s) anteriores
+                  Esta {t.player} aparece en {historyCount} partido(s) anteriores
                 </p>
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
