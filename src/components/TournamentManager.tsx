@@ -3,7 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Trophy, BarChart3, Trash2, AlertTriangle } from 'lucide-react';
-import logoHorizontal from '@/assets/logo-basqest-horizontal.webp';
+import logoHorizontal from '@/assets/logo-basqest-horizontal.svg';
 import TournamentStandings from '@/components/TournamentStandings';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
 import { toast } from 'sonner';
