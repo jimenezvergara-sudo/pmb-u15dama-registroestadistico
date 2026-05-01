@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from '@/context/AppContext';
+import { RosterProvider, DashboardProvider, ActiveGameProvider } from '@/context/contexts';
 import BottomNav, { TabId } from '@/components/BottomNav';
 import LiveGame from '@/components/LiveGame';
 import LiveGameErrorBoundary from '@/components/LiveGameErrorBoundary';
