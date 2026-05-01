@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Game, Player, QuarterId, QUARTER_LABELS } from '@/types/basketball';
+import { getRamaTerms, type Rama } from '@/utils/genderTerms';
 
 interface ReportOptions {
   teamName: string;
@@ -13,6 +14,8 @@ interface ReportOptions {
   playerFilter: string;
   premiumBannerUrl?: string;
   premiumBannerLink?: string;
+  /** Género del equipo: femenino | masculino | mixto. Default: femenino. */
+  rama?: Rama;
 }
 
 interface BoxScoreRow {
