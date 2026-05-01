@@ -473,7 +473,7 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="h-8 px-2 text-[11px]">#</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Jugadora</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">{t.playerCap}</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Tipo</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Detalle</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Cuarto</TableHead>
