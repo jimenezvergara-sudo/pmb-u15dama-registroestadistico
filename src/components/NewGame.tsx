@@ -314,7 +314,7 @@ const NewGame: React.FC = () => {
 
       <Button
         onClick={handleStart}
-        disabled={!opponentName || Object.keys(rosterNumbers).length === 0 || hasDuplicates || hasPending || isReadOnlyView}
+        disabled={!validation.ok || hasDuplicates || hasPending || isReadOnlyView}
         className="w-full h-14 text-lg font-bold tap-feedback gap-2"
       >
         <Play className="w-5 h-5" /> {isReadOnlyView ? 'Solo lectura — cambia a tu categoría' : 'Iniciar Partido'}
