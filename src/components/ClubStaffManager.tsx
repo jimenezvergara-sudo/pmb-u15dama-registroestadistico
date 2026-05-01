@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ShieldAlert, Loader2, UserPlus, Trash2, Users, Mail, Send, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { ShieldAlert, Loader2, UserPlus, Trash2, Users, Mail, Send, Clock, CheckCircle2, XCircle, UsersRound } from 'lucide-react';
+import CategoryBranchManager from '@/components/CategoryBranchManager';
 import { toast } from '@/hooks/use-toast';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
