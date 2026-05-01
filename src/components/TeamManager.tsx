@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Trash2, Shield, Camera } from 'lucide-react';
+import { Plus, Trash2, Shield, Camera, AlertTriangle } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.webp';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
+import { toast } from 'sonner';
+import { opponentTeamSchema, zodErrorsToMap } from '@/lib/validation';
 
 const TeamManager: React.FC = () => {
   const { teams, addTeam, removeTeam, myTeamName, setMyTeamName, myTeamLogo, setMyTeamLogo, isReadOnlyView } = useApp();
