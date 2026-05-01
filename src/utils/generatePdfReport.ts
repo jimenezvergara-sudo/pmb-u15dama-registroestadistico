@@ -1018,7 +1018,7 @@ export async function generatePdfReport(
     ['eFG%', 'Effective Field Goal %', 'Mide eficiencia de tiro ponderando triples: (2PT anotados + 0.5 x 3PT anotados) / TC intentados.'],
     ['TS%', 'True Shooting %', 'Eficiencia real incluyendo tiros libres: Puntos / (2 x (TC intentados + 0.44 x TL intentados)).'],
     ['AST/TOV', 'Ratio Asistencias/Perdidas', 'Relacion entre asistencias y perdidas. Valores altos indican buen cuidado del balon.'],
-    ['MIN%', 'Porcentaje de Minutos', 'Porcentaje del tiempo total de juego que la jugadora estuvo en cancha.'],
+    ['MIN%', 'Porcentaje de Minutos', `Porcentaje del tiempo total de juego que ${ramaTerms.the} ${ramaTerms.player} estuvo en cancha.`],
   ];
 
   autoTable(doc, {
