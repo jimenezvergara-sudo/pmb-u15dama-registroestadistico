@@ -6,6 +6,7 @@ import { Player, GameLeg, Game } from '@/types/basketball';
 import { Play, ClipboardList, AlertTriangle, Check } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.webp';
 import GameEventEditor from '@/components/GameEventEditor';
+import { newGameSchema, zodErrorsToMap } from '@/lib/validation';
 
 const NewGame: React.FC = () => {
   const { players, startGame, tournaments, teams, games, updateGame, isReadOnlyView } = useApp();
@@ -93,8 +94,20 @@ const NewGame: React.FC = () => {
   const hasDuplicates = Object.values(numberUsage).some(arr => arr.length > 1);
   const hasPending = Object.keys(pendingNumber).length > 0;
 
+  // Validación con Zod
+  const validation = useMemo(() => {
+    const result = newGameSchema.safeParse({
+      opponentName,
+      leg: leg || undefined,
+      isHome,
+      rosterSize: Object.keys(rosterNumbers).length,
+    });
+    if (result.success) return { ok: true as const, errors: {} as Record<string, string> };
+    return { ok: false as const, errors: zodErrorsToMap(result.error) };
+  }, [opponentName, leg, isHome, rosterNumbers]);
+
   const handleStart = () => {
-    if (!opponentName || Object.keys(rosterNumbers).length === 0) return;
+    if (!validation.ok) return;
     if (hasDuplicates || hasPending) return;
     const roster = players
       .filter(p => p.id in rosterNumbers)
@@ -119,7 +132,7 @@ const NewGame: React.FC = () => {
       <div className="space-y-3">
         {/* Team selector */}
         {teams.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1">
             <select
               value={selectedTeamId}
               onChange={e => {
@@ -138,15 +151,29 @@ const NewGame: React.FC = () => {
                 placeholder="O escribe el nombre del rival"
                 value={customOpponent}
                 onChange={e => setCustomOpponent(e.target.value)}
+                className={validation.errors.opponentName && customOpponent.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
               />
+            )}
+            {validation.errors.opponentName && (customOpponent.length > 0 || !selectedTeamId) && customOpponent.length > 0 && (
+              <p className="text-xs text-destructive font-semibold flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> {validation.errors.opponentName}
+              </p>
             )}
           </div>
         ) : (
-          <Input
-            placeholder="Equipo rival"
-            value={customOpponent}
-            onChange={e => setCustomOpponent(e.target.value)}
-          />
+          <div className="space-y-1">
+            <Input
+              placeholder="Equipo rival"
+              value={customOpponent}
+              onChange={e => setCustomOpponent(e.target.value)}
+              className={validation.errors.opponentName && customOpponent.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+            />
+            {validation.errors.opponentName && customOpponent.length > 0 && (
+              <p className="text-xs text-destructive font-semibold flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> {validation.errors.opponentName}
+              </p>
+            )}
+          </div>
         )}
 
         {/* Home/Away selector */}
@@ -287,7 +314,7 @@ const NewGame: React.FC = () => {
 
       <Button
         onClick={handleStart}
-        disabled={!opponentName || Object.keys(rosterNumbers).length === 0 || hasDuplicates || hasPending || isReadOnlyView}
+        disabled={!validation.ok || hasDuplicates || hasPending || isReadOnlyView}
         className="w-full h-14 text-lg font-bold tap-feedback gap-2"
       >
         <Play className="w-5 h-5" /> {isReadOnlyView ? 'Solo lectura — cambia a tu categoría' : 'Iniciar Partido'}

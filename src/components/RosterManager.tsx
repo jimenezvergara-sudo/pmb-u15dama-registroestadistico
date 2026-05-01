@@ -6,6 +6,7 @@ import { Player } from '@/types/basketball';
 import { Plus, Trash2, Merge, Check, X, AlertTriangle, Pencil, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.webp';
 import { toast } from 'sonner';
+import { playerSchema, zodErrorsToMap } from '@/lib/validation';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -115,20 +116,32 @@ const RosterManager: React.FC = () => {
   const usedNumbers = useMemo(() => new Set(players.map(p => p.number)), [players]);
   const parsedNumber = number.trim() === '' ? NaN : parseInt(number, 10);
   const numberDuplicate = !isNaN(parsedNumber) && usedNumbers.has(parsedNumber);
-  const firstOk = firstName.trim().length >= 2;
-  const lastOk = lastName.trim().length >= 2;
-  const numberOk = !isNaN(parsedNumber) && parsedNumber >= 0 && !numberDuplicate;
-  const canAdd = firstOk && lastOk && numberOk;
+
+  // Validación con Zod
+  const validation = useMemo(() => {
+    const result = playerSchema.safeParse({
+      firstName,
+      lastName,
+      number: isNaN(parsedNumber) ? undefined : parsedNumber,
+    });
+    if (result.success) return { ok: true as const, errors: {} as Record<string, string> };
+    return { ok: false as const, errors: zodErrorsToMap(result.error) };
+  }, [firstName, lastName, parsedNumber]);
+
+  const canAdd = validation.ok && !numberDuplicate;
 
   const handleAdd = () => {
     if (isReadOnlyView) {
       toast.error('Solo lectura: no podés agregar jugadoras en esta categoría');
       return;
     }
-    if (!canAdd) {
-      if (!firstOk || !lastOk) toast.error('Ingresa nombre y apellido (mín. 2 caracteres cada uno)');
-      else if (numberDuplicate) toast.error(`El número #${parsedNumber} ya está en uso`);
-      else toast.error('Número inválido');
+    if (numberDuplicate) {
+      toast.error(`El número #${parsedNumber} ya está en uso`);
+      return;
+    }
+    if (!validation.ok) {
+      const firstError: string | undefined = Object.values(validation.errors)[0];
+      if (firstError) toast.error(firstError);
       return;
     }
     const fullName = `${firstName.trim()} ${lastName.trim()}`.replace(/\s+/g, ' ');
@@ -137,6 +150,7 @@ const RosterManager: React.FC = () => {
     setLastName('');
     setNumber('');
   };
+
 
   const openMergeDialog = (keepId: string, removeId: string) => {
     const keep = players.find(p => p.id === keepId);
@@ -168,18 +182,30 @@ const RosterManager: React.FC = () => {
       <div className="space-y-2 rounded-lg border border-border/60 bg-card p-3">
         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Agregar jugadora</p>
         <div className="grid grid-cols-2 gap-2">
-          <Input
-            placeholder="Nombre"
-            value={firstName}
-            onChange={e => setFirstName(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
-          />
-          <Input
-            placeholder="Apellido"
-            value={lastName}
-            onChange={e => setLastName(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
-          />
+          <div className="space-y-1">
+            <Input
+              placeholder="Nombre"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+              className={validation.errors.firstName && firstName.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+            />
+            {validation.errors.firstName && firstName.length > 0 && (
+              <p className="text-[10px] text-destructive font-semibold leading-tight">{validation.errors.firstName}</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Input
+              placeholder="Apellido"
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+              className={validation.errors.lastName && lastName.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+            />
+            {validation.errors.lastName && lastName.length > 0 && (
+              <p className="text-[10px] text-destructive font-semibold leading-tight">{validation.errors.lastName}</p>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
           <Input
@@ -189,7 +215,7 @@ const RosterManager: React.FC = () => {
             value={number}
             onChange={e => setNumber(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
-            className={`flex-1 text-center font-bold ${numberDuplicate ? 'border-destructive ring-2 ring-destructive/40' : ''}`}
+            className={`flex-1 text-center font-bold ${(numberDuplicate || (validation.errors.number && number.length > 0)) ? 'border-destructive ring-2 ring-destructive/40' : ''}`}
           />
           <Button onClick={handleAdd} disabled={!canAdd || isReadOnlyView} className="tap-feedback shrink-0 gap-1">
             <Plus className="w-4 h-4" /> Añadir
@@ -198,6 +224,11 @@ const RosterManager: React.FC = () => {
         {numberDuplicate && (
           <p className="text-xs text-destructive flex items-center gap-1">
             <AlertTriangle className="w-3 h-3" /> El número #{parsedNumber} ya está asignado
+          </p>
+        )}
+        {!numberDuplicate && validation.errors.number && number.length > 0 && (
+          <p className="text-xs text-destructive flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> {validation.errors.number}
           </p>
         )}
       </div>

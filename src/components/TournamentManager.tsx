@@ -1,23 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Trophy, BarChart3, Trash2 } from 'lucide-react';
+import { Plus, Trophy, BarChart3, Trash2, AlertTriangle } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.webp';
 import TournamentStandings from '@/components/TournamentStandings';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
 import { toast } from 'sonner';
+import { tournamentSchema, zodErrorsToMap } from '@/lib/validation';
 
 const TournamentManager: React.FC = () => {
   const { tournaments, addTournament, removeTournament, isReadOnlyView } = useApp();
   const [name, setName] = useState('');
   const [selectedTournament, setSelectedTournament] = useState<{ id: string; name: string } | null>(null);
 
+  const validation = useMemo(() => {
+    const result = tournamentSchema.safeParse({ name });
+    if (result.success) return { ok: true as const, errors: {} as Record<string, string> };
+    return { ok: false as const, errors: zodErrorsToMap(result.error) };
+  }, [name]);
+
   const handleAdd = () => {
-    if (!name.trim()) return;
+    if (!validation.ok) {
+      const firstError: string | undefined = Object.values(validation.errors)[0];
+      if (firstError) toast.error(firstError);
+      return;
+    }
     addTournament({ name: name.trim(), date: new Date().toISOString() });
     setName('');
   };
+
 
   if (selectedTournament) {
     return (
@@ -36,16 +48,24 @@ const TournamentManager: React.FC = () => {
         <img src={logoHorizontal} alt="BASQUEST+" className="h-8 object-contain" />
       </div>
 
-      <div className="flex gap-2">
-        <Input
-          placeholder="Nombre del torneo"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          disabled={isReadOnlyView}
-        />
-        <Button onClick={handleAdd} size="icon" className="tap-feedback shrink-0" disabled={isReadOnlyView || !name.trim()}>
-          <Plus className="w-5 h-5" />
-        </Button>
+      <div className="space-y-1">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Nombre del torneo"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            disabled={isReadOnlyView}
+            className={validation.errors.name && name.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+          />
+          <Button onClick={handleAdd} size="icon" className="tap-feedback shrink-0" disabled={isReadOnlyView || !validation.ok}>
+            <Plus className="w-5 h-5" />
+          </Button>
+        </div>
+        {validation.errors.name && name.length > 0 && (
+          <p className="text-xs text-destructive font-semibold flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> {validation.errors.name}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
