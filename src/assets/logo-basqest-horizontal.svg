@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 100" role="img" aria-label="BASQUEST+ Inteligencia Deportiva">
+  <defs>
+    <linearGradient id="bqRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7A26E1"/>
+      <stop offset="100%" stop-color="#32D9FF"/>
+    </linearGradient>
+    <linearGradient id="bqBall" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFC300"/>
+      <stop offset="100%" stop-color="#E89400"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon: gradient ring + basketball -->
+  <g transform="translate(8 8)">
+    <!-- Outer gradient ring -->
+    <circle cx="42" cy="42" r="40" fill="none" stroke="url(#bqRing)" stroke-width="6"/>
+    <!-- Basketball -->
+    <circle cx="42" cy="42" r="26" fill="url(#bqBall)"/>
+    <!-- Basketball seams -->
+    <g stroke="#1a1a1a" stroke-width="2.2" fill="none" stroke-linecap="round">
+      <line x1="16" y1="42" x2="68" y2="42"/>
+      <line x1="42" y1="16" x2="42" y2="68"/>
+      <path d="M22 24 Q42 42 22 60"/>
+      <path d="M62 24 Q42 42 62 60"/>
+    </g>
+    <!-- Plus accent -->
+    <g transform="translate(66 14)">
+      <circle r="9" fill="#FFC300"/>
+      <path d="M-4 0 H4 M0 -4 V4" stroke="#1a1a1a" stroke-width="2.4" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-weight="900">
+    <text x="100" y="52" font-size="34" fill="#7A26E1" letter-spacing="-0.5">BASQ</text>
+    <text x="178" y="52" font-size="34" fill="#32D9FF" letter-spacing="-0.5">UEST</text>
+    <text x="255" y="52" font-size="34" fill="#FFC300" letter-spacing="-0.5">+</text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="100" y="74" font-family="Inter, system-ui, sans-serif" font-weight="600"
+        font-size="11" fill="#6B7280" letter-spacing="2.5">INTELIGENCIA DEPORTIVA</text>
+</svg>
