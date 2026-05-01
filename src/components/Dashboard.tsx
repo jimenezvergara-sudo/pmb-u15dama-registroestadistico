@@ -13,6 +13,7 @@ import NikitaChat from '@/components/NikitaChat';
 import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from 'sonner';
 import logoBasqest from '@/assets/logo-basqest-horizontal.png';
+import iconBasqest from '@/assets/logo-basqest.png';
 import { generatePdfReport } from '@/utils/generatePdfReport';
 import GameEventEditor from '@/components/GameEventEditor';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
@@ -259,7 +260,7 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0 shrink">
-          <img src={logoBasqest} alt="BASQUEST+" className="w-10 h-10 shrink-0 object-contain" />
+          <img src={iconBasqest} alt="BASQUEST+" className="w-10 h-10 shrink-0 object-contain" />
           <h2 className="text-lg font-extrabold text-foreground truncate">Estadísticas</h2>
         </div>
         <div className="flex items-center gap-2">
