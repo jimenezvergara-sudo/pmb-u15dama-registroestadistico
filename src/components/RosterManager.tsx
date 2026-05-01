@@ -182,7 +182,7 @@ const RosterManager: React.FC = () => {
       </div>
 
       <div className="space-y-2 rounded-lg border border-border/60 bg-card p-3">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Agregar jugadora</p>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Agregar {t.player}</p>
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
             <Input
