@@ -14,6 +14,7 @@ import { Undo2, BarChart3, Pause, Play } from 'lucide-react';
 import { shareHalftimeWhatsApp } from '@/utils/halftimeShare';
 import { getPendingLineupAge, LINEUP_IDLE_TIMEOUT_MS, requestRosterReturn } from '@/utils/activeGameExpiry';
 import logoBasqest from '@/assets/logo-basqest-horizontal.png';
+import { useRama } from '@/hooks/useRama';
 import {
   AlertDialog,
   AlertDialogAction,
