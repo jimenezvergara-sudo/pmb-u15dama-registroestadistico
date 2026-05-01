@@ -9,6 +9,7 @@ import CourtDiagram from '@/components/CourtDiagram';
 import { toast } from 'sonner';
 import { Trash2, Plus, ChevronDown, Trophy, Calendar, Users } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { useRama } from '@/hooks/useRama';
 
 interface Props {
   game: Game;
