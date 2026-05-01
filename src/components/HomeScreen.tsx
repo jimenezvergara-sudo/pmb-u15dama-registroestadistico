@@ -7,7 +7,7 @@ import { usePageView } from '@/hooks/useAnalytics';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Target, CircleDot, Percent, Grab, Handshake, ShieldCheck, Shield, LogOut, Info } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import logoBasqest from '@/assets/logo-basqest-new.webp';
+import logoBasqest from '@/assets/logo-basqest.svg';
 
 interface HomeScreenProps {
   onCategoryPress?: () => void;
