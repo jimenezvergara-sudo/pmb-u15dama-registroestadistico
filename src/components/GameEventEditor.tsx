@@ -426,7 +426,7 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
                 <div className="space-y-2">
                   <div className="flex flex-wrap gap-2">
                     <select value={actPlayerId} onChange={e => setActPlayerId(e.target.value)} className={`${selectCls} flex-1 min-w-[140px]`}>
-                      <option value="">— Jugadora —</option>
+                      <option value="">— {t.playerCap} —</option>
                       {sortedRoster.map(p => (
                         <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
                       ))}
