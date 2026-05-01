@@ -170,7 +170,7 @@ const LiveGame: React.FC = () => {
 
   const handleZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
     if (!selectedPlayer) {
-      toast('Selecciona una jugadora primero', { duration: 1500 });
+      toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
       return;
     }
     setPendingShot(zone);
