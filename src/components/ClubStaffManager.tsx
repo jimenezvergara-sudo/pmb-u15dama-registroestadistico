@@ -334,7 +334,7 @@ const ClubStaffManager: React.FC = () => {
       {/* Tabs */}
       <div className="px-4 mt-6 flex-1 mb-8">
         <Tabs defaultValue="users">
-          <TabsList className="grid grid-cols-2 w-full">
+          <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="users" className="text-xs">
               <Users className="w-3.5 h-3.5 mr-1.5" />
               Usuarios ({users.length})
@@ -346,6 +346,10 @@ const ClubStaffManager: React.FC = () => {
                   {pendingCount}
                 </span>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="branches" className="text-xs">
+              <UsersRound className="w-3.5 h-3.5 mr-1.5" />
+              Rama
             </TabsTrigger>
           </TabsList>
 
