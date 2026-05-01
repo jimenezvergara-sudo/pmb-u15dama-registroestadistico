@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Player } from '@/types/basketball';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Circle, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { useRama } from '@/hooks/useRama';
 
 interface Props {
   roster: Player[];
