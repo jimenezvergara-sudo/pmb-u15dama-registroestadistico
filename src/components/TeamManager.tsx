@@ -113,12 +113,47 @@ const TeamManager: React.FC = () => {
       <h3 className="text-sm font-bold text-muted-foreground mt-4 mb-2">Equipos Rivales</h3>
 
       <div className="space-y-2">
-        <Input placeholder="Nombre del Club" value={clubName} onChange={e => setClubName(e.target.value)} disabled={isReadOnlyView} />
-        <div className="grid grid-cols-2 gap-2">
-          <Input placeholder="Ciudad" value={city} onChange={e => setCity(e.target.value)} disabled={isReadOnlyView} />
-          <Input placeholder="Región" value={region} onChange={e => setRegion(e.target.value)} disabled={isReadOnlyView} />
+        <div className="space-y-1">
+          <Input
+            placeholder="Nombre del Club"
+            value={clubName}
+            onChange={e => setClubName(e.target.value)}
+            disabled={isReadOnlyView}
+            className={validation.errors.clubName && clubName.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+          />
+          {validation.errors.clubName && clubName.length > 0 && (
+            <p className="text-xs text-destructive font-semibold flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" /> {validation.errors.clubName}
+            </p>
+          )}
         </div>
-        <Button onClick={handleAdd} disabled={!clubName.trim() || isReadOnlyView} className="w-full tap-feedback gap-2">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <Input
+              placeholder="Ciudad"
+              value={city}
+              onChange={e => setCity(e.target.value)}
+              disabled={isReadOnlyView}
+              className={validation.errors.city && city.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+            />
+            {validation.errors.city && city.length > 0 && (
+              <p className="text-[10px] text-destructive font-semibold leading-tight">{validation.errors.city}</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Input
+              placeholder="Región"
+              value={region}
+              onChange={e => setRegion(e.target.value)}
+              disabled={isReadOnlyView}
+              className={validation.errors.region && region.length > 0 ? 'border-destructive ring-2 ring-destructive/40' : ''}
+            />
+            {validation.errors.region && region.length > 0 && (
+              <p className="text-[10px] text-destructive font-semibold leading-tight">{validation.errors.region}</p>
+            )}
+          </div>
+        </div>
+        <Button onClick={handleAdd} disabled={!validation.ok || isReadOnlyView} className="w-full tap-feedback gap-2">
           <Plus className="w-4 h-4" /> Añadir Equipo
         </Button>
       </div>
