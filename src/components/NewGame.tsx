@@ -309,7 +309,7 @@ const NewGame: React.FC = () => {
         </div>
         {hasDuplicates && (
           <p className="text-xs text-destructive mt-2 flex items-center gap-1">
-            <AlertTriangle className="w-3 h-3" /> Hay jugadoras con el mismo número. Corrige antes de iniciar.
+            <AlertTriangle className="w-3 h-3" /> Hay {t.players} con el mismo número. Corrige antes de iniciar.
           </p>
         )}
       </div>
