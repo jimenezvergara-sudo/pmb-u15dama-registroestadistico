@@ -150,8 +150,8 @@ const Dashboard: React.FC = () => {
     // Calculate court time percentage
     let courtTimePct = 0;
     if (!isAggregate && selectedGame) {
-      const totalGameTime = Object.values(selectedGame.courtTimeMs || {}).reduce((max, t) => Math.max(max, t), 0);
-      const playerTime = (selectedGame.courtTimeMs || {})[player.id] || 0;
+      const totalGameTime = Object.values(selectedGame.courtTimeMs || {}).reduce((max: number, t: unknown) => Math.max(max, t as number), 0);
+      const playerTime = ((selectedGame.courtTimeMs || {}) as Record<string, number>)[player.id] || 0;
       if (totalGameTime > 0) {
         courtTimePct = Math.round((playerTime / totalGameTime) * 100);
       }
@@ -162,8 +162,8 @@ const Dashboard: React.FC = () => {
       tournamentGames.forEach(g => {
         const ct = g.courtTimeMs || {};
         const maxTime = Object.values(ct).reduce((max: number, t: unknown) => Math.max(max, t as number), 0);
-        if (maxTime > 0 && ct[player.id] !== undefined) {
-          totalPct += ((ct[player.id] || 0) / maxTime) * 100;
+        if (maxTime > 0 && (ct as Record<string, number>)[player.id] !== undefined) {
+          totalPct += (((ct as Record<string, number>)[player.id] || 0) / maxTime) * 100;
           gamesWithData++;
         }
       });
