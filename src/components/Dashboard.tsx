@@ -297,6 +297,7 @@ const Dashboard: React.FC = () => {
               rama={rama}
             />
           )}
+          {canRunAI && <NikitaChat />}
           <Button
             variant="outline"
             size="sm"
