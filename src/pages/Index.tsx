@@ -102,6 +102,7 @@ const AppContent: React.FC = () => {
       {allowedTab === 'tournaments' && <TournamentManager />}
       {allowedTab === 'admin' && <AdminPanel />}
       {allowedTab === 'staff' && <ClubStaffManager />}
+      {perms.canRunAI && (allowedTab === 'home' || allowedTab === 'dashboard') && <NikitaChat floating />}
       <BottomNav activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
     </div>
   );
