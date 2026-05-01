@@ -103,16 +103,18 @@ Deno.serve(async (req) => {
     }
 
     // 4. ¿Existe el usuario?
-    const { data: existing } = await admin
-      .from('profiles')
-      .select('user_id, club_id')
-      .eq('user_id', await findUserIdByEmail(admin, email))
-      .maybeSingle();
+    const existingUserId = await findUserIdByEmail(admin, email);
 
     const adminName = profile.full_name || 'el administrador';
     const clubName = profile.my_team_name || 'el club';
 
-    if (existing?.user_id) {
+    if (existingUserId) {
+      const { data: existing } = await admin
+        .from('profiles')
+        .select('user_id, club_id')
+        .eq('user_id', existingUserId)
+        .maybeSingle();
+      // existing puede no estar (raro) — lo creamos abajo si hace falta
       // Ya existe → asignar directo
       if (existing.user_id === user.id) {
         return json({ error: 'No podés modificarte a vos mismo' }, 400);
