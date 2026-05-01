@@ -6,6 +6,7 @@ import { Player, GameLeg, Game } from '@/types/basketball';
 import { Play, ClipboardList, AlertTriangle, Check } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.webp';
 import GameEventEditor from '@/components/GameEventEditor';
+import { newGameSchema, zodErrorsToMap } from '@/lib/validation';
 
 const NewGame: React.FC = () => {
   const { players, startGame, tournaments, teams, games, updateGame, isReadOnlyView } = useApp();
