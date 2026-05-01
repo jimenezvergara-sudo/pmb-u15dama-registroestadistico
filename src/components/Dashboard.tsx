@@ -297,7 +297,7 @@ const Dashboard: React.FC = () => {
               rama={rama}
             />
           )}
-          {canRunAI && <NikitaChat />}
+          
           <Button
             variant="outline"
             size="sm"
@@ -665,6 +665,8 @@ const Dashboard: React.FC = () => {
           onSave={updateGame}
         />
       )}
+
+      {canRunAI && <NikitaChat floating />}
     </div>
   );
 };

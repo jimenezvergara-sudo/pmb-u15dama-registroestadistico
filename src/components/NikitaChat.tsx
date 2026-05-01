@@ -17,9 +17,11 @@ interface ChatMessage {
 interface NikitaChatProps {
   /** Optional stats context (e.g. plain-text box score) inyectado al system prompt. */
   statsPayload?: string;
+  /** Render como botón flotante (FAB) en lugar de inline. */
+  floating?: boolean;
 }
 
-const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload }) => {
+const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload, floating = false }) => {
   const { rama } = useRama();
   const { myTeamName, activeCategory } = useRoster();
   const [open, setOpen] = useState(false);
@@ -80,14 +82,24 @@ const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload }) => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs font-bold"
-        >
-          <Sparkles className="w-4 h-4" />
-          Nikita
-        </Button>
+        {floating ? (
+          <Button
+            size="icon"
+            aria-label="Abrir Nikita"
+            className="fixed bottom-5 right-5 z-50 h-14 w-14 rounded-full shadow-2xl bg-gradient-to-br from-primary to-primary/80 hover:scale-105 transition-transform"
+          >
+            <Sparkles className="w-6 h-6" />
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs font-bold"
+          >
+            <Sparkles className="w-4 h-4" />
+            Nikita
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent side="bottom" className="h-[85vh] flex flex-col p-0">
         <SheetHeader className="px-4 py-3 border-b border-border/60">
