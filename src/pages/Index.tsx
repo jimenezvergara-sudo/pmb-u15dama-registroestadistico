@@ -14,6 +14,7 @@ import ClubStaffManager from '@/components/ClubStaffManager';
 import ReadOnlyBanner from '@/components/ReadOnlyBanner';
 import { CATEGORIES, Category } from '@/types/basketball';
 import { consumeRosterReturnRequest, LINEUP_RETURN_EVENT } from '@/utils/activeGameExpiry';
+import { usePermissions } from '@/hooks/usePermissions';
 import logoBasqest from '@/assets/logo-basqest-new.webp';
 
 const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSelect }) => (
@@ -38,12 +39,24 @@ const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSel
 
 const AppContent: React.FC = () => {
   const { activeGame, activeCategory, setActiveCategory, loading } = useApp();
+  const perms = usePermissions();
   const [tab, setTab] = useState<TabId>('home');
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   React.useEffect(() => {
-    if (activeGame) setTab('live');
-  }, [activeGame?.id]);
+    if (activeGame && perms.canEditGames) setTab('live');
+  }, [activeGame?.id, perms.canEditGames]);
+
+  // Defense-in-depth: if a tab is rendered but the user doesn't have permission, fall back to home.
+  const allowedTab: TabId = (() => {
+    if (tab === 'live' && !perms.canEditGames) return 'home';
+    if (tab === 'roster' && !perms.canEditRoster) return 'home';
+    if (tab === 'teams' && !perms.canEditTeams) return 'home';
+    if (tab === 'tournaments' && !perms.canEditTournaments) return 'home';
+    if (tab === 'staff' && !perms.canViewStaffList) return 'home';
+    if (tab === 'admin' && !perms.canViewAdmin) return 'home';
+    return tab;
+  })();
 
   React.useEffect(() => {
     const returnToRoster = () => {
@@ -75,19 +88,19 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16 relative">
       <ReadOnlyBanner />
       
-      {tab === 'home' && <HomeScreen onCategoryPress={() => setShowCategoryPicker(true)} />}
-      {tab === 'live' && (activeGame ? (
+      {allowedTab === 'home' && <HomeScreen onCategoryPress={() => setShowCategoryPicker(true)} />}
+      {allowedTab === 'live' && (activeGame ? (
         <LiveGameErrorBoundary>
           <LiveGame />
         </LiveGameErrorBoundary>
       ) : <NewGame />)}
-      {tab === 'roster' && <RosterManager />}
-      {tab === 'teams' && <TeamManager />}
-      {tab === 'dashboard' && <Dashboard />}
-      {tab === 'tournaments' && <TournamentManager />}
-      {tab === 'admin' && <AdminPanel />}
-      {tab === 'staff' && <ClubStaffManager />}
-      <BottomNav activeTab={tab} onTabChange={setTab} hasActiveGame={!!activeGame} />
+      {allowedTab === 'roster' && <RosterManager />}
+      {allowedTab === 'teams' && <TeamManager />}
+      {allowedTab === 'dashboard' && <Dashboard />}
+      {allowedTab === 'tournaments' && <TournamentManager />}
+      {allowedTab === 'admin' && <AdminPanel />}
+      {allowedTab === 'staff' && <ClubStaffManager />}
+      <BottomNav activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
     </div>
   );
 };
