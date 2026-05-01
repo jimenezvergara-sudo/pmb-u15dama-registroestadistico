@@ -52,9 +52,9 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, sub
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
             <div className="space-y-1">
-              <p className="font-extrabold text-destructive">Faltan jugadoras para iniciar</p>
+              <p className="font-extrabold text-destructive">Faltan {t.players} para iniciar</p>
               <p className="text-xs font-semibold text-muted-foreground">
-                El quinteto necesita 5 jugadoras y este partido tiene {roster.length}. Vuelve para corregir el roster.
+                El quinteto necesita 5 {t.players} y este partido tiene {roster.length}. Vuelve para corregir el roster.
               </p>
             </div>
           </div>
