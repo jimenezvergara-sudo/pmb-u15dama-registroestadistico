@@ -384,7 +384,7 @@ const RosterManager: React.FC = () => {
       <Dialog open={!!editPlayer} onOpenChange={(o) => !o && setEditPlayer(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar nombre de jugadora</DialogTitle>
+            <DialogTitle>Editar nombre de {t.player}</DialogTitle>
             <DialogDescription>
               Modifica el nombre y apellido. El número de camiseta se edita por separado.
             </DialogDescription>
