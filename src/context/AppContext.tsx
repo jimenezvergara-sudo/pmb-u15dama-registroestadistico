@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { enqueue as enqueueSync, flushQueue } from '@/utils/syncQueue';
 import { requestRosterReturn, shouldExpirePendingLineup } from '@/utils/activeGameExpiry';
+import { logger } from '@/utils/logger';
 
 interface AppState {
   players: Player[];
