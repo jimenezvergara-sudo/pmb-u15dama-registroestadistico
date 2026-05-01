@@ -6,6 +6,7 @@ import { Sparkles, Loader2, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
+import type { Rama } from '@/utils/genderTerms';
 
 interface BoxScoreRow {
   playerName: string;
@@ -44,6 +45,7 @@ interface AiAnalysisProps {
   totalOpponent: number;
   numGames: number;
   gameLabel: string;
+  rama?: Rama;
 }
 
 const AiAnalysis: React.FC<AiAnalysisProps> = ({
@@ -53,6 +55,7 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
   totalOpponent,
   numGames,
   gameLabel,
+  rama,
 }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -382,7 +385,7 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
       });
 
       const { data, error } = await supabase.functions.invoke('analyze-stats', {
-        body: { statsPayload: lines.join('\n') },
+        body: { statsPayload: lines.join('\n'), rama: rama ?? 'femenino' },
       });
 
       if (error) throw error;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Game, QUARTER_LABELS } from '@/types/basketball';
 import { useApp } from '@/context/AppContext';
+import { useRama } from '@/hooks/useRama';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ interface Props {
 
 const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
   const { myTeamName, myTeamLogo, activeCategory } = useApp();
+  const { rama } = useRama(activeCategory);
 
   const teamScore = game.shots.filter(s => s.made).reduce((sum, s) => sum + s.points, 0);
   const oppScore = (game.opponentScores || []).reduce((sum, s) => sum + s.points, 0);
@@ -107,6 +109,7 @@ const LiveGameReport: React.FC<Props> = ({ game, onClose }) => {
           gameLabel: `vs ${game.opponentName}`,
           quarterFilter: 'ALL',
           playerFilter: 'ALL',
+          rama,
         },
       );
     } catch (e) {

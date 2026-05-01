@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useDashboard, useRoster } from '@/context/contexts';
+import { useRama } from '@/hooks/useRama';
 import { Game, QuarterId, QUARTER_LABELS } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Button } from '@/components/ui/button';
 import { Trash2, Target, CircleDot, Crosshair, FileDown, Pencil, HelpCircle, Grab, Handshake, ShieldCheck } from 'lucide-react';
 import AiAnalysis from '@/components/AiAnalysis';
+import NikitaChat from '@/components/NikitaChat';
 import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from 'sonner';
 import logoBasqest from '@/assets/logo-basqest-horizontal.png';
@@ -21,6 +23,7 @@ const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 const Dashboard: React.FC = () => {
   const { games, removeGame, updateGame } = useDashboard();
   const { tournaments, teams, activeCategory, myTeamName, myTeamLogo, players } = useRoster();
+  const { rama } = useRama();
   const { canRunAI, canEditGames } = usePermissions();
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [filterTournamentId, setFilterTournamentId] = useState<string>('ALL');
@@ -291,8 +294,10 @@ const Dashboard: React.FC = () => {
               totalOpponent={totalOpponent}
               numGames={numGames}
               gameLabel={selectedGameId === 'ALL' ? `Todos los partidos (${tournamentGames.length})` : `vs ${selectedGame?.opponentName || ''}`}
+              rama={rama}
             />
           )}
+          {canRunAI && <NikitaChat />}
           <Button
             variant="outline"
             size="sm"
@@ -316,6 +321,7 @@ const Dashboard: React.FC = () => {
                 playerFilter: filterPlayer,
                 premiumBannerUrl: premiumBanner?.url,
                 premiumBannerLink: premiumBanner?.link,
+                rama,
               });
               toast.success('PDF descargado');
             }}

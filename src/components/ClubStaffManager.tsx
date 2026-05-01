@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ShieldAlert, Loader2, UserPlus, Trash2, Users, Mail, Send, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { ShieldAlert, Loader2, UserPlus, Trash2, Users, Mail, Send, Clock, CheckCircle2, XCircle, UsersRound } from 'lucide-react';
+import CategoryBranchManager from '@/components/CategoryBranchManager';
 import { toast } from '@/hooks/use-toast';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -333,7 +334,7 @@ const ClubStaffManager: React.FC = () => {
       {/* Tabs */}
       <div className="px-4 mt-6 flex-1 mb-8">
         <Tabs defaultValue="users">
-          <TabsList className="grid grid-cols-2 w-full">
+          <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="users" className="text-xs">
               <Users className="w-3.5 h-3.5 mr-1.5" />
               Usuarios ({users.length})
@@ -345,6 +346,10 @@ const ClubStaffManager: React.FC = () => {
                   {pendingCount}
                 </span>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="branches" className="text-xs">
+              <UsersRound className="w-3.5 h-3.5 mr-1.5" />
+              Rama
             </TabsTrigger>
           </TabsList>
 
@@ -486,6 +491,10 @@ const ClubStaffManager: React.FC = () => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="branches" className="mt-4">
+            <CategoryBranchManager />
           </TabsContent>
         </Tabs>
       </div>
