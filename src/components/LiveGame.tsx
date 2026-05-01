@@ -129,7 +129,7 @@ const LiveGame: React.FC = () => {
         roster={activeGame.roster}
         preSelected={activeGame.onCourtPlayerIds || []}
         title={`Quinteto para ${QUARTER_LABELS[pendingQuarter]}`}
-        subtitle={`Selecciona las 5 jugadoras que inician el ${QUARTER_LABELS[pendingQuarter]} (seleccionadas/5)`}
+        subtitle={`Selecciona las 5 ${t.players} que inician el ${QUARTER_LABELS[pendingQuarter]} (seleccionadas/5)`}
         buttonLabel={`Iniciar ${QUARTER_LABELS[pendingQuarter]}`}
         onBack={() => setPendingQuarter(null)}
         onConfirm={(starterIds) => {
