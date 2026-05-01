@@ -81,7 +81,7 @@ const SubstitutionDialog: React.FC<Props> = ({ roster, onCourtIds, onSubstitute 
           <div>
             <p className="text-xs font-bold text-success uppercase tracking-wider mb-2">Entra</p>
             {bench.length === 0 ? (
-              <p className="text-xs text-muted-foreground italic">No hay jugadoras en banca</p>
+              <p className="text-xs text-muted-foreground italic">No hay {t.players} en banca</p>
             ) : (
               <div className="grid grid-cols-3 gap-2">
                 {bench.map(p => (
