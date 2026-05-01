@@ -10,7 +10,7 @@ import { Trash2, Target, CircleDot, Crosshair, FileDown, Pencil, HelpCircle, Gra
 import AiAnalysis from '@/components/AiAnalysis';
 import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from 'sonner';
-import logoBasqest from '@/assets/logo-basqest.png';
+import logoBasqest from '@/assets/logo-basqest-horizontal.png';
 import { generatePdfReport } from '@/utils/generatePdfReport';
 import GameEventEditor from '@/components/GameEventEditor';
 import AdBannerCarousel from '@/components/AdBannerCarousel';
