@@ -24,6 +24,7 @@ import {
 
 const RosterManager: React.FC = () => {
   const { players, games, addPlayer, removePlayer, mergePlayers, updatePlayer, isReadOnlyView } = useApp();
+  const { t } = useRama();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [number, setNumber] = useState('');
