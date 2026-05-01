@@ -50,6 +50,7 @@ export async function generatePdfReport(
   allPlayers: Player[],
   options: ReportOptions
 ) {
+  const ramaTerms = getRamaTerms(options.rama);
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
