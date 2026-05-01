@@ -18,6 +18,7 @@ interface Props {
 }
 
 const SubstitutionDialog: React.FC<Props> = ({ roster, onCourtIds, onSubstitute }) => {
+  const { t } = useRama();
   const [open, setOpen] = useState(false);
   const [playerOut, setPlayerOut] = useState<string | null>(null);
   const [playerIn, setPlayerIn] = useState<string | null>(null);
