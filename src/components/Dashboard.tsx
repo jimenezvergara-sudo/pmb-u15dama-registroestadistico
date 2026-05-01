@@ -257,10 +257,10 @@ const Dashboard: React.FC = () => {
       <AdBannerCarousel />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src={logoBasqest} alt="BASQUEST+" className="w-10 h-10" />
-          <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 shrink">
+          <img src={logoBasqest} alt="BASQUEST+" className="w-10 h-10 shrink-0 object-contain" />
+          <h2 className="text-lg font-extrabold text-foreground truncate">Estadísticas</h2>
         </div>
         <div className="flex items-center gap-2">
           {canRunAI && (
