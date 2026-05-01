@@ -1,6 +1,7 @@
 import React from 'react';
 import { Game, QUARTER_LABELS } from '@/types/basketball';
 import { useApp } from '@/context/AppContext';
+import { useRama } from '@/hooks/useRama';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
