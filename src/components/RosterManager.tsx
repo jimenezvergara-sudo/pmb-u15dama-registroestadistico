@@ -413,7 +413,7 @@ const RosterManager: React.FC = () => {
               />
               {editNumberDuplicate && (
                 <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" /> #{editParsedNumber} ya está asignado a otra jugadora
+                  <AlertTriangle className="w-3 h-3" /> #{editParsedNumber} ya está asignado a {t.another} {t.player}
                 </p>
               )}
             </div>
