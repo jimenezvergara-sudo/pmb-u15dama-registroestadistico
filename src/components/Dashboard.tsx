@@ -20,6 +20,7 @@ const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const Dashboard: React.FC = () => {
   const { games, tournaments, removeGame, updateGame, teams, activeCategory, myTeamName, myTeamLogo, players } = useApp();
+  const { canRunAI, canEditGames } = usePermissions();
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [filterTournamentId, setFilterTournamentId] = useState<string>('ALL');
   const [selectedGameId, setSelectedGameId] = useState<string>('ALL');
@@ -258,37 +259,39 @@ const Dashboard: React.FC = () => {
           <h2 className="text-lg font-extrabold text-foreground">Estadísticas</h2>
         </div>
         <div className="flex items-center gap-2">
-          <AiAnalysis
-            boxScore={boxScore.map(r => ({
-              playerName: r.player.name,
-              number: r.player.number,
-              pts: r.pts,
-              fgm: r.fgm,
-              fga: r.fga,
-              fgPct: r.fgPct,
-              twoM: r.twoM,
-              twoA: r.twoA,
-              twoPct: r.twoPct,
-              threeM: r.threeM,
-              threeA: r.threeA,
-              threePct: r.threePct,
-              ftM: r.ftM,
-              ftA: r.ftA,
-              ftPct: r.ftPct,
-              reb: r.reb,
-              oReb: r.oReb,
-              dReb: r.dReb,
-              ast: r.ast,
-              stl: r.stl,
-              pf: r.pf,
-              courtTimePct: r.courtTimePct,
-            }))}
-            chartData={chartData}
-            totalPoints={totalPoints}
-            totalOpponent={totalOpponent}
-            numGames={numGames}
-            gameLabel={selectedGameId === 'ALL' ? `Todos los partidos (${tournamentGames.length})` : `vs ${selectedGame?.opponentName || ''}`}
-          />
+          {canRunAI && (
+            <AiAnalysis
+              boxScore={boxScore.map(r => ({
+                playerName: r.player.name,
+                number: r.player.number,
+                pts: r.pts,
+                fgm: r.fgm,
+                fga: r.fga,
+                fgPct: r.fgPct,
+                twoM: r.twoM,
+                twoA: r.twoA,
+                twoPct: r.twoPct,
+                threeM: r.threeM,
+                threeA: r.threeA,
+                threePct: r.threePct,
+                ftM: r.ftM,
+                ftA: r.ftA,
+                ftPct: r.ftPct,
+                reb: r.reb,
+                oReb: r.oReb,
+                dReb: r.dReb,
+                ast: r.ast,
+                stl: r.stl,
+                pf: r.pf,
+                courtTimePct: r.courtTimePct,
+              }))}
+              chartData={chartData}
+              totalPoints={totalPoints}
+              totalOpponent={totalOpponent}
+              numGames={numGames}
+              gameLabel={selectedGameId === 'ALL' ? `Todos los partidos (${tournamentGames.length})` : `vs ${selectedGame?.opponentName || ''}`}
+            />
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -368,7 +371,7 @@ const Dashboard: React.FC = () => {
             );
           })}
         </select>
-        {selectedGameId !== 'ALL' && selectedGame && (
+        {selectedGameId !== 'ALL' && selectedGame && canEditGames && (
           <>
             <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => setEditingGame(selectedGame)}>
               <Pencil className="w-4 h-4" />
