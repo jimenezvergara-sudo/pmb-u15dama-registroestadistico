@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useApp } from '@/context/AppContext';
+import { useActiveGame, useRoster } from '@/context/contexts';
 import { QuarterId, QUARTER_LABELS, ActionType } from '@/types/basketball';
 import CourtDiagram from '@/components/CourtDiagram';
 
@@ -33,9 +33,10 @@ const LiveGame: React.FC = () => {
     activeGame, setQuarter, recordShot, undoLastShot, endGame,
     recordOpponentScore, undoLastOpponentScore, recordAction,
     setOnCourtPlayers, recordSubstitution, snapshotCourtTime, startGameTimer,
-    myTeamName, myTeamLogo, cancelActiveGame,
+    cancelActiveGame,
     deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
-  } = useApp();
+  } = useActiveGame();
+  const { myTeamName, myTeamLogo } = useRoster();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [courtRotation, setCourtRotation] = useState(0);

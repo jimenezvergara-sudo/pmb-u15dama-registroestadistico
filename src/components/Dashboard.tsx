@@ -19,7 +19,8 @@ import { supabase } from '@/integrations/supabase/client';
 const ALL_QUARTERS: QuarterId[] = ['Q1', 'Q2', 'Q3', 'Q4', 'OT1', 'OT2', 'OT3'];
 
 const Dashboard: React.FC = () => {
-  const { games, tournaments, removeGame, updateGame, teams, activeCategory, myTeamName, myTeamLogo, players } = useApp();
+  const { games, removeGame, updateGame } = useDashboard();
+  const { tournaments, teams, activeCategory, myTeamName, myTeamLogo, players } = useRoster();
   const { canRunAI, canEditGames } = usePermissions();
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [filterTournamentId, setFilterTournamentId] = useState<string>('ALL');
