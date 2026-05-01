@@ -40,8 +40,18 @@ const TeamManager: React.FC = () => {
   const [city, setCity] = useState('');
   const [region, setRegion] = useState('');
 
+  const validation = useMemo(() => {
+    const result = opponentTeamSchema.safeParse({ clubName, city, region });
+    if (result.success) return { ok: true as const, errors: {} as Record<string, string> };
+    return { ok: false as const, errors: zodErrorsToMap(result.error) };
+  }, [clubName, city, region]);
+
   const handleAdd = () => {
-    if (!clubName.trim()) return;
+    if (!validation.ok) {
+      const firstError: string | undefined = Object.values(validation.errors)[0];
+      if (firstError) toast.error(firstError);
+      return;
+    }
     addTeam({ clubName: clubName.trim(), city: city.trim(), region: region.trim() });
     setClubName('');
     setCity('');
