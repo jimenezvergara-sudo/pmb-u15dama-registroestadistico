@@ -280,7 +280,7 @@ const RosterManager: React.FC = () => {
       <div className="rounded-lg border border-border/60 overflow-hidden">
         {players.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">
-            Añade jugadoras para empezar
+            Añade {t.players} para empezar
           </p>
         ) : (
           <>
