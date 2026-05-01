@@ -14,6 +14,7 @@ import { Undo2, BarChart3, Pause, Play } from 'lucide-react';
 import { shareHalftimeWhatsApp } from '@/utils/halftimeShare';
 import { getPendingLineupAge, LINEUP_IDLE_TIMEOUT_MS, requestRosterReturn } from '@/utils/activeGameExpiry';
 import logoBasqest from '@/assets/logo-basqest-horizontal.png';
+import { useRama } from '@/hooks/useRama';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +38,7 @@ const LiveGame: React.FC = () => {
     deleteShot, deleteAction, deleteOpponentScore, toggleShotResult,
   } = useActiveGame();
   const { myTeamName, myTeamLogo } = useRoster();
+  const { t } = useRama(activeGame?.category);
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [courtRotation, setCourtRotation] = useState(0);
@@ -127,7 +129,7 @@ const LiveGame: React.FC = () => {
         roster={activeGame.roster}
         preSelected={activeGame.onCourtPlayerIds || []}
         title={`Quinteto para ${QUARTER_LABELS[pendingQuarter]}`}
-        subtitle={`Selecciona las 5 jugadoras que inician el ${QUARTER_LABELS[pendingQuarter]} (seleccionadas/5)`}
+        subtitle={`Selecciona las 5 ${t.players} que inician el ${QUARTER_LABELS[pendingQuarter]} (seleccionadas/5)`}
         buttonLabel={`Iniciar ${QUARTER_LABELS[pendingQuarter]}`}
         onBack={() => setPendingQuarter(null)}
         onConfirm={(starterIds) => {
@@ -163,12 +165,12 @@ const LiveGame: React.FC = () => {
   const handlePlayerSelect = (playerId: string) => {
     setSelectedPlayer(playerId);
     setPendingShot(null);
-    setActionsPanelOpen(false); // Cambiar de jugadora cierra el panel
+    setActionsPanelOpen(false); // Cambiar de jugador/a cierra el panel
   };
 
   const handleZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
     if (!selectedPlayer) {
-      toast('Selecciona una jugadora primero', { duration: 1500 });
+      toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
       return;
     }
     setPendingShot(zone);
@@ -201,7 +203,7 @@ const LiveGame: React.FC = () => {
 
   const handleQuickAction = (action: ActionType) => {
     if (!selectedPlayer) {
-      toast('Selecciona una jugadora primero', { duration: 1500 });
+      toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
       return;
     }
     const playerId = selectedPlayer;
@@ -382,7 +384,7 @@ const LiveGame: React.FC = () => {
       {/* Player grid - show on-court indicator */}
       <div className="px-3 pt-3">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-          {!selectedPlayer ? '1. Selecciona jugadora' : pendingShot ? '3. ¿Canasta o Fallo?' : '2. Toca zona en cancha'}
+          {!selectedPlayer ? `1. Selecciona ${t.player}` : pendingShot ? '3. ¿Canasta o Fallo?' : '2. Toca zona en cancha'}
         </p>
         <div className="grid grid-cols-4 gap-2">
           {activeGame.roster.map(player => {
@@ -444,7 +446,7 @@ const LiveGame: React.FC = () => {
         <button
           onClick={() => {
             if (!selectedPlayer) {
-              toast('Selecciona una jugadora primero', { duration: 1500 });
+              toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
               return;
             }
             setActionsPanelOpen(o => !o);

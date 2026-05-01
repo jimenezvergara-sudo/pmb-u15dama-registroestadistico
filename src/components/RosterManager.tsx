@@ -7,6 +7,7 @@ import { Plus, Trash2, Merge, Check, X, AlertTriangle, Pencil, ArrowUp, ArrowDow
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import { toast } from 'sonner';
 import { playerSchema, zodErrorsToMap } from '@/lib/validation';
+import { useRama } from '@/hooks/useRama';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -24,6 +25,7 @@ import {
 
 const RosterManager: React.FC = () => {
   const { players, games, addPlayer, removePlayer, mergePlayers, updatePlayer, isReadOnlyView } = useApp();
+  const { t } = useRama();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [number, setNumber] = useState('');
@@ -88,7 +90,7 @@ const RosterManager: React.FC = () => {
       return;
     }
     if (!editNumberValid) {
-      if (editNumberDuplicate) toast.error(`El número #${editParsedNumber} ya está en uso por otra jugadora`);
+      if (editNumberDuplicate) toast.error(`El número #${editParsedNumber} ya está en uso por ${t.another} ${t.player}`);
       else toast.error('Número de camiseta inválido');
       return;
     }
@@ -132,7 +134,7 @@ const RosterManager: React.FC = () => {
 
   const handleAdd = () => {
     if (isReadOnlyView) {
-      toast.error('Solo lectura: no podés agregar jugadoras en esta categoría');
+      toast.error(`Solo lectura: no podés agregar ${t.players} en esta categoría`);
       return;
     }
     if (numberDuplicate) {
@@ -180,7 +182,7 @@ const RosterManager: React.FC = () => {
       </div>
 
       <div className="space-y-2 rounded-lg border border-border/60 bg-card p-3">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Agregar jugadora</p>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Agregar {t.player}</p>
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
             <Input
@@ -236,7 +238,7 @@ const RosterManager: React.FC = () => {
       {/* Merge confirmation dialog */}
       {mergeDialog && (
         <div className="rounded-lg border-2 border-[hsl(45,100%,50%)] bg-primary/5 p-3 space-y-3">
-          <p className="text-sm font-bold text-foreground">Fusionar jugadoras</p>
+          <p className="text-sm font-bold text-foreground">Fusionar {t.players}</p>
           <p className="text-xs text-muted-foreground">
             Los datos de <strong>{mergeDialog.removeName}</strong> se fusionarán con <strong>{mergeDialog.keepName}</strong>.
           </p>
@@ -278,7 +280,7 @@ const RosterManager: React.FC = () => {
       <div className="rounded-lg border border-border/60 overflow-hidden">
         {players.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">
-            Añade jugadoras para empezar
+            Añade {t.players} para empezar
           </p>
         ) : (
           <>
@@ -382,7 +384,7 @@ const RosterManager: React.FC = () => {
       <Dialog open={!!editPlayer} onOpenChange={(o) => !o && setEditPlayer(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar nombre de jugadora</DialogTitle>
+            <DialogTitle>Editar nombre de {t.player}</DialogTitle>
             <DialogDescription>
               Modifica el nombre y apellido. El número de camiseta se edita por separado.
             </DialogDescription>
@@ -411,7 +413,7 @@ const RosterManager: React.FC = () => {
               />
               {editNumberDuplicate && (
                 <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" /> #{editParsedNumber} ya está asignado a otra jugadora
+                  <AlertTriangle className="w-3 h-3" /> #{editParsedNumber} ya está asignado a {t.another} {t.player}
                 </p>
               )}
             </div>
@@ -419,7 +421,7 @@ const RosterManager: React.FC = () => {
             {historyCount > 0 && (
               <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-2">
                 <p className="text-xs font-bold text-foreground">
-                  Esta jugadora aparece en {historyCount} partido(s) anteriores
+                  Esta {t.player} aparece en {historyCount} partido(s) anteriores
                 </p>
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input

@@ -7,9 +7,11 @@ import { Play, ClipboardList, AlertTriangle, Check } from 'lucide-react';
 import logoHorizontal from '@/assets/logo-basqest-horizontal.png';
 import GameEventEditor from '@/components/GameEventEditor';
 import { newGameSchema, zodErrorsToMap } from '@/lib/validation';
+import { useRama } from '@/hooks/useRama';
 
 const NewGame: React.FC = () => {
   const { players, startGame, tournaments, teams, games, updateGame, isReadOnlyView } = useApp();
+  const { t } = useRama();
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [customOpponent, setCustomOpponent] = useState('');
@@ -230,7 +232,7 @@ const NewGame: React.FC = () => {
         </div>
         {players.length === 0 && (
           <p className="text-muted-foreground text-sm text-center py-6">
-            Primero añade jugadoras en Plantilla
+            Primero añade {t.players} en Plantilla
           </p>
         )}
         <div className="space-y-1.5">
@@ -307,7 +309,7 @@ const NewGame: React.FC = () => {
         </div>
         {hasDuplicates && (
           <p className="text-xs text-destructive mt-2 flex items-center gap-1">
-            <AlertTriangle className="w-3 h-3" /> Hay jugadoras con el mismo número. Corrige antes de iniciar.
+            <AlertTriangle className="w-3 h-3" /> Hay {t.players} con el mismo número. Corrige antes de iniciar.
           </p>
         )}
       </div>

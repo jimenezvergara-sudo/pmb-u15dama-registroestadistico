@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      club_categories: {
+        Row: {
+          category: string
+          club_id: string
+          created_at: string
+          id: string
+          rama: Database["public"]["Enums"]["team_branch"]
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          club_id: string
+          created_at?: string
+          id?: string
+          rama?: Database["public"]["Enums"]["team_branch"]
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          club_id?: string
+          created_at?: string
+          id?: string
+          rama?: Database["public"]["Enums"]["team_branch"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       club_games: {
         Row: {
           actions: Json
@@ -529,6 +556,10 @@ export type Database = {
         }[]
       }
       club_remove_user: { Args: { _target_user_id: string }; Returns: Json }
+      get_category_rama: {
+        Args: { _category: string; _club_id: string }
+        Returns: Database["public"]["Enums"]["team_branch"]
+      }
       get_user_assigned_category: {
         Args: { _user_id: string }
         Returns: string
@@ -556,6 +587,7 @@ export type Database = {
         | "club_staff"
       invitation_status: "pending" | "accepted" | "expired" | "cancelled"
       org_plan: "free" | "pro" | "elite"
+      team_branch: "femenino" | "masculino" | "mixto"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -695,6 +727,7 @@ export const Constants = {
       ],
       invitation_status: ["pending", "accepted", "expired", "cancelled"],
       org_plan: ["free", "pro", "elite"],
+      team_branch: ["femenino", "masculino", "mixto"],
     },
   },
 } as const

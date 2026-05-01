@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Player } from '@/types/basketball';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Circle, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { useRama } from '@/hooks/useRama';
 
 interface Props {
   roster: Player[];
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, subtitle, buttonLabel, preSelected }) => {
+  const { t } = useRama();
   const [selected, setSelected] = useState<Set<string>>(new Set(preSelected || []));
   const rosterTooSmall = roster.length < 5;
 
@@ -42,7 +44,7 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, sub
       )}
       <h2 className="text-lg font-extrabold text-foreground mb-1">{title || 'Quinteto Inicial'}</h2>
       <p className="text-xs text-muted-foreground mb-4">
-        {subtitle || `Selecciona las 5 jugadoras que inician (${selected.size}/5)`}
+        {subtitle || `Selecciona ${t.thePl} 5 ${t.players} que inician (${selected.size}/5)`}
       </p>
 
       {rosterTooSmall && (
@@ -50,9 +52,9 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, sub
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
             <div className="space-y-1">
-              <p className="font-extrabold text-destructive">Faltan jugadoras para iniciar</p>
+              <p className="font-extrabold text-destructive">Faltan {t.players} para iniciar</p>
               <p className="text-xs font-semibold text-muted-foreground">
-                El quinteto necesita 5 jugadoras y este partido tiene {roster.length}. Vuelve para corregir el roster.
+                El quinteto necesita 5 {t.players} y este partido tiene {roster.length}. Vuelve para corregir el roster.
               </p>
             </div>
           </div>

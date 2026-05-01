@@ -9,6 +9,7 @@ import CourtDiagram from '@/components/CourtDiagram';
 import { toast } from 'sonner';
 import { Trash2, Plus, ChevronDown, Trophy, Calendar, Users } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { useRama } from '@/hooks/useRama';
 
 interface Props {
   game: Game;
@@ -55,6 +56,7 @@ const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
   const { tournaments } = useApp();
+  const { t } = useRama(game.category);
   const [editedGame, setEditedGame] = useState<Game>(game);
   const [tab, setTab] = useState<TabId>('all');
   const [addOpen, setAddOpen] = useState(false);
@@ -345,7 +347,7 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
                 <div className="space-y-2">
                   <div className="flex flex-wrap gap-2">
                     <select value={shotPlayerId} onChange={e => setShotPlayerId(e.target.value)} className={`${selectCls} flex-1 min-w-[140px]`}>
-                      <option value="">— Jugadora —</option>
+                      <option value="">— {t.playerCap} —</option>
                       {sortedRoster.map(p => (
                         <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
                       ))}
@@ -424,7 +426,7 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
                 <div className="space-y-2">
                   <div className="flex flex-wrap gap-2">
                     <select value={actPlayerId} onChange={e => setActPlayerId(e.target.value)} className={`${selectCls} flex-1 min-w-[140px]`}>
-                      <option value="">— Jugadora —</option>
+                      <option value="">— {t.playerCap} —</option>
                       {sortedRoster.map(p => (
                         <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
                       ))}
@@ -471,7 +473,7 @@ const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="h-8 px-2 text-[11px]">#</TableHead>
-                  <TableHead className="h-8 px-2 text-[11px]">Jugadora</TableHead>
+                  <TableHead className="h-8 px-2 text-[11px]">{t.playerCap}</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Tipo</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Detalle</TableHead>
                   <TableHead className="h-8 px-2 text-[11px]">Cuarto</TableHead>

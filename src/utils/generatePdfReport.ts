@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Game, Player, QuarterId, QUARTER_LABELS } from '@/types/basketball';
+import { getRamaTerms, type Rama } from '@/utils/genderTerms';
 
 interface ReportOptions {
   teamName: string;
@@ -13,6 +14,8 @@ interface ReportOptions {
   playerFilter: string;
   premiumBannerUrl?: string;
   premiumBannerLink?: string;
+  /** Género del equipo: femenino | masculino | mixto. Default: femenino. */
+  rama?: Rama;
 }
 
 interface BoxScoreRow {
@@ -47,6 +50,7 @@ export async function generatePdfReport(
   allPlayers: Player[],
   options: ReportOptions
 ) {
+  const ramaTerms = getRamaTerms(options.rama);
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
@@ -523,7 +527,7 @@ export async function generatePdfReport(
 
     autoTable(doc, {
       startY,
-      head: [['Jugadora', 'TC', '2PT', '3PT', 'TL', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG', 'TS']],
+      head: [[ramaTerms.playerCap, 'TC', '2PT', '3PT', 'TL', 'PTS', 'RO', 'RD', 'REB', 'AST', 'STL', 'TOV', 'PF', 'eFG', 'TS']],
       body: tableBody,
       margin: { left: M, right: M },
       tableWidth: 'auto',
@@ -998,7 +1002,7 @@ export async function generatePdfReport(
   sectionTitle('Glosario de Abreviaturas');
 
   const glossary: [string, string, string][] = [
-    ['PTS', 'Puntos', 'Total de puntos anotados por la jugadora.'],
+    ['PTS', 'Puntos', `Total de puntos anotados por ${ramaTerms.the} ${ramaTerms.player}.`],
     ['2PT', 'Tiros de 2 puntos', 'Lanzamientos realizados dentro del arco de tres puntos (valen 2 puntos cada uno).'],
     ['3PT', 'Tiros de 3 puntos', 'Lanzamientos realizados fuera del arco de tres puntos (valen 3 puntos cada uno).'],
     ['TL', 'Tiros Libres', 'Lanzamientos desde la linea de tiro libre tras una falta (valen 1 punto cada uno).'],
@@ -1014,7 +1018,7 @@ export async function generatePdfReport(
     ['eFG%', 'Effective Field Goal %', 'Mide eficiencia de tiro ponderando triples: (2PT anotados + 0.5 x 3PT anotados) / TC intentados.'],
     ['TS%', 'True Shooting %', 'Eficiencia real incluyendo tiros libres: Puntos / (2 x (TC intentados + 0.44 x TL intentados)).'],
     ['AST/TOV', 'Ratio Asistencias/Perdidas', 'Relacion entre asistencias y perdidas. Valores altos indican buen cuidado del balon.'],
-    ['MIN%', 'Porcentaje de Minutos', 'Porcentaje del tiempo total de juego que la jugadora estuvo en cancha.'],
+    ['MIN%', 'Porcentaje de Minutos', `Porcentaje del tiempo total de juego que ${ramaTerms.the} ${ramaTerms.player} estuvo en cancha.`],
   ];
 
   autoTable(doc, {

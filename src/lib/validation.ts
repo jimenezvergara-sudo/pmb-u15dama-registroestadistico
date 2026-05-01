@@ -88,7 +88,7 @@ export const newGameSchema = z.object({
   rosterSize: z
     .number()
     .int()
-    .min(1, 'Selecciona al menos una jugadora para el roster'),
+    .min(1, 'Selecciona al menos un jugador/a para el roster'),
 });
 
 export type NewGameInput = z.infer<typeof newGameSchema>;
