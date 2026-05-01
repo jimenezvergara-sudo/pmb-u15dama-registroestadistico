@@ -56,6 +56,7 @@ const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 const GameEventEditor: React.FC<Props> = ({ game, open, onClose, onSave }) => {
   const { tournaments } = useApp();
+  const { t } = useRama(game.category);
   const [editedGame, setEditedGame] = useState<Game>(game);
   const [tab, setTab] = useState<TabId>('all');
   const [addOpen, setAddOpen] = useState(false);
