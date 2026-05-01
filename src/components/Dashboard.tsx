@@ -293,6 +293,7 @@ const Dashboard: React.FC = () => {
               totalOpponent={totalOpponent}
               numGames={numGames}
               gameLabel={selectedGameId === 'ALL' ? `Todos los partidos (${tournamentGames.length})` : `vs ${selectedGame?.opponentName || ''}`}
+              rama={rama}
             />
           )}
           <Button
