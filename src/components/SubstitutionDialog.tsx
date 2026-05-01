@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ArrowRightLeft } from 'lucide-react';
+import { useRama } from '@/hooks/useRama';
 
 interface Props {
   roster: Player[];
