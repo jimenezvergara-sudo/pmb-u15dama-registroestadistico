@@ -44,7 +44,7 @@ const StartingLineup: React.FC<Props> = ({ roster, onConfirm, onBack, title, sub
       )}
       <h2 className="text-lg font-extrabold text-foreground mb-1">{title || 'Quinteto Inicial'}</h2>
       <p className="text-xs text-muted-foreground mb-4">
-        {subtitle || `Selecciona las 5 jugadoras que inician (${selected.size}/5)`}
+        {subtitle || `Selecciona ${t.thePl} 5 ${t.players} que inician (${selected.size}/5)`}
       </p>
 
       {rosterTooSmall && (
