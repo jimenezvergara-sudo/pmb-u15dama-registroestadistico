@@ -134,7 +134,7 @@ const RosterManager: React.FC = () => {
 
   const handleAdd = () => {
     if (isReadOnlyView) {
-      toast.error('Solo lectura: no podés agregar jugadoras en esta categoría');
+      toast.error(`Solo lectura: no podés agregar ${t.players} en esta categoría`);
       return;
     }
     if (numberDuplicate) {
