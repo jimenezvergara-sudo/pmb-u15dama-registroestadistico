@@ -385,7 +385,7 @@ const AiAnalysis: React.FC<AiAnalysisProps> = ({
       });
 
       const { data, error } = await supabase.functions.invoke('analyze-stats', {
-        body: { statsPayload: lines.join('\n') },
+        body: { statsPayload: lines.join('\n'), rama: rama ?? 'femenino' },
       });
 
       if (error) throw error;
