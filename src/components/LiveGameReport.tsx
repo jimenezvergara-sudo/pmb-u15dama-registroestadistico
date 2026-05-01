@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Share2, FileText, TrendingUp, TrendingDown, Minus, HelpCircle, Clock } from 'lucide-react';
 import { generatePdfReport } from '@/utils/generatePdfReport';
 import { shareHalftimeWhatsApp, isHalftimeAvailable } from '@/utils/halftimeShare';
-import logoBasqest from '@/assets/logo-basqest.svg';
+import logoBasqest from '@/assets/logo-basqest.png';
 
 const isRebound = (type: string) => type === 'rebound' || type === 'offensive_rebound' || type === 'defensive_rebound';
 
