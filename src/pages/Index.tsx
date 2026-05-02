@@ -88,8 +88,12 @@ const AppContent: React.FC = () => {
     );
   }
 
+  // Hide BottomNav (and remove bottom padding) when actively tracking a live
+  // game in landscape — maximizes screen real estate for in-game tracking.
+  const liveLandscape = isLandscape && allowedTab === 'live' && !!activeGame;
+
   return (
-    <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16 relative">
+    <div className={`min-h-screen max-w-md mx-auto flex flex-col relative ${liveLandscape ? '' : 'pb-16'}`}>
       <ReadOnlyBanner />
       
       {allowedTab === 'home' && <HomeScreen onCategoryPress={() => setShowCategoryPicker(true)} />}
@@ -105,7 +109,9 @@ const AppContent: React.FC = () => {
       {allowedTab === 'admin' && <AdminPanel />}
       {allowedTab === 'staff' && <ClubStaffManager />}
       {perms.canRunAI && (allowedTab === 'home' || allowedTab === 'dashboard') && <NikitaChat floating />}
-      <BottomNav activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
+      {!liveLandscape && (
+        <BottomNav activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
+      )}
     </div>
   );
 };
