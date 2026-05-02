@@ -149,7 +149,7 @@ const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload, floating = false 
                 send();
               }
             }}
-            placeholder="Preguntale algo a Nikita…"
+            placeholder="Pregúntale algo a Nikita…"
             disabled={loading}
             className="flex-1"
           />
