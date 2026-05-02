@@ -93,7 +93,7 @@ const AppContent: React.FC = () => {
   const liveLandscape = isLandscape && allowedTab === 'live' && !!activeGame;
 
   return (
-    <div className={`min-h-screen max-w-md mx-auto flex flex-col relative ${liveLandscape ? '' : 'pb-16'}`}>
+    <div className={`min-h-screen ${liveLandscape ? 'w-full' : 'max-w-md'} mx-auto flex flex-col relative ${liveLandscape ? '' : 'pb-16'}`}>
       <ReadOnlyBanner />
       
       {allowedTab === 'home' && <HomeScreen onCategoryPress={() => setShowCategoryPicker(true)} />}
