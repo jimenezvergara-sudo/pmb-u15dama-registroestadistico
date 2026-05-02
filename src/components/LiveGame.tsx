@@ -265,69 +265,29 @@ const LiveGame: React.FC = () => {
 
   // ===== LANDSCAPE LAYOUT (auto switches on device rotation) =====
   if (isLandscape) {
-    // In landscape, "pendingShot" without a position acts as a shot-mode selector:
-    // - points=1 (TL) → registered immediately, no court tap needed
-    // - points=2 or 3 → user must tap court to complete the shot
-    const shotMode: 1 | 2 | 3 | null = pendingShot ? pendingShot.points : null;
-    const hasCourtPosition = !!pendingShot && (pendingShot.x !== -1 || pendingShot.y !== -1);
-
-    const handleShotModeSelect = (points: 1 | 2 | 3) => {
-      if (!selectedPlayer) {
-        toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
-        return;
-      }
-      if (points === 1) {
-        // TL: register directly with default zone, no court tap
-        setPendingShot({ x: 50, y: 75, points: 1 });
-        return;
-      }
-      // 2PT / 3PT: arm shot mode, await court tap. Use sentinel coords (-1,-1)
-      setPendingShot({ x: -1, y: -1, points });
-      toast(`Toca la cancha para registrar ${points}PT`, { duration: 1200 });
-    };
+    // En landscape el flujo de tiro es: jugadora → tocar zona en cancha (2pt/3pt
+    // se determinan por la zona) → Canasta/Fallo. TL es el único atajo manual.
+    const hasCourtPosition = !!pendingShot;
 
     const handleLandscapeZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
       if (!selectedPlayer) {
         toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
         return;
       }
-      // If user has armed 2PT or 3PT mode, override zone points with the armed mode
-      // and use the tapped coordinates as the position.
-      if (shotMode === 2 || shotMode === 3) {
-        setPendingShot({ x: zone.x, y: zone.y, points: shotMode });
+      setPendingShot(zone);
+    };
+
+    const handleFreeThrow = () => {
+      if (!selectedPlayer) {
+        toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
         return;
       }
-      // No armed mode → use the zone's native points (preserves direct-on-court flow)
-      setPendingShot(zone);
+      setPendingShot({ x: 50, y: 75, points: 1 });
     };
 
     const playerGrid = (
       <div className="grid grid-cols-3 gap-1.5">
-        {activeGame.roster.map(player => {
-          const isOnCourt = onCourtIds.includes(player.id);
-          const fouls = (activeGame.actions || []).filter(a => a.playerId === player.id && a.type === 'foul').length;
-          const isSelected = selectedPlayer === player.id;
-          const isFlashing = flash?.playerId === player.id;
-          return (
-            <button
-              key={player.id}
-              onClick={() => handlePlayerSelect(player.id)}
-              style={isFlashing ? { backgroundColor: flash!.color, color: '#fff' } : undefined}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg tap-feedback min-h-[56px] transition-all relative border-2 ${
-                isFlashing
-                  ? 'scale-105 border-accent shadow-lg'
-                  : isSelected
-                    ? 'bg-card text-card-foreground border-accent ring-2 ring-accent scale-[1.03]'
-                    : 'bg-card text-card-foreground border-transparent hover:border-primary/50'
-              } ${!isOnCourt ? 'opacity-40' : ''}`}
-            >
-              <span className={`text-2xl font-black leading-none ${isSelected || isFlashing ? 'text-accent' : 'text-foreground'}`}>
-                {player.number}
-              </span>
-              <span className="text-[10px] font-semibold leading-tight mt-0.5 truncate w-full text-center text-muted-foreground">
-                {player.name.split(' ')[0]}
-              </span>
-              {isOnCourt && <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success ring-1 ring-background" />}
+...
               {fouls > 0 && (
                 <span className={`absolute top-0.5 left-0.5 min-w-[14px] h-[14px] rounded-full text-[8px] font-black flex items-center justify-center px-0.5 ${
                   fouls >= 5 ? 'bg-destructive text-destructive-foreground animate-pulse' : fouls === 4 ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'
@@ -339,35 +299,24 @@ const LiveGame: React.FC = () => {
       </div>
     );
 
-    // Row 1: shot type buttons (2PT / 3PT / TL)
-    const shotButtons = (
-      <div className="grid grid-cols-3 gap-1.5">
-        {([2, 3, 1] as const).map(pts => {
-          const label = pts === 1 ? 'TL' : `${pts}PT`;
-          const emoji = pts === 1 ? '🏀' : pts === 3 ? '🎯' : '🏀';
-          const isArmed = shotMode === pts;
-          return (
-            <button
-              key={pts}
-              onClick={() => handleShotModeSelect(pts)}
-              disabled={!selectedPlayer}
-              className={`min-h-[56px] rounded-lg text-xs font-bold tap-feedback border-2 flex flex-col items-center justify-center gap-0.5 ${
-                !selectedPlayer
-                  ? 'bg-muted text-muted-foreground border-border opacity-50'
-                  : isArmed
-                    ? 'bg-accent text-accent-foreground border-accent ring-2 ring-accent animate-pulse'
-                    : 'bg-card text-card-foreground border-border hover:border-primary'
-              }`}
-            >
-              <span className="text-base leading-none">{emoji}</span>
-              <span className="text-[11px] leading-none">{label}</span>
-            </button>
-          );
-        })}
-      </div>
+    // Botón único de Tiro Libre (los 2pt/3pt se registran tocando la cancha)
+    const freeThrowButton = (
+      <button
+        onClick={handleFreeThrow}
+        disabled={!selectedPlayer}
+        className={`w-full min-h-[44px] rounded-lg text-xs font-bold tap-feedback border-2 flex items-center justify-center gap-1.5 ${
+          !selectedPlayer
+            ? 'bg-muted text-muted-foreground border-border opacity-50'
+            : pendingShot?.points === 1
+              ? 'bg-accent text-accent-foreground border-accent ring-2 ring-accent'
+              : 'bg-card text-card-foreground border-border hover:border-primary'
+        }`}
+      >
+        🏀 Tiro Libre
+      </button>
     );
 
-    // Row 2: non-shot quick actions (immediate register)
+    // Acciones rápidas (no-tiro): se registran inmediatamente
     const actionButtons = (
       <div className="grid grid-cols-3 gap-1.5">
         {([
@@ -382,7 +331,7 @@ const LiveGame: React.FC = () => {
             key={a.key}
             onClick={() => handleQuickAction(a.key)}
             disabled={!selectedPlayer}
-            className={`min-h-[56px] rounded-lg text-xs font-bold tap-feedback border-2 flex flex-col items-center justify-center gap-0.5 ${
+            className={`min-h-[48px] rounded-lg text-xs font-bold tap-feedback border-2 flex flex-col items-center justify-center gap-0.5 ${
               !selectedPlayer
                 ? 'bg-muted text-muted-foreground border-border opacity-50'
                 : 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
@@ -397,11 +346,9 @@ const LiveGame: React.FC = () => {
 
     const statusMsg = !selectedPlayer
       ? `1. Selecciona ${t.player}`
-      : shotMode === 1 || (shotMode && hasCourtPosition)
+      : hasCourtPosition
         ? '3. ¿Canasta o Fallo?'
-        : shotMode
-          ? `2. Toca la cancha (${shotMode}PT)`
-          : '2. ¿Qué pasó?';
+        : '2. Toca la cancha o TL';
 
     return (
       <div className="flex flex-col h-screen overflow-hidden">
