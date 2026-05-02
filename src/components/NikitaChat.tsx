@@ -73,7 +73,7 @@ const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload, floating = false 
       if (reply) setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (err) {
       console.error(err);
-      toast.error('No pude responder, intentá de nuevo.');
+      toast.error('No pude responder, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
