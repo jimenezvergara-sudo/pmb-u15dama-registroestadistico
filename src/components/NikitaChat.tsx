@@ -30,10 +30,10 @@ const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload, floating = false 
       role: 'assistant',
       content:
         rama === 'masculino'
-          ? '¡Hola! Soy Nikita 🏀 Tu asistente táctica. Preguntame lo que quieras del rendimiento del equipo.'
+          ? '¡Hola! Soy Nikita 🏀 Tu asistente táctica. Pregúntame lo que quieras del rendimiento del equipo.'
           : rama === 'mixto'
-            ? '¡Hola! Soy Nikita 🏀 Tu asistente táctica. ¿En qué puedo ayudarte con el equipo?'
-            : '¡Hola! Soy Nikita 🏀 Tu asistente táctica. Preguntame lo que quieras sobre el rendimiento de las jugadoras.',
+            ? '¡Hola! Soy Nikita 🏀 Tu asistente táctica. ¿En qué te puedo ayudar con el equipo?'
+            : '¡Hola! Soy Nikita 🏀 Tu asistente táctica. Pregúntame lo que quieras sobre el rendimiento de las jugadoras.',
     },
   ]);
   const [input, setInput] = useState('');
