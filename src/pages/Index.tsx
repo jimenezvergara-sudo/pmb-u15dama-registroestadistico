@@ -43,6 +43,7 @@ const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSel
 const AppContent: React.FC = () => {
   const { activeGame, activeCategory, setActiveCategory, loading } = useApp();
   const perms = usePermissions();
+  const isLandscape = useIsLandscape();
   const [tab, setTab] = useState<TabId>('home');
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
