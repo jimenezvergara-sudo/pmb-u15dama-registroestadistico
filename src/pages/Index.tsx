@@ -17,6 +17,7 @@ import ReadOnlyBanner from '@/components/ReadOnlyBanner';
 import { CATEGORIES, Category } from '@/types/basketball';
 import { consumeRosterReturnRequest, LINEUP_RETURN_EVENT } from '@/utils/activeGameExpiry';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useIsLandscape } from '@/hooks/useOrientation';
 import logoBasqest from '@/assets/logo-basqest.png';
 
 const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSelect }) => (
@@ -42,6 +43,7 @@ const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSel
 const AppContent: React.FC = () => {
   const { activeGame, activeCategory, setActiveCategory, loading } = useApp();
   const perms = usePermissions();
+  const isLandscape = useIsLandscape();
   const [tab, setTab] = useState<TabId>('home');
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
@@ -86,8 +88,12 @@ const AppContent: React.FC = () => {
     );
   }
 
+  // Hide BottomNav (and remove bottom padding) when actively tracking a live
+  // game in landscape — maximizes screen real estate for in-game tracking.
+  const liveLandscape = isLandscape && allowedTab === 'live' && !!activeGame;
+
   return (
-    <div className="min-h-screen max-w-md mx-auto flex flex-col pb-16 relative">
+    <div className={`min-h-screen ${liveLandscape ? 'w-full' : 'max-w-md'} mx-auto flex flex-col relative ${liveLandscape ? '' : 'pb-16'}`}>
       <ReadOnlyBanner />
       
       {allowedTab === 'home' && <HomeScreen onCategoryPress={() => setShowCategoryPicker(true)} />}
@@ -103,7 +109,9 @@ const AppContent: React.FC = () => {
       {allowedTab === 'admin' && <AdminPanel />}
       {allowedTab === 'staff' && <ClubStaffManager />}
       {perms.canRunAI && (allowedTab === 'home' || allowedTab === 'dashboard') && <NikitaChat floating />}
-      <BottomNav activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
+      {!liveLandscape && (
+        <BottomNav activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
+      )}
     </div>
   );
 };

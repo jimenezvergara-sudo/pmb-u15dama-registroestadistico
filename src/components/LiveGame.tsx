@@ -15,6 +15,7 @@ import { shareHalftimeWhatsApp } from '@/utils/halftimeShare';
 import { getPendingLineupAge, LINEUP_IDLE_TIMEOUT_MS, requestRosterReturn } from '@/utils/activeGameExpiry';
 import logoBasqest from '@/assets/logo-basqest-horizontal.png';
 import { useRama } from '@/hooks/useRama';
+import { useIsLandscape } from '@/hooks/useOrientation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +40,7 @@ const LiveGame: React.FC = () => {
   } = useActiveGame();
   const { myTeamName, myTeamLogo } = useRoster();
   const { t } = useRama(activeGame?.category);
+  const isLandscape = useIsLandscape();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [courtRotation, setCourtRotation] = useState(0);
@@ -261,6 +263,198 @@ const LiveGame: React.FC = () => {
 
   const onCourtIds = activeGame.onCourtPlayerIds || [];
 
+  // ===== LANDSCAPE LAYOUT (auto switches on device rotation) =====
+  if (isLandscape) {
+    const playerGrid = (
+      <div className="grid grid-cols-3 gap-1.5">
+        {activeGame.roster.map(player => {
+          const isOnCourt = onCourtIds.includes(player.id);
+          const fouls = (activeGame.actions || []).filter(a => a.playerId === player.id && a.type === 'foul').length;
+          const isSelected = selectedPlayer === player.id;
+          const isFlashing = flash?.playerId === player.id;
+          return (
+            <button
+              key={player.id}
+              onClick={() => handlePlayerSelect(player.id)}
+              style={isFlashing ? { backgroundColor: flash!.color, color: '#fff' } : undefined}
+              className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-lg tap-feedback min-h-[48px] transition-all relative border-2 ${
+                isFlashing
+                  ? 'scale-105 border-accent shadow-lg'
+                  : isSelected
+                    ? 'bg-card text-card-foreground border-accent ring-2 ring-accent scale-[1.03]'
+                    : 'bg-card text-card-foreground border-transparent hover:border-primary/50'
+              } ${!isOnCourt ? 'opacity-40' : ''}`}
+            >
+              <span className={`text-xl font-black leading-none ${isSelected || isFlashing ? 'text-accent' : 'text-foreground'}`}>
+                {player.number}
+              </span>
+              <span className="text-[9px] font-semibold leading-tight mt-0.5 truncate w-full text-center text-muted-foreground">
+                {player.name.split(' ')[0]}
+              </span>
+              {isOnCourt && <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success ring-1 ring-background" />}
+              {fouls > 0 && (
+                <span className={`absolute top-0.5 left-0.5 min-w-[14px] h-[14px] rounded-full text-[8px] font-black flex items-center justify-center px-0.5 ${
+                  fouls >= 5 ? 'bg-destructive text-destructive-foreground animate-pulse' : fouls === 4 ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'
+                }`}>{fouls}F</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+
+    const actionButtons = (
+      <div className="grid grid-cols-3 gap-1.5">
+        <button
+          onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
+          className={`min-h-[40px] rounded-lg text-xs font-bold tap-feedback border-2 ${
+            pendingShot?.points === 1 ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground border-border'
+          }`}
+        >🏀 TL</button>
+        {([
+          { key: 'offensive_rebound' as ActionType, label: 'Reb OF', emoji: '💪' },
+          { key: 'defensive_rebound' as ActionType, label: 'Reb DEF', emoji: '🛡️' },
+          { key: 'assist' as ActionType, label: 'Asist.', emoji: '🤝' },
+          { key: 'steal' as ActionType, label: 'Robo', emoji: '⚡' },
+          { key: 'turnover' as ActionType, label: 'Pérd.', emoji: '💨' },
+          { key: 'foul' as ActionType, label: 'Falta', emoji: '✋' },
+        ]).map(a => (
+          <button
+            key={a.key}
+            onClick={() => handleQuickAction(a.key)}
+            disabled={!selectedPlayer}
+            className={`min-h-[40px] rounded-lg text-xs font-bold tap-feedback border-2 flex flex-col items-center justify-center gap-0 ${
+              !selectedPlayer
+                ? 'bg-muted text-muted-foreground border-border opacity-50'
+                : 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+            }`}
+          >
+            <span className="text-sm leading-none">{a.emoji}</span>
+            <span className="text-[10px] leading-none mt-0.5">{a.label}</span>
+          </button>
+        ))}
+      </div>
+    );
+
+    return (
+      <div className="flex flex-col h-screen overflow-hidden">
+        {/* Compact scoreboard top */}
+        <div className="bg-primary px-3 py-1.5 flex items-center justify-between gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[10px] text-primary-foreground/70 font-bold uppercase truncate">{myTeamName || 'Local'}</span>
+            <span className="text-2xl font-black text-primary-foreground leading-none">{teamScore}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {QUARTERS.slice(0, 4).map(q => (
+              <button
+                key={q}
+                onClick={() => { if (q !== activeGame.currentQuarter) setPendingQuarter(q); }}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-bold tap-feedback ${
+                  activeGame.currentQuarter === q ? 'bg-primary-foreground text-primary' : 'bg-primary-foreground/20 text-primary-foreground/70'
+                }`}
+              >{QUARTER_LABELS[q]}</button>
+            ))}
+            <button
+              onClick={handleTogglePause}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-bold tap-feedback flex items-center ${
+                isPaused ? 'bg-success text-success-foreground animate-pulse' : 'bg-primary-foreground/20 text-primary-foreground'
+              }`}
+            >{isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}</button>
+          </div>
+          <div className="flex items-center gap-2 min-w-0 justify-end">
+            <span className="text-2xl font-black text-primary-foreground/80 leading-none">{opponentTotal}</span>
+            <span className="text-[10px] text-primary-foreground/70 font-bold uppercase truncate">{activeGame.opponentName}</span>
+          </div>
+        </div>
+
+        {/* Rival scoring quick row */}
+        <div className="bg-destructive/10 px-2 py-1 flex items-center gap-1 flex-shrink-0">
+          <span className="text-[9px] font-bold text-destructive uppercase">Rival</span>
+          {([1, 2, 3] as const).map(pts => (
+            <Button
+              key={pts}
+              size="sm"
+              variant="outline"
+              className="h-6 px-2 text-[10px] font-bold border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              onClick={() => { recordOpponentScore(pts); toast(`Rival: +${pts}`, { duration: 800 }); }}
+            >+{pts}</Button>
+          ))}
+          <Button size="sm" variant="ghost" className="h-6 px-1 text-destructive ml-auto" onClick={() => undoLastOpponentScore()}>
+            <Undo2 className="w-3 h-3" />
+          </Button>
+          <span className="text-[9px] font-semibold text-muted-foreground">
+            {!selectedPlayer ? `Selecciona ${t.player}` : pendingShot ? '¿Canasta o Fallo?' : 'Toca cancha'}
+          </span>
+        </div>
+
+        {/* Main split: court 60% / panel 40% */}
+        <div className="flex-1 flex min-h-0 overflow-hidden">
+          {/* LEFT — Court */}
+          <div className="relative flex-1 basis-[60%] min-w-0 px-1 py-1 flex items-center justify-center">
+            <CourtDiagram
+              onZoneTap={handleZoneTap}
+              shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
+              rotation={courtRotation}
+              onRotate={() => setCourtRotation(r => (r + 90) % 360)}
+            />
+          </div>
+
+          {/* RIGHT — Players + actions */}
+          <div className="basis-[40%] flex flex-col gap-2 px-2 py-1.5 border-l border-border overflow-y-auto">
+            {playerGrid}
+            {actionButtons}
+            <SubstitutionDialog
+              roster={activeGame.roster}
+              onCourtIds={onCourtIds}
+              onSubstitute={(pIn, pOut) => {
+                recordSubstitution(pIn, pOut);
+                const nameIn = activeGame.roster.find(p => p.id === pIn);
+                const nameOut = activeGame.roster.find(p => p.id === pOut);
+                toast(`Cambio: #${nameIn?.number} ↔ #${nameOut?.number}`, { duration: 1500 });
+              }}
+            />
+            {pendingShot && selectedPlayer && (
+              <div className="grid grid-cols-2 gap-2">
+                <Button onClick={() => handleResult(true)} className="h-10 text-sm font-bold bg-success text-success-foreground hover:bg-success/90">✓ Canasta</Button>
+                <Button variant="destructive" onClick={() => handleResult(false)} className="h-10 text-sm font-bold">✗ Fallo</Button>
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-1.5 mt-auto">
+              <Button variant="outline" onClick={handleUndo} className="h-9 text-[11px] font-bold rounded-lg col-span-1">
+                <Undo2 className="w-3.5 h-3.5" />
+              </Button>
+              <Button variant="secondary" onClick={() => setShowReport(true)} className="h-9 text-[11px] font-bold rounded-lg">
+                📊
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="secondary" className="h-9 text-[11px] font-bold rounded-lg">⏹ Fin</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Finalizar el partido?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta acción guardará el partido con todas las estadísticas registradas.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>NO, Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => { snapshotCourtTime(); endGame(); }}>SÍ, Finalizar</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        </div>
+
+        {showReport && activeGame && (
+          <LiveGameReport game={activeGame} onClose={() => setShowReport(false)} />
+        )}
+      </div>
+    );
+  }
+
+  // ===== PORTRAIT LAYOUT (default) =====
   return (
     <div className="flex flex-col h-full">
       {/* Header: Scoreboard */}
