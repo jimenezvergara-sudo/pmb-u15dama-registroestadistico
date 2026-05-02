@@ -40,6 +40,7 @@ const LiveGame: React.FC = () => {
   } = useActiveGame();
   const { myTeamName, myTeamLogo } = useRoster();
   const { t } = useRama(activeGame?.category);
+  const isLandscape = useIsLandscape();
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number; points: 1 | 2 | 3 } | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [courtRotation, setCourtRotation] = useState(0);
