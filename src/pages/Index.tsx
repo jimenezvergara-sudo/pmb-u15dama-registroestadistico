@@ -17,6 +17,7 @@ import ReadOnlyBanner from '@/components/ReadOnlyBanner';
 import { CATEGORIES, Category } from '@/types/basketball';
 import { consumeRosterReturnRequest, LINEUP_RETURN_EVENT } from '@/utils/activeGameExpiry';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useIsLandscape } from '@/hooks/useOrientation';
 import logoBasqest from '@/assets/logo-basqest.png';
 
 const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSelect }) => (
