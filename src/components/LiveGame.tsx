@@ -287,7 +287,31 @@ const LiveGame: React.FC = () => {
 
     const playerGrid = (
       <div className="grid grid-cols-3 gap-1.5">
-...
+        {activeGame.roster.map(player => {
+          const isOnCourt = onCourtIds.includes(player.id);
+          const fouls = (activeGame.actions || []).filter(a => a.playerId === player.id && a.type === 'foul').length;
+          const isSelected = selectedPlayer === player.id;
+          const isFlashing = flash?.playerId === player.id;
+          return (
+            <button
+              key={player.id}
+              onClick={() => handlePlayerSelect(player.id)}
+              style={isFlashing ? { backgroundColor: flash!.color, color: '#fff' } : undefined}
+              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg tap-feedback min-h-[56px] transition-all relative border-2 ${
+                isFlashing
+                  ? 'scale-105 border-accent shadow-lg'
+                  : isSelected
+                    ? 'bg-card text-card-foreground border-accent ring-2 ring-accent scale-[1.03]'
+                    : 'bg-card text-card-foreground border-transparent hover:border-primary/50'
+              } ${!isOnCourt ? 'opacity-40' : ''}`}
+            >
+              <span className={`text-2xl font-black leading-none ${isSelected || isFlashing ? 'text-accent' : 'text-foreground'}`}>
+                {player.number}
+              </span>
+              <span className="text-[10px] font-semibold leading-tight mt-0.5 truncate w-full text-center text-muted-foreground">
+                {player.name.split(' ')[0]}
+              </span>
+              {isOnCourt && <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success ring-1 ring-background" />}
               {fouls > 0 && (
                 <span className={`absolute top-0.5 left-0.5 min-w-[14px] h-[14px] rounded-full text-[8px] font-black flex items-center justify-center px-0.5 ${
                   fouls >= 5 ? 'bg-destructive text-destructive-foreground animate-pulse' : fouls === 4 ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'
