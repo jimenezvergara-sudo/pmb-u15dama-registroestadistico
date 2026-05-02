@@ -195,28 +195,42 @@ const NewGame: React.FC = () => {
         </div>
 
         {/* Leg selector */}
-        <select
-          value={leg}
-          onChange={e => setLeg(e.target.value as GameLeg | '')}
-          className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm font-semibold"
-        >
-          <option value="">Tipo de partido</option>
-          <option value="ida">Ida</option>
-          <option value="vuelta">Vuelta</option>
-        </select>
-
-        {tournaments.length > 0 && (
+        <div className="space-y-1">
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Tipo de partido</label>
           <select
-            value={tournamentId}
-            onChange={e => setTournamentId(e.target.value)}
+            value={leg}
+            onChange={e => setLeg(e.target.value as GameLeg | '')}
             className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm font-semibold"
           >
-            <option value="">Sin torneo</option>
-            {tournaments.map(t => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
+            <option value="">Amistoso / Sin definir</option>
+            <option value="ida">Ida</option>
+            <option value="vuelta">Vuelta</option>
           </select>
-        )}
+        </div>
+
+        {/* Tournament selector — siempre visible para incentivar la asignación */}
+        <div className="space-y-1">
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+            🏆 Torneo
+          </label>
+          {tournaments.length > 0 ? (
+            <select
+              value={tournamentId}
+              onChange={e => setTournamentId(e.target.value)}
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm font-semibold"
+            >
+              <option value="">Sin torneo (amistoso)</option>
+              {tournaments.map(tn => (
+                <option key={tn.id} value={tn.id}>{tn.name}</option>
+              ))}
+            </select>
+          ) : (
+            <div className="rounded-md border border-dashed border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+              No hay torneos creados en esta categoría. Crea uno desde la pestaña <span className="font-bold text-foreground">Torneos</span> para asociarlo.
+            </div>
+          )}
+        </div>
+
       </div>
 
       <div>
