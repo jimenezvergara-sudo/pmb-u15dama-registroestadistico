@@ -83,16 +83,80 @@ async function buildDbContext(authHeader: string, category?: string): Promise<st
       lines.push(`\n(No pude leer los partidos: ${gamesErr.message})`);
     } else if (games && games.length > 0) {
       lines.push(`\nÚLTIMOS ${games.length} PARTIDOS:`);
+
+      // Acumulador agregado por jugadora a lo largo de TODOS los partidos retornados.
+      // Clave: playerId. Valor: estadísticas acumuladas.
+      type Agg = {
+        name: string;
+        number: number | null;
+        gp: number; // partidos jugados (al menos 1 evento)
+        pts: number;
+        twoM: number; twoA: number;
+        threeM: number; threeA: number;
+        ftM: number; ftA: number;
+        oreb: number; dreb: number;
+        ast: number; stl: number; tov: number; fouls: number;
+      };
+      const agg: Record<string, Agg> = {};
+      const ensure = (pid: string, roster: Array<Record<string, unknown>>) => {
+        if (!agg[pid]) {
+          const found = roster.find((r) => (r?.id as string) === pid);
+          agg[pid] = {
+            name: (found?.name as string) ?? "Desconocida",
+            number: (found?.number as number) ?? null,
+            gp: 0, pts: 0,
+            twoM: 0, twoA: 0, threeM: 0, threeA: 0, ftM: 0, ftA: 0,
+            oreb: 0, dreb: 0, ast: 0, stl: 0, tov: 0, fouls: 0,
+          };
+        }
+        return agg[pid];
+      };
+
       for (const g of games) {
         // Calcular puntos propios desde shots (made === true).
         let pf = 0;
         const shots = Array.isArray(g.shots) ? g.shots : [];
+        const actions = Array.isArray(g.actions) ? g.actions : [];
+        const gameRoster = Array.isArray(g.roster) ? (g.roster as Array<Record<string, unknown>>) : [];
+        const seenPlayers = new Set<string>();
+
         for (const s of shots as Array<Record<string, unknown>>) {
-          if (s?.made === true) {
-            const t = s?.type;
-            pf += t === "3pt" ? 3 : t === "2pt" ? 2 : t === "ft" ? 1 : 0;
+          const pid = (s?.playerId ?? s?.player_id) as string | undefined;
+          const t = s?.type as string | undefined;
+          // Inferir puntos: type "3pt"/"2pt"/"ft" o campo points.
+          const pts3 = t === "3pt" || (s?.points as number) === 3;
+          const pts2 = t === "2pt" || (s?.points as number) === 2;
+          const pts1 = t === "ft" || (s?.points as number) === 1;
+          const made = s?.made === true;
+
+          if (made) pf += pts3 ? 3 : pts2 ? 2 : pts1 ? 1 : 0;
+
+          if (pid) {
+            seenPlayers.add(pid);
+            const a = ensure(pid, gameRoster);
+            if (pts3) { a.threeA += 1; if (made) { a.threeM += 1; a.pts += 3; } }
+            else if (pts2) { a.twoA += 1; if (made) { a.twoM += 1; a.pts += 2; } }
+            else if (pts1) { a.ftA += 1; if (made) { a.ftM += 1; a.pts += 1; } }
           }
         }
+
+        for (const ac of actions as Array<Record<string, unknown>>) {
+          const pid = (ac?.playerId ?? ac?.player_id) as string | undefined;
+          const t = ac?.type as string | undefined;
+          if (!pid || !t) continue;
+          seenPlayers.add(pid);
+          const a = ensure(pid, gameRoster);
+          if (t === "offensive_rebound") a.oreb += 1;
+          else if (t === "defensive_rebound") a.dreb += 1;
+          else if (t === "rebound") a.dreb += 1; // legacy → defensivo
+          else if (t === "assist") a.ast += 1;
+          else if (t === "steal") a.stl += 1;
+          else if (t === "turnover") a.tov += 1;
+          else if (t === "foul") a.fouls += 1;
+        }
+
+        for (const pid of seenPlayers) ensure(pid, gameRoster).gp += 1;
+
         // Puntos rivales: suma opponent_scores por periodo.
         let pc = 0;
         const opp = Array.isArray(g.opponent_scores) ? g.opponent_scores : [];
@@ -103,6 +167,23 @@ async function buildDbContext(authHeader: string, category?: string): Promise<st
         const fecha = g.date ? new Date(g.date as string).toISOString().slice(0, 10) : "?";
         const sede = g.is_home === false ? "(V)" : "(L)";
         lines.push(`- ${fecha} vs ${g.opponent_name ?? "rival"} ${sede} — ${pf}-${pc}${g.leg ? ` [${g.leg}]` : ""}`);
+      }
+
+      // Render del agregado por jugadora (ordenado por PTS desc).
+      const aggList = Object.values(agg).filter((a) => a.gp > 0);
+      if (aggList.length > 0) {
+        aggList.sort((a, b) => b.pts - a.pts);
+        lines.push(`\nESTADÍSTICAS AGREGADAS POR JUGADORA (últimos ${games.length} partidos):`);
+        lines.push(`Formato: #N Nombre | GP | PTS | 2PT m/a | 3PT m/a | TL m/a | RO | RD | AST | ROB | PER | FAL | PPG`);
+        for (const a of aggList) {
+          const ppg = a.gp > 0 ? (a.pts / a.gp).toFixed(1) : "0.0";
+          const num = a.number != null ? `#${a.number}` : "#?";
+          lines.push(
+            `- ${num} ${a.name} | GP:${a.gp} | PTS:${a.pts} | 2PT:${a.twoM}/${a.twoA} | 3PT:${a.threeM}/${a.threeA} | TL:${a.ftM}/${a.ftA} | RO:${a.oreb} | RD:${a.dreb} | AST:${a.ast} | ROB:${a.stl} | PER:${a.tov} | FAL:${a.fouls} | PPG:${ppg}`,
+          );
+        }
+      } else {
+        lines.push(`\nESTADÍSTICAS AGREGADAS: (los partidos no tienen eventos individuales registrados)`);
       }
     } else {
       lines.push("\nÚLTIMOS PARTIDOS: (sin partidos registrados)");
@@ -129,18 +210,19 @@ const buildSystemPrompt = (
     ? `\n\nContexto estadístico adicional:\n${statsPayload}`
     : "";
 
-  return `Eres **Nikita**, la asistente táctica de baloncesto de BASQUEST+. Acompañás a entrenadores y staff de categorías formativas.
+  return `Eres **Nikita**, la asistente táctica de básquetbol de BASQUEST+. Acompañas a entrenadores y staff de categorías formativas en Chile.
 
 ${ramaInstruction(rama)}
 
 ${teamLine}
 
 Tu estilo:
-- Cercana, directa, profesional. Hablás en español rioplatense neutro.
+- Cercana, directa, profesional. Hablas en **español de Chile** (chileno neutro). Usa "tú" (no "vos" ni "vosotros"). Nunca uses voseo argentino ("hablás", "tenés", "podés", "decíme") — siempre tuteo chileno ("hablas", "tienes", "puedes", "dime"). Vocabulario chileno cuando aporta: "cancha", "partido", "entrenador/a", "harto".
 - Respuestas BREVES por defecto (3-6 oraciones). Solo te extiendes si te lo piden.
-- **NUNCA inventes nombres de jugadoras/jugadores ni números.** Si te preguntan por una persona o partido que NO aparece en los DATOS REALES de abajo, decílo explícitamente: "No tengo ese dato en la base." Usá EXCLUSIVAMENTE los nombres y dorsales que figuran en el ROSTER.
-- Cuando hay datos, citálos concretamente. No extrapolés ni redondees inventando.
-- Si te preguntan algo fuera de baloncesto/coaching/estadística, redirigís amablemente.
+- **NUNCA inventes nombres de jugadoras/jugadores ni números.** Si te preguntan por una persona o partido que NO aparece en los DATOS REALES de abajo, dilo explícitamente: "No tengo ese dato en la base." Usa EXCLUSIVAMENTE los nombres y dorsales que figuran en el ROSTER.
+- Cuando te pregunten por "la más completa", "la mejor", "líder en X" o similares, USA SIEMPRE el bloque "ESTADÍSTICAS AGREGADAS POR JUGADORA" de abajo. Cita números concretos (PTS, PPG, AST, RO+RD, etc.). Si ese bloque está vacío, di que aún no hay eventos individuales registrados.
+- Cuando hay datos, cítalos concretamente. No extrapoles ni redondees inventando.
+- Si te preguntan algo fuera de básquetbol/coaching/estadística, rediriges amablemente.
 - Emojis con moderación: 🏀 📊 🎯 💪 ⚠️.
 - Markdown ligero: máximo **negrita** para 1-2 ideas clave.
 

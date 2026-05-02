@@ -30,10 +30,10 @@ const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload, floating = false 
       role: 'assistant',
       content:
         rama === 'masculino'
-          ? '¡Hola! Soy Nikita 🏀 Tu asistente táctica. Preguntame lo que quieras del rendimiento del equipo.'
+          ? '¡Hola! Soy Nikita 🏀 Tu asistente táctica. Pregúntame lo que quieras del rendimiento del equipo.'
           : rama === 'mixto'
-            ? '¡Hola! Soy Nikita 🏀 Tu asistente táctica. ¿En qué puedo ayudarte con el equipo?'
-            : '¡Hola! Soy Nikita 🏀 Tu asistente táctica. Preguntame lo que quieras sobre el rendimiento de las jugadoras.',
+            ? '¡Hola! Soy Nikita 🏀 Tu asistente táctica. ¿En qué te puedo ayudar con el equipo?'
+            : '¡Hola! Soy Nikita 🏀 Tu asistente táctica. Pregúntame lo que quieras sobre el rendimiento de las jugadoras.',
     },
   ]);
   const [input, setInput] = useState('');
@@ -73,7 +73,7 @@ const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload, floating = false 
       if (reply) setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (err) {
       console.error(err);
-      toast.error('No pude responder, intentá de nuevo.');
+      toast.error('No pude responder, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -149,7 +149,7 @@ const NikitaChat: React.FC<NikitaChatProps> = ({ statsPayload, floating = false 
                 send();
               }
             }}
-            placeholder="Preguntale algo a Nikita…"
+            placeholder="Pregúntale algo a Nikita…"
             disabled={loading}
             className="flex-1"
           />
