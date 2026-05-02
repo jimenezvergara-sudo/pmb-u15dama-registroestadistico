@@ -265,6 +265,42 @@ const LiveGame: React.FC = () => {
 
   // ===== LANDSCAPE LAYOUT (auto switches on device rotation) =====
   if (isLandscape) {
+    // In landscape, "pendingShot" without a position acts as a shot-mode selector:
+    // - points=1 (TL) → registered immediately, no court tap needed
+    // - points=2 or 3 → user must tap court to complete the shot
+    const shotMode: 1 | 2 | 3 | null = pendingShot ? pendingShot.points : null;
+    const hasCourtPosition = !!pendingShot && (pendingShot.x !== -1 || pendingShot.y !== -1);
+
+    const handleShotModeSelect = (points: 1 | 2 | 3) => {
+      if (!selectedPlayer) {
+        toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
+        return;
+      }
+      if (points === 1) {
+        // TL: register directly with default zone, no court tap
+        setPendingShot({ x: 50, y: 75, points: 1 });
+        return;
+      }
+      // 2PT / 3PT: arm shot mode, await court tap. Use sentinel coords (-1,-1)
+      setPendingShot({ x: -1, y: -1, points });
+      toast(`Toca la cancha para registrar ${points}PT`, { duration: 1200 });
+    };
+
+    const handleLandscapeZoneTap = (zone: { x: number; y: number; points: 1 | 2 | 3 }) => {
+      if (!selectedPlayer) {
+        toast(`Selecciona ${t.the === 'el' ? 'un' : 'una'} ${t.player} primero`, { duration: 1500 });
+        return;
+      }
+      // If user has armed 2PT or 3PT mode, override zone points with the armed mode
+      // and use the tapped coordinates as the position.
+      if (shotMode === 2 || shotMode === 3) {
+        setPendingShot({ x: zone.x, y: zone.y, points: shotMode });
+        return;
+      }
+      // No armed mode → use the zone's native points (preserves direct-on-court flow)
+      setPendingShot(zone);
+    };
+
     const playerGrid = (
       <div className="grid grid-cols-3 gap-1.5">
         {activeGame.roster.map(player => {
@@ -277,7 +313,7 @@ const LiveGame: React.FC = () => {
               key={player.id}
               onClick={() => handlePlayerSelect(player.id)}
               style={isFlashing ? { backgroundColor: flash!.color, color: '#fff' } : undefined}
-              className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-lg tap-feedback min-h-[48px] transition-all relative border-2 ${
+              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg tap-feedback min-h-[56px] transition-all relative border-2 ${
                 isFlashing
                   ? 'scale-105 border-accent shadow-lg'
                   : isSelected
@@ -285,10 +321,10 @@ const LiveGame: React.FC = () => {
                     : 'bg-card text-card-foreground border-transparent hover:border-primary/50'
               } ${!isOnCourt ? 'opacity-40' : ''}`}
             >
-              <span className={`text-xl font-black leading-none ${isSelected || isFlashing ? 'text-accent' : 'text-foreground'}`}>
+              <span className={`text-2xl font-black leading-none ${isSelected || isFlashing ? 'text-accent' : 'text-foreground'}`}>
                 {player.number}
               </span>
-              <span className="text-[9px] font-semibold leading-tight mt-0.5 truncate w-full text-center text-muted-foreground">
+              <span className="text-[10px] font-semibold leading-tight mt-0.5 truncate w-full text-center text-muted-foreground">
                 {player.name.split(' ')[0]}
               </span>
               {isOnCourt && <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success ring-1 ring-background" />}
@@ -303,14 +339,37 @@ const LiveGame: React.FC = () => {
       </div>
     );
 
+    // Row 1: shot type buttons (2PT / 3PT / TL)
+    const shotButtons = (
+      <div className="grid grid-cols-3 gap-1.5">
+        {([2, 3, 1] as const).map(pts => {
+          const label = pts === 1 ? 'TL' : `${pts}PT`;
+          const emoji = pts === 1 ? '🏀' : pts === 3 ? '🎯' : '🏀';
+          const isArmed = shotMode === pts;
+          return (
+            <button
+              key={pts}
+              onClick={() => handleShotModeSelect(pts)}
+              disabled={!selectedPlayer}
+              className={`min-h-[56px] rounded-lg text-xs font-bold tap-feedback border-2 flex flex-col items-center justify-center gap-0.5 ${
+                !selectedPlayer
+                  ? 'bg-muted text-muted-foreground border-border opacity-50'
+                  : isArmed
+                    ? 'bg-accent text-accent-foreground border-accent ring-2 ring-accent animate-pulse'
+                    : 'bg-card text-card-foreground border-border hover:border-primary'
+              }`}
+            >
+              <span className="text-base leading-none">{emoji}</span>
+              <span className="text-[11px] leading-none">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+
+    // Row 2: non-shot quick actions (immediate register)
     const actionButtons = (
       <div className="grid grid-cols-3 gap-1.5">
-        <button
-          onClick={() => handleZoneTap({ x: 50, y: 75, points: 1 })}
-          className={`min-h-[40px] rounded-lg text-xs font-bold tap-feedback border-2 ${
-            pendingShot?.points === 1 ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground border-border'
-          }`}
-        >🏀 TL</button>
         {([
           { key: 'offensive_rebound' as ActionType, label: 'Reb OF', emoji: '💪' },
           { key: 'defensive_rebound' as ActionType, label: 'Reb DEF', emoji: '🛡️' },
@@ -323,18 +382,26 @@ const LiveGame: React.FC = () => {
             key={a.key}
             onClick={() => handleQuickAction(a.key)}
             disabled={!selectedPlayer}
-            className={`min-h-[40px] rounded-lg text-xs font-bold tap-feedback border-2 flex flex-col items-center justify-center gap-0 ${
+            className={`min-h-[56px] rounded-lg text-xs font-bold tap-feedback border-2 flex flex-col items-center justify-center gap-0.5 ${
               !selectedPlayer
                 ? 'bg-muted text-muted-foreground border-border opacity-50'
                 : 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
             }`}
           >
-            <span className="text-sm leading-none">{a.emoji}</span>
-            <span className="text-[10px] leading-none mt-0.5">{a.label}</span>
+            <span className="text-base leading-none">{a.emoji}</span>
+            <span className="text-[10px] leading-none">{a.label}</span>
           </button>
         ))}
       </div>
     );
+
+    const statusMsg = !selectedPlayer
+      ? `1. Selecciona ${t.player}`
+      : shotMode === 1 || (shotMode && hasCourtPosition)
+        ? '3. ¿Canasta o Fallo?'
+        : shotMode
+          ? `2. Toca la cancha (${shotMode}PT)`
+          : '2. ¿Qué pasó?';
 
     return (
       <div className="flex flex-col h-screen overflow-hidden">
@@ -356,10 +423,18 @@ const LiveGame: React.FC = () => {
             ))}
             <button
               onClick={handleTogglePause}
+              aria-label={isPaused ? 'Reanudar' : 'Pausa'}
               className={`px-1.5 py-0.5 rounded text-[10px] font-bold tap-feedback flex items-center ${
                 isPaused ? 'bg-success text-success-foreground animate-pulse' : 'bg-primary-foreground/20 text-primary-foreground'
               }`}
             >{isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}</button>
+            <button
+              onClick={() => setShowReport(true)}
+              aria-label="Informe en vivo"
+              className="px-1.5 py-0.5 rounded text-[10px] font-bold tap-feedback bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-0.5"
+            >
+              <BarChart3 className="w-3 h-3" /> 📊
+            </button>
           </div>
           <div className="flex items-center gap-2 min-w-0 justify-end">
             <span className="text-2xl font-black text-primary-foreground/80 leading-none">{opponentTotal}</span>
@@ -367,7 +442,7 @@ const LiveGame: React.FC = () => {
           </div>
         </div>
 
-        {/* Rival scoring quick row */}
+        {/* Status / rival scoring quick row */}
         <div className="bg-destructive/10 px-2 py-1 flex items-center gap-1 flex-shrink-0">
           <span className="text-[9px] font-bold text-destructive uppercase">Rival</span>
           {([1, 2, 3] as const).map(pts => (
@@ -379,30 +454,22 @@ const LiveGame: React.FC = () => {
               onClick={() => { recordOpponentScore(pts); toast(`Rival: +${pts}`, { duration: 800 }); }}
             >+{pts}</Button>
           ))}
-          <Button size="sm" variant="ghost" className="h-6 px-1 text-destructive ml-auto" onClick={() => undoLastOpponentScore()}>
+          <Button size="sm" variant="ghost" className="h-6 px-1 text-destructive" onClick={() => undoLastOpponentScore()}>
             <Undo2 className="w-3 h-3" />
           </Button>
-          <span className="text-[9px] font-semibold text-muted-foreground">
-            {!selectedPlayer ? `Selecciona ${t.player}` : pendingShot ? '¿Canasta o Fallo?' : 'Toca cancha'}
-          </span>
+          <span className="text-[10px] font-bold text-foreground ml-auto truncate">{statusMsg}</span>
         </div>
 
-        {/* Main split: court 60% / panel 40% */}
+        {/* Main split: LEFT panel 40% (players + actions) | RIGHT court 60% */}
         <div className="flex-1 flex min-h-0 overflow-hidden">
-          {/* LEFT — Court */}
-          <div className="relative flex-1 basis-[60%] min-w-0 px-1 py-1 flex items-center justify-center">
-            <CourtDiagram
-              onZoneTap={handleZoneTap}
-              shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
-              rotation={courtRotation}
-              onRotate={() => setCourtRotation(r => (r + 90) % 360)}
-            />
-          </div>
-
-          {/* RIGHT — Players + actions */}
-          <div className="basis-[40%] flex flex-col gap-2 px-2 py-1.5 border-l border-border overflow-y-auto">
+          {/* LEFT — Players + Actions (40%) */}
+          <div className="basis-[40%] flex flex-col gap-2 px-2 py-1.5 overflow-y-auto border-r border-border/60">
+            {/* PASO 1 — ¿Quién? */}
             {playerGrid}
+            {/* PASO 2 — ¿Qué pasó? Tiros + Acciones */}
+            {shotButtons}
             {actionButtons}
+            {/* Cambios + result + footer */}
             <SubstitutionDialog
               roster={activeGame.roster}
               onCourtIds={onCourtIds}
@@ -413,22 +480,19 @@ const LiveGame: React.FC = () => {
                 toast(`Cambio: #${nameIn?.number} ↔ #${nameOut?.number}`, { duration: 1500 });
               }}
             />
-            {pendingShot && selectedPlayer && (
+            {pendingShot && selectedPlayer && (shotMode === 1 || hasCourtPosition) && (
               <div className="grid grid-cols-2 gap-2">
-                <Button onClick={() => handleResult(true)} className="h-10 text-sm font-bold bg-success text-success-foreground hover:bg-success/90">✓ Canasta</Button>
-                <Button variant="destructive" onClick={() => handleResult(false)} className="h-10 text-sm font-bold">✗ Fallo</Button>
+                <Button onClick={() => handleResult(true)} className="h-11 text-sm font-bold bg-success text-success-foreground hover:bg-success/90">✓ Canasta</Button>
+                <Button variant="destructive" onClick={() => handleResult(false)} className="h-11 text-sm font-bold">✗ Fallo</Button>
               </div>
             )}
-            <div className="grid grid-cols-3 gap-1.5 mt-auto">
-              <Button variant="outline" onClick={handleUndo} className="h-9 text-[11px] font-bold rounded-lg col-span-1">
-                <Undo2 className="w-3.5 h-3.5" />
-              </Button>
-              <Button variant="secondary" onClick={() => setShowReport(true)} className="h-9 text-[11px] font-bold rounded-lg">
-                📊
+            <div className="grid grid-cols-2 gap-1.5 mt-auto">
+              <Button variant="outline" onClick={handleUndo} className="h-9 text-[11px] font-bold rounded-lg">
+                <Undo2 className="w-3.5 h-3.5 mr-1" /> Deshacer
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="secondary" className="h-9 text-[11px] font-bold rounded-lg">⏹ Fin</Button>
+                  <Button variant="secondary" className="h-9 text-[11px] font-bold rounded-lg">⏹ Finalizar</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
@@ -444,6 +508,21 @@ const LiveGame: React.FC = () => {
                 </AlertDialogContent>
               </AlertDialog>
             </div>
+          </div>
+
+          {/* RIGHT — Court always visible (60%) */}
+          <div className="relative flex-1 basis-[60%] min-w-0 px-1 py-1 flex items-center justify-center">
+            <CourtDiagram
+              onZoneTap={handleLandscapeZoneTap}
+              shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
+              rotation={courtRotation}
+              onRotate={() => setCourtRotation(r => (r + 90) % 360)}
+            />
+            {(shotMode === 2 || shotMode === 3) && !hasCourtPosition && (
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-accent-foreground text-[11px] font-black uppercase tracking-wider shadow-lg pointer-events-none animate-pulse">
+                Toca la cancha · {shotMode}PT
+              </div>
+            )}
           </div>
         </div>
 
