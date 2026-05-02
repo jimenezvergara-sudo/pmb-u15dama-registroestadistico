@@ -434,13 +434,13 @@ const LiveGame: React.FC = () => {
         {/* Main split: LEFT panel 40% (players + actions) | RIGHT court 60% */}
         <div className="flex-1 flex min-h-0 overflow-hidden">
           {/* LEFT — Players + Actions (40%) */}
-          <div className="basis-[40%] flex flex-col gap-2 px-2 py-1.5 overflow-y-auto border-r border-border/60">
+          <div className="basis-[40%] flex flex-col gap-1.5 px-2 py-1.5 overflow-y-auto border-r border-border/60">
             {/* PASO 1 — ¿Quién? */}
             {playerGrid}
-            {/* PASO 2 — ¿Qué pasó? Tiros + Acciones */}
-            {shotButtons}
+            {/* PASO 2 — Tiro Libre + Acciones rápidas (2pt/3pt se registran tocando la cancha) */}
+            {freeThrowButton}
             {actionButtons}
-            {/* Cambios + result + footer */}
+            {/* Cambios */}
             <SubstitutionDialog
               roster={activeGame.roster}
               onCourtIds={onCourtIds}
@@ -451,12 +451,6 @@ const LiveGame: React.FC = () => {
                 toast(`Cambio: #${nameIn?.number} ↔ #${nameOut?.number}`, { duration: 1500 });
               }}
             />
-            {pendingShot && selectedPlayer && (shotMode === 1 || hasCourtPosition) && (
-              <div className="grid grid-cols-2 gap-2">
-                <Button onClick={() => handleResult(true)} className="h-11 text-sm font-bold bg-success text-success-foreground hover:bg-success/90">✓ Canasta</Button>
-                <Button variant="destructive" onClick={() => handleResult(false)} className="h-11 text-sm font-bold">✗ Fallo</Button>
-              </div>
-            )}
             <div className="grid grid-cols-2 gap-1.5 mt-auto">
               <Button variant="outline" onClick={handleUndo} className="h-9 text-[11px] font-bold rounded-lg">
                 <Undo2 className="w-3.5 h-3.5 mr-1" /> Deshacer
@@ -481,21 +475,50 @@ const LiveGame: React.FC = () => {
             </div>
           </div>
 
-          {/* RIGHT — Court always visible (60%) */}
-          <div className="relative flex-1 basis-[60%] min-w-0 px-1 py-1 flex items-center justify-center">
-            <CourtDiagram
-              onZoneTap={handleLandscapeZoneTap}
-              shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
-              rotation={courtRotation}
-              onRotate={() => setCourtRotation(r => (r + 90) % 360)}
-            />
-            {(shotMode === 2 || shotMode === 3) && !hasCourtPosition && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-accent-foreground text-[11px] font-black uppercase tracking-wider shadow-lg pointer-events-none animate-pulse">
-                Toca la cancha · {shotMode}PT
-              </div>
-            )}
+          {/* RIGHT — Court + Canasta/Fallo (60%) */}
+          <div className="relative flex-1 basis-[60%] min-w-0 px-1 py-1 flex flex-col">
+            <div className="relative flex-1 min-h-0 flex items-center justify-center">
+              <CourtDiagram
+                onZoneTap={handleLandscapeZoneTap}
+                shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
+                rotation={courtRotation}
+                onRotate={() => setCourtRotation(r => (r + 90) % 360)}
+              />
+              {selectedPlayer && !hasCourtPosition && (
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-accent-foreground text-[11px] font-black uppercase tracking-wider shadow-lg pointer-events-none">
+                  Toca la cancha (2pt / 3pt) o usa TL
+                </div>
+              )}
+            </div>
+            {/* Canasta / Fallo justo debajo de la cancha para flujo continuo */}
+            <div className="grid grid-cols-2 gap-2 px-1 pt-1.5 flex-shrink-0">
+              <Button
+                onClick={() => handleResult(true)}
+                disabled={!pendingShot || !selectedPlayer}
+                className="h-11 text-sm font-bold bg-success text-success-foreground hover:bg-success/90 disabled:opacity-40"
+              >
+                ✓ Canasta {pendingShot ? `(${pendingShot.points}pt)` : ''}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => handleResult(false)}
+                disabled={!pendingShot || !selectedPlayer}
+                className="h-11 text-sm font-bold disabled:opacity-40"
+              >
+                ✗ Fallo {pendingShot ? `(${pendingShot.points}pt)` : ''}
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* Live Action Log — desplegable inferior para correcciones */}
+        <LiveActionLog
+          game={activeGame}
+          onDeleteShot={deleteShot}
+          onDeleteAction={deleteAction}
+          onDeleteOpponentScore={deleteOpponentScore}
+          onToggleShotResult={toggleShotResult}
+        />
 
         {showReport && activeGame && (
           <LiveGameReport game={activeGame} onClose={() => setShowReport(false)} />
