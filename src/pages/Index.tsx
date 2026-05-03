@@ -14,6 +14,7 @@ import AdminPanel from '@/components/AdminPanel';
 import ClubStaffManager from '@/components/ClubStaffManager';
 import NikitaChat from '@/components/NikitaChat';
 import ReadOnlyBanner from '@/components/ReadOnlyBanner';
+import DesktopSidebar from '@/components/DesktopSidebar';
 import { CATEGORIES, Category } from '@/types/basketball';
 import { consumeRosterReturnRequest, LINEUP_RETURN_EVENT } from '@/utils/activeGameExpiry';
 import { usePermissions } from '@/hooks/usePermissions';
