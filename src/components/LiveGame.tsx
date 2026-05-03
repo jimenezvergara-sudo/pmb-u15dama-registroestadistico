@@ -7,6 +7,7 @@ import SubstitutionDialog from '@/components/SubstitutionDialog';
 import StartingLineup from '@/components/StartingLineup';
 import LiveGameReport from '@/components/LiveGameReport';
 import LiveActionLog from '@/components/LiveActionLog';
+import LiveGameLandscape from '@/components/LiveGameLandscape';
 
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
