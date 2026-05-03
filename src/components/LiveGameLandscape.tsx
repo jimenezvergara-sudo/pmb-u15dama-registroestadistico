@@ -86,7 +86,7 @@ const LiveGameLandscape: React.FC<Props> = ({
       : '2. Toca la cancha o TL';
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col h-[100dvh] w-screen overflow-hidden bg-background">
+    <div className="fixed inset-0 z-[60] flex flex-col h-[100dvh] w-screen overflow-hidden bg-background">
       {/* Compact scoreboard */}
       <div className="bg-primary px-3 py-1.5 flex items-center justify-between gap-2 flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
