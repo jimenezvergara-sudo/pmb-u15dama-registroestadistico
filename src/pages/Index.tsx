@@ -14,6 +14,7 @@ import AdminPanel from '@/components/AdminPanel';
 import ClubStaffManager from '@/components/ClubStaffManager';
 import NikitaChat from '@/components/NikitaChat';
 import ReadOnlyBanner from '@/components/ReadOnlyBanner';
+import DesktopSidebar from '@/components/DesktopSidebar';
 import { CATEGORIES, Category } from '@/types/basketball';
 import { consumeRosterReturnRequest, LINEUP_RETURN_EVENT } from '@/utils/activeGameExpiry';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -92,10 +93,21 @@ const AppContent: React.FC = () => {
   // game in landscape — maximizes screen real estate for in-game tracking.
   const liveLandscape = isLandscape && allowedTab === 'live' && !!activeGame;
 
-  return (
-    <div className={`min-h-screen ${liveLandscape ? 'w-full' : 'max-w-md'} mx-auto flex flex-col relative ${liveLandscape ? '' : 'pb-16'}`}>
+  // Live game landscape on phone takes the full screen — bypass any shell.
+  if (liveLandscape) {
+    return (
+      <div className="min-h-screen w-full relative">
+        <ReadOnlyBanner />
+        <LiveGameErrorBoundary>
+          <LiveGame />
+        </LiveGameErrorBoundary>
+      </div>
+    );
+  }
+
+  const content = (
+    <>
       <ReadOnlyBanner />
-      
       {allowedTab === 'home' && <HomeScreen onCategoryPress={() => setShowCategoryPicker(true)} />}
       {allowedTab === 'live' && (activeGame ? (
         <LiveGameErrorBoundary>
@@ -109,9 +121,24 @@ const AppContent: React.FC = () => {
       {allowedTab === 'admin' && <AdminPanel />}
       {allowedTab === 'staff' && <ClubStaffManager />}
       {perms.canRunAI && (allowedTab === 'home' || allowedTab === 'dashboard') && <NikitaChat floating />}
-      {!liveLandscape && (
-        <BottomNav activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
-      )}
+    </>
+  );
+
+  return (
+    <div className="min-h-screen w-full lg:flex">
+      {/* Desktop sidebar (≥1024px) */}
+      <DesktopSidebar activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
+
+      {/* Main column: mobile keeps max-w-md, tablet max-w-2xl, desktop fluid */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        <div className="mx-auto w-full max-w-md md:max-w-2xl lg:max-w-none flex flex-col relative pb-16 lg:pb-0 min-h-screen">
+          {content}
+        </div>
+        {/* BottomNav only on <lg */}
+        <div className="lg:hidden">
+          <BottomNav activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
+        </div>
+      </div>
     </div>
   );
 };
