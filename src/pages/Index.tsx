@@ -18,7 +18,7 @@ import DesktopSidebar from '@/components/DesktopSidebar';
 import { CATEGORIES, Category } from '@/types/basketball';
 import { consumeRosterReturnRequest, LINEUP_RETURN_EVENT } from '@/utils/activeGameExpiry';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useIsLandscape } from '@/hooks/useOrientation';
+import { useIsLiveGameLandscape } from '@/hooks/useOrientation';
 import logoBasqest from '@/assets/logo-basqest.png';
 
 const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSelect }) => (
@@ -44,7 +44,7 @@ const CategorySelector: React.FC<{ onSelect: (c: Category) => void }> = ({ onSel
 const AppContent: React.FC = () => {
   const { activeGame, activeCategory, setActiveCategory, loading } = useApp();
   const perms = usePermissions();
-  const isLandscape = useIsLandscape();
+  const isLandscape = useIsLiveGameLandscape();
   const [tab, setTab] = useState<TabId>('home');
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
@@ -125,12 +125,12 @@ const AppContent: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen w-full lg:flex">
+    <div className="min-h-screen w-full lg:grid lg:grid-cols-[240px_1fr]">
       {/* Desktop sidebar (≥1024px) */}
       <DesktopSidebar activeTab={allowedTab} onTabChange={setTab} hasActiveGame={!!activeGame} />
 
       {/* Main column: mobile keeps max-w-md, tablet max-w-2xl, desktop fluid */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="min-w-0 flex flex-col">
         <div className="mx-auto w-full max-w-md md:max-w-2xl lg:max-w-none flex flex-col relative pb-16 lg:pb-0 min-h-screen">
           {content}
         </div>
