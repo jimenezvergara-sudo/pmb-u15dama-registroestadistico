@@ -253,7 +253,7 @@ const Dashboard: React.FC = () => {
   })();
 
   return (
-    <div className="p-4 space-y-4 pb-24">
+      <div className="p-4 lg:p-6 space-y-4 lg:space-y-5 pb-24 lg:pb-8">
       {/* Ad Banner */}
       <AdBannerCarousel />
 
@@ -405,7 +405,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Score summary */}
-      <div className="bg-primary rounded-xl p-4 flex items-center justify-between">
+      <div className="bg-primary rounded-xl p-4 flex items-center justify-between lg:hidden">
         <div className="text-center flex-1">
           <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">BASQUEST+</p>
           <p className="text-4xl font-black text-primary-foreground">{isAggregate ? ppg : totalPoints}</p>
@@ -421,6 +421,25 @@ const Dashboard: React.FC = () => {
           <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">Rival</p>
           <p className="text-4xl font-black text-primary-foreground/80">{isAggregate ? oppPpg : totalOpponent}</p>
           {isAggregate && <p className="text-[9px] text-primary-foreground/50 font-bold">PPG</p>}
+        </div>
+      </div>
+      <div className="hidden lg:grid grid-cols-3 gap-3">
+        <div className="bg-primary rounded-xl p-4">
+          <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-bold">BASQUEST+</p>
+          <p className="text-4xl font-black text-primary-foreground leading-none mt-1">{isAggregate ? ppg : totalPoints}</p>
+          <p className="text-[10px] text-primary-foreground/60 font-bold mt-1">{isAggregate ? 'PPG' : 'PTS'}</p>
+        </div>
+        <div className="bg-card rounded-xl p-4 border border-border">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">TC</p>
+          <p className="text-4xl font-black text-foreground leading-none mt-1">
+            {filteredShots.length > 0 ? Math.round((filteredShots.filter(s => s.made).length / filteredShots.length) * 100) : 0}%
+          </p>
+          <p className="text-[10px] text-muted-foreground font-bold mt-1">Tiros de campo</p>
+        </div>
+        <div className="bg-card rounded-xl p-4 border border-border">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Rival</p>
+          <p className="text-4xl font-black text-foreground leading-none mt-1">{isAggregate ? oppPpg : totalOpponent}</p>
+          <p className="text-[10px] text-muted-foreground font-bold mt-1">{isAggregate ? 'PPG' : 'PTS'}</p>
         </div>
       </div>
 
@@ -488,7 +507,7 @@ const Dashboard: React.FC = () => {
       {/* Efficiency Leaders */}
       <div className="bg-card rounded-xl p-3">
         <p className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Líderes de Eficiencia</p>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 lg:gap-3">
           {([
             { kind: 'pct' as const, label: 'Triples', icon: <Target className="w-4 h-4" />, data: efficiencyLeaders.triples, pct: efficiencyLeaders.triples?.threePct ?? 0, made: efficiencyLeaders.triples ? `${efficiencyLeaders.triples.threeM}/${efficiencyLeaders.triples.threeA}` : '-', volume: efficiencyLeaders.triples?.threeA ?? 0, min: MIN_TRIPLES },
             { kind: 'pct' as const, label: 'Dobles', icon: <CircleDot className="w-4 h-4" />, data: efficiencyLeaders.dobles, pct: efficiencyLeaders.dobles?.twoPct ?? 0, made: efficiencyLeaders.dobles ? `${efficiencyLeaders.dobles.twoM}/${efficiencyLeaders.dobles.twoA}` : '-', volume: efficiencyLeaders.dobles?.twoA ?? 0, min: MIN_DOBLES },
@@ -537,8 +556,8 @@ const Dashboard: React.FC = () => {
         <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wider">
           Box Score {isAggregate && tournamentGames.length > 1 ? `(${tournamentGames.length} partidos)` : ''}
         </p>
-        <div className="overflow-x-auto -mx-3 px-3">
-          <table className="text-xs w-full min-w-[520px]">
+        <div className="overflow-x-auto lg:overflow-x-visible -mx-3 px-3 lg:mx-0 lg:px-0">
+          <table className="text-xs lg:text-[11px] w-full min-w-[520px] lg:min-w-0 table-fixed">
             <thead>
               <tr className="text-muted-foreground border-b border-border">
                 <th
