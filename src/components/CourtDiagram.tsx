@@ -41,9 +41,11 @@ interface Props {
   shots?: Array<{ x: number; y: number; made: boolean; points: 1 | 2 | 3 }>;
   rotation: number;
   onRotate: () => void;
+  className?: string;
+  courtClassName?: string;
 }
 
-const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [], rotation, onRotate }) => {
+const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [], rotation, onRotate, className = '', courtClassName = '' }) => {
 
   const handleClick = (zone: CourtZone, e: React.MouseEvent<SVGPathElement>) => {
     const svg = e.currentTarget.ownerSVGElement;
@@ -53,7 +55,7 @@ const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [], rotation, onRota
   };
 
   return (
-    <div className="w-full max-w-md mx-auto relative">
+    <div className={`w-full max-w-md mx-auto relative ${className}`}>
       <button
         onClick={onRotate}
         className="absolute top-1 right-1 z-10 p-1.5 rounded-full bg-card/80 backdrop-blur-sm border border-border text-muted-foreground hover:text-foreground hover:bg-card transition-colors tap-feedback"
@@ -61,7 +63,7 @@ const CourtDiagram: React.FC<Props> = ({ onZoneTap, shots = [], rotation, onRota
       >
         <RotateCw className="w-4 h-4" />
       </button>
-      <div className="aspect-[300/280] my-2" style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.3s ease' }}>
+      <div className={`aspect-[300/280] my-2 ${courtClassName}`} style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.3s ease' }}>
         <svg viewBox="0 0 300 280" className="w-full h-full" style={{ touchAction: 'manipulation' }}>
           <rect x="0" y="0" width="300" height="280" rx="4" className="fill-court-bg" />
 
