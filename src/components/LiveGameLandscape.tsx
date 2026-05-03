@@ -86,7 +86,7 @@ const LiveGameLandscape: React.FC<Props> = ({
       : '2. Toca la cancha o TL';
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="fixed inset-0 z-40 flex flex-col h-[100dvh] w-screen overflow-hidden bg-background">
       {/* Compact scoreboard */}
       <div className="bg-primary px-3 py-1.5 flex items-center justify-between gap-2 flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
@@ -113,7 +113,7 @@ const LiveGameLandscape: React.FC<Props> = ({
           <button
             onClick={() => setShowReport(true)}
             aria-label="Informe en vivo"
-            className="px-1.5 py-0.5 rounded text-[10px] font-bold tap-feedback bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-0.5"
+            className="px-1.5 py-0.5 rounded text-[10px] font-bold tap-feedback bg-accent text-accent-foreground hover:bg-accent/90 flex items-center gap-0.5"
           >
             <BarChart3 className="w-3 h-3" /> 📊
           </button>
@@ -175,7 +175,7 @@ const LiveGameLandscape: React.FC<Props> = ({
                   {isOnCourt && <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-success ring-1 ring-background" />}
                   {fouls > 0 && (
                     <span className={`absolute top-0.5 left-0.5 min-w-[14px] h-[14px] rounded-full text-[8px] font-black flex items-center justify-center px-0.5 ${
-                      fouls >= 5 ? 'bg-destructive text-destructive-foreground animate-pulse' : fouls === 4 ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'
+                      fouls >= 5 ? 'bg-destructive text-destructive-foreground animate-pulse' : fouls === 4 ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'
                     }`}>{fouls}F</span>
                   )}
                 </button>
@@ -267,6 +267,8 @@ const LiveGameLandscape: React.FC<Props> = ({
               shots={activeGame.shots.map(s => ({ x: s.x, y: s.y, made: s.made, points: s.points }))}
               rotation={courtRotation}
               onRotate={() => setCourtRotation(r => (r + 90) % 360)}
+              className="max-w-none h-full flex items-center justify-center"
+              courtClassName="my-0 w-full max-h-full"
             />
             {selectedPlayer && !hasCourtPosition && (
               <div className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-accent-foreground text-[11px] font-black uppercase tracking-wider shadow-lg pointer-events-none">
